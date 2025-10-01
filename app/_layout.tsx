@@ -1,24 +1,39 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+// app/_layout.tsx (main layout)
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { useAuthStore } from '@/store/useAuthStore';
+import { useEffect } from 'react';
+import { useRouter, useSegments } from 'expo-router';
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const { user, isLoading } = useAuthStore();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+    const inOnboardingGroup = segments[0] === '(onboarding)';
+    const inTabsGroup = segments[0] === '(tabs)';
+
+    if (!user && !inAuthGroup) {
+      // Redirect to login if not authenticated
+      router.replace('/(auth)/login');
+    } else if (user && !user.onboardingCompleted && !inOnboardingGroup) {
+      // Redirect to onboarding if not completed
+      router.replace('/(onboarding)');
+    } else if (user && user.onboardingCompleted && (inAuthGroup || inOnboardingGroup)) {
+      // Redirect to main app if already authenticated and completed onboarding
+      router.replace('/(tabs)');
+    }
+  }, [user, isLoading, segments]);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(onboarding)" />
+      {/* <Stack.Screen name="(user)" />
+      <Stack.Screen name="(host)" /> */}
+    </Stack>
   );
 }

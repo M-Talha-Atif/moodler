@@ -1,0 +1,137 @@
+/* global.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Professional Spacing Scale */
+@layer base {
+  :root {
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+  }
+}
+
+/* Custom component classes with professional spacing */
+@layer components {
+  /* === BUTTONS === */
+  .btn {
+    @apply rounded-xl flex items-center justify-center shadow-sm active:scale-95 transition-all font-semibold;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-primary-foreground;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground;
+  }
+  
+  .btn-outline {
+    @apply bg-transparent border border-primary text-primary;
+  }
+  
+  .btn-sm {
+    @apply px-4 py-2 text-sm;
+  }
+  
+  .btn-md {
+    @apply px-6 py-3 text-base;
+  }
+  
+  .btn-lg {
+    @apply px-8 py-4 text-lg;
+  }
+  
+  .btn:disabled {
+    @apply bg-muted text-muted-foreground opacity-50;
+  }
+  
+  /* === INPUTS === */
+  .input-container {
+    @apply space-y-2 mb-4;
+  }
+  
+  .input-label {
+    @apply text-foreground text-sm font-medium;
+  }
+  
+  .input-field {
+    @apply bg-input border border-border rounded-xl p-4 text-foreground text-base w-full;
+  }
+  
+  .input-field:focus {
+    @apply border-primary ring-2 ring-primary/20;
+  }
+  
+  .input-error {
+    @apply border-destructive ring-2 ring-destructive/20;
+  }
+  
+  /* === CARDS & CONTAINERS === */
+  .card {
+    @apply bg-card border border-border rounded-2xl p-6 shadow-sm;
+  }
+  
+  .section {
+    @apply mb-6;
+  }
+  
+  .container-padded {
+    @apply px-6 py-4;
+  }
+  
+  /* === FEEDBACK === */
+  .error-message {
+    @apply bg-destructive/10 border border-destructive rounded-xl p-4 mb-4;
+  }
+  
+  .error-text {
+    @apply text-destructive text-sm text-center font-medium;
+  }
+  
+  .success-message {
+    @apply bg-success/10 border border-success rounded-xl p-4 mb-4;
+  }
+  
+  .success-text {
+    @apply text-success text-sm text-center font-medium;
+  }
+  
+  /* === LAYOUT === */
+  .screen-container {
+    @apply flex-1 bg-background p-6;
+  }
+  
+  .centered-container {
+    @apply flex-1 justify-center items-center bg-background p-6;
+  }
+  
+  .form-container {
+    @apply space-y-6;
+  }
+  
+  /* === TYPOGRAPHY === */
+  .text-title {
+    @apply text-3xl font-bold text-foreground;
+  }
+  
+  .text-subtitle {
+    @apply text-xl font-semibold text-foreground;
+  }
+  
+  .text-body {
+    @apply text-base text-foreground;
+  }
+  
+  .text-caption {
+    @apply text-sm text-muted-foreground;
+  }
+  
+  .text-link {
+    @apply text-primary font-semibold;
+  }
+}

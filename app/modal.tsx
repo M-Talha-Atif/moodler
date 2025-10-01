@@ -4,6 +4,9 @@ import { StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 
+// Purpose: Overlay screens (popups, settings, details)
+// Normal screens se different - overlay dikhta hai
+
 export default function ModalScreen() {
   return (
     <ThemedView style={styles.container}>
