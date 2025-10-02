@@ -1,23 +1,42 @@
-// services/storageService.ts - IN-MEMORY STORAGE
-class InMemoryStorage {
-  private storage: { [key: string]: string } = {};
+// services/storageService.ts
+import * as SecureStore from 'expo-secure-store';
 
+export const storageService = {
   async setItem(key: string, value: string): Promise<void> {
-    this.storage[key] = value;
-    console.log('📦 Stored:', key);
-  }
+    try {
+      await SecureStore.setItemAsync(key, value);
+    } catch (error) {
+      console.error('Error storing data:', error);
+      throw error;
+    }
+  },
 
   async getItem(key: string): Promise<string | null> {
-    return this.storage[key] || null;
-  }
+    try {
+      return await SecureStore.getItemAsync(key);
+    } catch (error) {
+      console.error('Error retrieving data:', error);
+      return null;
+    }
+  },
 
   async removeItem(key: string): Promise<void> {
-    delete this.storage[key];
-  }
+    try {
+      await SecureStore.deleteItemAsync(key);
+    } catch (error) {
+      console.error('Error removing data:', error);
+      throw error;
+    }
+  },
 
   async clear(): Promise<void> {
-    this.storage = {};
-  }
-}
-
-export const storageService = new InMemoryStorage();
+    try {
+      // Note: SecureStore doesn't have a clear method, so we remove items individually
+      // You'll need to track which keys you want to clear
+      console.warn('SecureStore clear not implemented - remove items individually');
+    } catch (error) {
+      console.error('Error clearing storage:', error);
+      throw error;
+    }
+  },
+};

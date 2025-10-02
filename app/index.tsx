@@ -8,7 +8,8 @@ export default function Index() {
 
   useEffect(() => {
     setTimeout(() => {
-      router.replace('/(auth)/login');
+      // router.replace('/(auth)/login');
+      router.replace('/onboarding');
     }, 2000);
   }, []);
 

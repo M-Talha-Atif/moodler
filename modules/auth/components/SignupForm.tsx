@@ -15,7 +15,6 @@ export default function SignupForm() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const router = useRouter();
     const { isLoading, error, signup, setError, clearError } = useAuthStore();
 
     const handleSubmit = async () => {
@@ -29,8 +28,8 @@ export default function SignupForm() {
             return;
         }
 
-        if (password.length < 8) {
-            setError('Password must be at least 8 characters');
+        if (password.length < 6) {
+            setError('Password must be at least 6 characters');
             return;
         }
 
@@ -38,6 +37,7 @@ export default function SignupForm() {
             clearError();
             await signup(name, email, password, selectedRole);
             ToastAndroid.show('✅ Account created successfully!', ToastAndroid.SHORT);
+            
         } catch (err) {
             console.error('Signup error:', err);
             ToastAndroid.show('❌ Signup failed', ToastAndroid.SHORT);
@@ -56,7 +56,7 @@ export default function SignupForm() {
         <View className="space-y-8">
             {/* Error Message */}
             {error && (
-                <View className="bg-red-50 border border-red-200 rounded-xl p-4 mb-2">
+                <View className="bg-red-50 border border-red-200 rounded-xl p-4">
                     <Text className="text-red-700 text-sm text-center font-medium">
                         {error}
                     </Text>
@@ -64,8 +64,8 @@ export default function SignupForm() {
             )}
 
             {/* Role Picker - Using RoleSelector Component */}
-            <View className="space-y-5">
-                <Text className="text-gray-900 text-base font-semibold text-center mb-1">
+            <View className="space-y-4">
+                <Text className="text-gray-900 text-sm font-semibold text-center">
                     Choose Your Role
                 </Text>
                 
@@ -78,9 +78,9 @@ export default function SignupForm() {
 
             {/* Name Input */}
             <View className="space-y-3">
-                <Text className="text-gray-900 text-sm font-semibold mb-2">Full Name</Text>
+                <Text className="text-gray-900 text-sm font-semibold">Full Name</Text>
                 <TextInput
-                    className="w-full bg-white border border-gray-200 rounded-xl p-5 text-gray-900 text-base"
+                    className="w-full bg-white border border-gray-200 rounded-xl p-4 text-gray-900 text-base"
                     placeholder="Enter your full name"
                     placeholderTextColor="#9CA3AF"
                     value={name}
@@ -91,9 +91,9 @@ export default function SignupForm() {
 
             {/* Email Input */}
             <View className="space-y-3">
-                <Text className="text-gray-900 text-sm font-semibold mb-2">Email Address</Text>
+                <Text className="text-gray-900 text-sm font-semibold">Email Address</Text>
                 <TextInput
-                    className="w-full bg-white border border-gray-200 rounded-xl p-5 text-gray-900 text-base"
+                    className="w-full bg-white border border-gray-200 rounded-xl p-4 text-gray-900 text-base"
                     placeholder="Enter your email address"
                     placeholderTextColor="#9CA3AF"
                     value={email}
@@ -106,10 +106,10 @@ export default function SignupForm() {
 
             {/* Password Input */}
             <View className="space-y-3">
-                <Text className="text-gray-900 text-sm font-semibold mb-2">Password</Text>
+                <Text className="text-gray-900 text-sm font-semibold">Password</Text>
                 <View className="relative">
                     <TextInput
-                        className="w-full bg-white border border-gray-200 rounded-xl p-5 text-gray-900 text-base pr-14"
+                        className="w-full bg-white border border-gray-200 rounded-xl p-4 text-gray-900 text-base pr-12"
                         placeholder="Create a password"
                         placeholderTextColor="#9CA3AF"
                         value={password}
@@ -118,28 +118,28 @@ export default function SignupForm() {
                         editable={!isLoading}
                     />
                     <TouchableOpacity
-                        className="absolute right-4 top-5"
+                        className="absolute right-4 top-4"
                         onPress={togglePasswordVisibility}
                         disabled={isLoading}
                     >
                         {showPassword ? (
-                            <Ionicons name="eye-off" size={22} color="#6B7280" />
+                            <Ionicons name="eye-off" size={20} color="#6B7280" />
                         ) : (
-                            <Ionicons name="eye" size={22} color="#6B7280" />
+                            <Ionicons name="eye" size={20} color="#6B7280" />
                         )}
                     </TouchableOpacity>
                 </View>
-                <Text className="text-gray-500 text-xs mt-1 ml-1">
-                    Must be at least 8 characters
+                <Text className="text-gray-500 text-xs">
+                    Must be at least 6 characters
                 </Text>
             </View>
 
             {/* Confirm Password Input */}
             <View className="space-y-3">
-                <Text className="text-gray-900 text-sm font-semibold mb-2">Confirm Password</Text>
+                <Text className="text-gray-900 text-sm font-semibold">Confirm Password</Text>
                 <View className="relative">
                     <TextInput
-                        className="w-full bg-white border border-gray-200 rounded-xl p-5 text-gray-900 text-base pr-14"
+                        className="w-full bg-white border border-gray-200 rounded-xl p-4 text-gray-900 text-base pr-12"
                         placeholder="Confirm your password"
                         placeholderTextColor="#9CA3AF"
                         value={confirmPassword}
@@ -148,25 +148,25 @@ export default function SignupForm() {
                         editable={!isLoading}
                     />
                     <TouchableOpacity
-                        className="absolute right-4 top-5"
+                        className="absolute right-4 top-4"
                         onPress={toggleConfirmPasswordVisibility}
                         disabled={isLoading}
                     >
                         {showConfirmPassword ? (
-                            <Ionicons name="eye-off" size={22} color="#6B7280" />
+                            <Ionicons name="eye-off" size={20} color="#6B7280" />
                         ) : (
-                            <Ionicons name="eye" size={22} color="#6B7280" />
+                            <Ionicons name="eye" size={20} color="#6B7280" />
                         )}
                     </TouchableOpacity>
                 </View>
             </View>
 
-            {/* Spacing before button */}
-            <View className="h-4" />
+            {/* Spacing */}
+            <View className="h-2" />
 
             {/* Signup Button */}
             <Pressable
-                className={`w-full rounded-xl p-5 shadow-sm ${isLoading
+                className={`w-full rounded-xl p-4 shadow-sm ${isLoading
                     ? 'bg-gray-400'
                     : 'bg-[#7bf163] active:bg-[#6bd953]'
                     }`}
@@ -177,9 +177,6 @@ export default function SignupForm() {
                     {isLoading ? 'Creating Account...' : `Sign Up as ${selectedRole === 'user' ? 'User' : 'Host'}`}
                 </Text>
             </Pressable>
-
-            {/* Additional spacing at bottom */}
-            <View className="h-4" />
         </View>
     );
 }

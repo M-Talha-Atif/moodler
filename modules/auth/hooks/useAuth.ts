@@ -48,7 +48,7 @@ export const useAuth = () => {
       
       // Navigate based on role
       if (role === 'user') {
-        router.replace('/(auth)/onboarding');
+        router.replace('/onboarding');
       } else {
         router.replace('/(host)');
       }

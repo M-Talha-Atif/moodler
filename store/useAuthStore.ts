@@ -1,6 +1,6 @@
-// store/useAuthStore.ts - UPDATED WITH REAL STORAGE
+// store/useAuthStore.ts - COMPLETE FIXED VERSION
 import { create } from 'zustand';
-import { storageService } from '@/services/storageService';
+import { storageService } from '@/services/storageService'; 
 import { authService, AuthResponse } from '@/modules/auth/services/authService';
 
 interface User {
@@ -9,7 +9,6 @@ interface User {
   email: string;
   role: 'user' | 'host';
   onboardingCompleted: boolean;
-  
 }
 
 interface AuthState {
@@ -20,14 +19,15 @@ interface AuthState {
   error: string | null;
   
   // ACTIONS
-  login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string, role: 'user' | 'host') => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthResponse>;
+  signup: (name: string, email: string, password: string, role: 'user' | 'host') => Promise<AuthResponse>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
   updateUser: (updates: Partial<User>) => void;
+  completeOnboarding: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -38,7 +38,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   error: null,
 
   // LOGIN WITH REAL API
-  login: async (email: string, password: string) => {
+  login: async (email: string, password: string): Promise<AuthResponse> => {
     try {
       set({ isLoading: true, error: null });
       
@@ -57,6 +57,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         error: null,
       });
       
+      return response;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Login failed';
       set({ error: errorMessage, isLoading: false });
@@ -65,7 +66,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   // SIGNUP WITH REAL API
-  signup: async (name: string, email: string, password: string, role: 'user' | 'host') => {
+  signup: async (name: string, email: string, password: string, role: 'user' | 'host'): Promise<AuthResponse> => {
     try {
       set({ isLoading: true, error: null });
       
@@ -74,16 +75,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       
       // Store token and user data
       await storageService.setItem('auth_token', response.token);
-      await storageService.setItem('user_data', JSON.stringify(response.user));
+      
+      // Create user with onboarding not completed for new signups
+      const userWithOnboarding = { 
+        ...response.user, 
+        onboardingCompleted: false 
+      };
+      
+      await storageService.setItem('user_data', JSON.stringify(userWithOnboarding));
       
       // Update state
       set({
-        user: response.user,
+        user: userWithOnboarding,
         token: response.token,
         isLoading: false,
         error: null,
       });
       
+      return { ...response, user: userWithOnboarding };
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Signup failed';
       set({ error: errorMessage, isLoading: false });
@@ -122,9 +131,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           user,
           token,
         });
-        
-        // Optional: Verify token with backend
-        // const currentUser = await authService.getCurrentUser();
       }
     } catch (error) {
       console.error('Auth check error:', error);
@@ -134,14 +140,43 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
+  // COMPLETE ONBOARDING
+  completeOnboarding: async () => {
+    try {
+      const { user } = get();
+      if (!user) return;
+
+      // Update user with onboarding completed
+      const updatedUser = { ...user, onboardingCompleted: true };
+      
+      // Update state
+      set({ user: updatedUser });
+      
+      // Update storage
+      await storageService.setItem('user_data', JSON.stringify(updatedUser));
+      
+      console.log('✅ Onboarding marked as completed');
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+      throw error;
+    }
+  },
+
   // UTILITY ACTIONS
   setLoading: (isLoading) => set({ isLoading }),
   setError: (error) => set({ error }),
   clearError: () => set({ error: null }),
 
   updateUser: (updates: Partial<User>) => {
-    set((state) => ({
-      user: state.user ? { ...state.user, ...updates } : null
-    }));
+    set((state) => {
+      const updatedUser = state.user ? { ...state.user, ...updates } : null;
+      
+      // Also update storage
+      if (updatedUser) {
+        storageService.setItem('user_data', JSON.stringify(updatedUser));
+      }
+      
+      return { user: updatedUser };
+    });
   },
 }));

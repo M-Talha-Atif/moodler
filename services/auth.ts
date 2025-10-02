@@ -1,5 +1,5 @@
-// src/services/auth.ts
-import api from './apiClient';
+// modules/auth/services/authService.ts
+import api from '@/services/apiClient';
 
 export interface LoginCredentials {
   email: string;
@@ -7,9 +7,9 @@ export interface LoginCredentials {
 }
 
 export interface SignupData {
+  name: string;
   email: string;
   password: string;
-  name: string;
   role: 'user' | 'host';
 }
 
@@ -17,27 +17,30 @@ export interface AuthResponse {
   token: string;
   user: {
     id: string;
-    email: string;
     name: string;
+    email: string;
     role: 'user' | 'host';
+    onboardingCompleted: boolean; 
   };
 }
 
-export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/login', credentials);
-  return response.data;
-};
+export const authService = {
+  async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/auth/login', credentials);
+    return response.data;
+  },
 
-export const signup = async (userData: SignupData): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/signup', userData);
-  return response.data;
-};
+  async signup(userData: SignupData): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/auth/signup', userData);
+    return response.data;
+  },
 
-export const logout = async (): Promise<void> => {
-  await api.post('/auth/logout');
-};
+  async logout(): Promise<void> {
+    await api.post('/auth/logout');
+  },
 
-export const getCurrentUser = async () => {
-  const response = await api.get("/auth/me");
-  return response.data.data;
+  async getCurrentUser() {
+    const response = await api.get('/auth/me');
+    return response.data;
+  },
 };
