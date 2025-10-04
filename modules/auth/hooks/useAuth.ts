@@ -1,36 +1,28 @@
 // modules/auth/hooks/useAuth.ts
-import { useRouter } from 'expo-router';
-import { useAuthStore } from '@/store/useAuthStore';
-import { authService } from '../services/authService';
+import { useRouter } from "expo-router";
+import { useAuthStore } from "@/store/useAuthStore";
+import { getTodayMoodLog } from "@/modules/dailyCheckIn/services/moodLogService";
 
 export const useAuth = () => {
   const router = useRouter();
-  const { 
-    setLoading, 
-    setError, 
-    loginSuccess, 
-    logout: storeLogout,
-    clearError 
-  } = useAuthStore();
+  const { setLoading, setError, clearError, login, signup, logout } =
+    useAuthStore();
 
-  const login = async (email: string, password: string) => {
+  const handleLogin = async (email: string, password: string) => {
     try {
-      setLoading(true);
       clearError();
-      
-      const response = await authService.login({ email, password });
-      loginSuccess(response);
-      
-      // Navigate based on role
-      if (response.user.role === 'user') {
-        router.replace('/(user)');
-      } else {
-        router.replace('/(host)');
-      }
-      
+
+      const response = await login(email, password);
+
+      // daily check-in status fetch
+      const todayLog = await getTodayMoodLog();
+      useAuthStore.setState({
+        user: { ...response.user, hasDailyCheckIn: !!todayLog },
+      });
+
       return response;
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Login failed';
+      const errorMessage = err.response?.data?.message || "Login failed";
       setError(errorMessage);
       throw err;
     } finally {
@@ -38,24 +30,22 @@ export const useAuth = () => {
     }
   };
 
-  const signup = async (name: string, email: string, password: string, role: 'user' | 'host') => {
+  const handleSignup = async (
+    name: string,
+    email: string,
+    password: string,
+    role: "user" | "host",
+  ) => {
     try {
-      setLoading(true);
+      // setLoading(true);
       clearError();
-      
-      const response = await authService.signup({ name, email, password, role });
-      loginSuccess(response);
-      
-      // Navigate based on role
-      if (role === 'user') {
-        router.replace('/onboarding');
-      } else {
-        router.replace('/(host)');
-      }
-      
-      return response;
+
+      await signup(name, email, password, role);
+
+      // Signup ke baad bas login page bhejna hai
+      router.replace("/(auth)/login");
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Signup failed';
+      const errorMessage = err.response?.data?.message || "Signup failed";
       setError(errorMessage);
       throw err;
     } finally {
@@ -63,20 +53,19 @@ export const useAuth = () => {
     }
   };
 
-  const logout = async () => {
+  const handleLogout = async () => {
     try {
-      await authService.logout();
+      await logout();
     } catch (err) {
-      console.error('Logout error:', err);
+      console.error("Logout error:", err);
     } finally {
-      storeLogout();
-      router.replace('/(auth)/login');
+      router.replace("/(auth)/login");
     }
   };
 
   return {
-    login,
-    signup,
-    logout,
+    login: handleLogin,
+    signup: handleSignup,
+    logout: handleLogout,
   };
 };

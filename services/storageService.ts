@@ -1,42 +1,43 @@
 // services/storageService.ts
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const storageService = {
   async setItem(key: string, value: string): Promise<void> {
     try {
-      await SecureStore.setItemAsync(key, value);
+      await AsyncStorage.setItem(key, value);
+      console.log("📦 Storage - Set:", key);
     } catch (error) {
-      console.error('Error storing data:', error);
-      throw error;
+      console.error("Error storing data:", error);
+      // Don't throw, just log
     }
   },
 
   async getItem(key: string): Promise<string | null> {
     try {
-      return await SecureStore.getItemAsync(key);
+      const value = await AsyncStorage.getItem(key);
+      console.log("📦 Storage - Get:", key, value ? "✓" : "null");
+      return value;
     } catch (error) {
-      console.error('Error retrieving data:', error);
+      console.error("Error retrieving data:", error);
       return null;
     }
   },
 
   async removeItem(key: string): Promise<void> {
     try {
-      await SecureStore.deleteItemAsync(key);
+      await AsyncStorage.removeItem(key);
+      console.log("📦 Storage - Remove:", key);
     } catch (error) {
-      console.error('Error removing data:', error);
-      throw error;
+      console.error("Error removing data:", error);
     }
   },
 
   async clear(): Promise<void> {
     try {
-      // Note: SecureStore doesn't have a clear method, so we remove items individually
-      // You'll need to track which keys you want to clear
-      console.warn('SecureStore clear not implemented - remove items individually');
+      await AsyncStorage.clear();
+      console.log("📦 Storage - Cleared");
     } catch (error) {
-      console.error('Error clearing storage:', error);
-      throw error;
+      console.error("Error clearing storage:", error);
     }
   },
 };

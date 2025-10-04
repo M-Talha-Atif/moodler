@@ -1,16 +1,16 @@
 // modules/onboarding/components/QuestionInput.tsx
-import { View, Text, TouchableOpacity, Switch } from 'react-native';
-import { MotiView } from 'moti';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, Switch } from "react-native";
+import { MotiView } from "moti";
+import { Ionicons } from "@expo/vector-icons";
 
 // Emoji Picker
 const EmojiPicker = ({ value, onChange }) => (
   <View className="flex-row justify-center gap-4 mt-2">
-    {['😄', '🙂', '😐', '😕', '😢'].map((emoji) => (
+    {["😄", "🙂", "😐", "😕", "😢"].map((emoji) => (
       <TouchableOpacity
         key={emoji}
         onPress={() => onChange(emoji)}
-        className={`p-3 rounded-full ${emoji === value ? 'bg-[#7bf163]/20 border-2 border-[#7bf163]' : 'bg-gray-100'}`}
+        className={`p-3 rounded-full ${emoji === value ? "bg-[#7bf163]/20 border-2 border-[#7bf163]" : "bg-gray-100"}`}
       >
         <Text className="text-2xl">{emoji}</Text>
       </TouchableOpacity>
@@ -22,7 +22,7 @@ const EmojiPicker = ({ value, onChange }) => (
 const ChipSelectorMulti = ({ options, value = [], onChange }) => {
   // Ensure value is always an array
   const safeValue = Array.isArray(value) ? value : [];
-  
+
   const toggleSelection = (option) => {
     const newValue = safeValue.includes(option)
       ? safeValue.filter((v) => v !== option)
@@ -44,13 +44,15 @@ const ChipSelectorMulti = ({ options, value = [], onChange }) => {
               onPress={() => toggleSelection(option)}
               className={`px-4 py-3 rounded-full border flex-row items-center gap-2 ${
                 safeValue.includes(option)
-                  ? 'bg-[#7bf163] border-[#7bf163]'
-                  : 'bg-white border-gray-300'
+                  ? "bg-[#7bf163] border-[#7bf163]"
+                  : "bg-white border-gray-300"
               }`}
             >
-              <Text className={`font-medium ${
-                safeValue.includes(option) ? 'text-white' : 'text-gray-800'
-              }`}>
+              <Text
+                className={`font-medium ${
+                  safeValue.includes(option) ? "text-white" : "text-gray-800"
+                }`}
+              >
                 {option}
               </Text>
               {safeValue.includes(option) && (
@@ -89,13 +91,15 @@ const ChipSelectorSingle = ({ options, value, onChange }) => (
             onPress={() => onChange(option)}
             className={`px-4 py-3 rounded-full border flex-row items-center gap-2 ${
               value === option
-                ? 'bg-[#7bf163] border-[#7bf163]'
-                : 'bg-white border-gray-300'
+                ? "bg-[#7bf163] border-[#7bf163]"
+                : "bg-white border-gray-300"
             }`}
           >
-            <Text className={`font-medium ${
-              value === option ? 'text-white' : 'text-gray-800'
-            }`}>
+            <Text
+              className={`font-medium ${
+                value === option ? "text-white" : "text-gray-800"
+              }`}
+            >
               {option}
             </Text>
             {value === option && (
@@ -111,10 +115,12 @@ const ChipSelectorSingle = ({ options, value, onChange }) => (
 // Toggle Input - FIXED: Handle null/undefined value
 const ToggleInput = ({ value, onChange }) => {
   const safeValue = value === "true"; // Convert to boolean
-  
+
   return (
     <View className="flex-row items-center justify-between mt-3 p-4 rounded-xl bg-gray-100">
-      <Text className="font-medium text-gray-800">Enable community features</Text>
+      <Text className="font-medium text-gray-800">
+        Enable community features
+      </Text>
       <Switch
         value={safeValue}
         onValueChange={(checked) => onChange(checked ? "true" : "false")}
@@ -127,32 +133,55 @@ const ToggleInput = ({ value, onChange }) => {
 
 // Main QuestionInput Component - FIXED: Provide default values
 interface QuestionInputProps {
-  type: 'emoji' | 'chips' | 'toggle';
+  type: "emoji" | "chips" | "toggle";
   value: any;
   onChange: (value: any) => void;
   id: string;
   options?: string[];
 }
 
-export default function QuestionInput({ type, value, onChange, id, options = [] }: QuestionInputProps) {
+export default function QuestionInput({
+  type,
+  value,
+  onChange,
+  id,
+  options = [],
+}: QuestionInputProps) {
   // Ensure we have safe default values
-  const safeValue = value !== null && value !== undefined ? value : 
-                   type === 'chips' ? [] : 
-                   type === 'toggle' ? "false" : null;
+  const safeValue =
+    value !== null && value !== undefined
+      ? value
+      : type === "chips"
+        ? []
+        : type === "toggle"
+          ? "false"
+          : null;
 
   switch (type) {
-    case 'emoji':
+    case "emoji":
       return <EmojiPicker value={safeValue} onChange={onChange} />;
 
-    case 'chips':
+    case "chips":
       // Single choice for specific IDs
-      if (id === 'social' || id === 'learningStyle' || id === 'intro') {
-        return <ChipSelectorSingle options={options} value={safeValue} onChange={onChange} />;
+      if (id === "social" || id === "learningStyle" || id === "intro") {
+        return (
+          <ChipSelectorSingle
+            options={options}
+            value={safeValue}
+            onChange={onChange}
+          />
+        );
       }
       // Multi choice for others
-      return <ChipSelectorMulti options={options} value={safeValue} onChange={onChange} />;
+      return (
+        <ChipSelectorMulti
+          options={options}
+          value={safeValue}
+          onChange={onChange}
+        />
+      );
 
-    case 'toggle':
+    case "toggle":
       return <ToggleInput value={safeValue} onChange={onChange} />;
 
     default:

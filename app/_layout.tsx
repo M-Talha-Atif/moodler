@@ -1,57 +1,125 @@
-// app/_layout.tsx
-import { Stack } from 'expo-router';
-import { useAuthStore } from '@/store/useAuthStore';
-import { useEffect, useState } from 'react';
-import { useRouter, useSegments } from 'expo-router';
-import { View, ActivityIndicator } from 'react-native';
+  // app/_layout.tsx
+  import { useAuthStore } from "@/store/useAuthStore";
+  import { useEffect, useState } from "react";
+  import { useRouter, useSegments, Stack } from "expo-router";
+  import { View, ActivityIndicator, Text } from "react-native";
+  import "../global.css";
+  import { useDailyCheckInStore } from "@/modules/dailyCheckIn/store/useDailyCheckInStore";
+  import { useMoodLog } from "@/modules/dailyCheckIn/hooks/useMoodLog";
 
-export default function RootLayout() {
-  const { user, isLoading, checkAuth } = useAuthStore();
-  const segments = useSegments();
-  const router = useRouter();
-  const [isNavigationReady, setIsNavigationReady] = useState(false);
+  export default function RootLayout() {
+    const { user, isLoading, checkAuth } = useAuthStore();
+    const segments = useSegments();
+    const router = useRouter();
+    const [isNavigationReady, setIsNavigationReady] = useState(false);
 
-  useEffect(() => {
-    // Check auth on app start
-    checkAuth().finally(() => {
-      setIsNavigationReady(true);
-    });
-  }, []);
+    const { hasDailyCheckIn, setHasDailyCheckIn } = useDailyCheckInStore();
+    const { checkTodayMoodLog } = useMoodLog();
 
-  useEffect(() => {
-    if (!isNavigationReady || isLoading) return;
+    // 🔍 Daily check-in fetch
+    useEffect(() => {
+      const checkDaily = async () => {
+        if (user?.role === "user") {
+          try {
+            const log = await checkTodayMoodLog();
+            setHasDailyCheckIn(!!log);
+          } catch {
+            setHasDailyCheckIn(false);
+          }
+        } else if (user?.role === "host") {
+          setHasDailyCheckIn(true);
+        } else {
+          setHasDailyCheckIn(null);
+        }
+      };
 
-    const inAuthGroup = segments[0] === '(auth)';
-    const inOnboardingGroup = segments[0] === 'onboarding';
-    const inTabsGroup = segments[0] === '(tabs)';
+      if (user) checkDaily();
+    }, [user]);
 
-    console.log('Routing check:', { user, segments, isLoading });
+    // 🔐 Auth check
+    useEffect(() => {
+      checkAuth().finally(() => {
+        setIsNavigationReady(true);
+      });
+    }, []);
 
-    if (!user && !inAuthGroup) {
-      // Redirect to login if not authenticated
-      router.replace('/(auth)/login');
-    } else if (user && !user.onboardingCompleted && !inOnboardingGroup) {
-      // Redirect to onboarding if not completed
-      router.replace('/onboarding');
-    } else if (user && user.onboardingCompleted && (inAuthGroup || inOnboardingGroup)) {
-      // Redirect to main app if already authenticated and completed onboarding
-      router.replace('/(tabs)');
+    // 🚦 AUTO NAVIGATION
+    useEffect(() => {
+      if (!isNavigationReady || isLoading) return;
+
+      // Agar user hai aur role "user" hai aur abhi daily status null hai → wait karo
+      if (user?.role === "user" && hasDailyCheckIn === null) {
+        return;
+      }
+
+      const currentSegment = segments[0];
+
+      // 1️⃣ No user → Login
+      if (!user) {
+        if (currentSegment !== "(auth)") {
+          router.replace("/(auth)/login");
+        }
+        return;
+      }
+
+      // Host
+      if (user.role === "host") {
+        if (segments[0] !== "(tabs)" || segments[1] !== "(host)") {
+          router.replace("/(tabs)/(host)");
+        }
+        return;
+      }
+
+      // User
+      if (user.role === "user") {
+        if (!user.onboardingCompleted) {
+          if (segments[0] !== "onboarding") {
+            router.replace("/onboarding");
+          }
+          return;
+        }
+
+        if (hasDailyCheckIn === false) {
+          if (segments[0] !== "daily-check-in") {
+            router.replace("/daily-check-in");
+          }
+        } else if (hasDailyCheckIn === true) {
+          if (segments[0] !== "(tabs)" || segments[1] !== "(user)") {
+            router.replace("/(tabs)/(user)");
+          }
+        }
+      }
+
+
+    }, [user, isLoading, segments, isNavigationReady, hasDailyCheckIn, router]);
+
+    // 🌀 Loader
+    if (
+      !isNavigationReady ||
+      (user?.role === "user" && hasDailyCheckIn === null)
+    ) {
+      return (
+        <View className="flex-1 justify-center items-center bg-background">
+          <ActivityIndicator size="large" color="#6366f1" />
+          <Text className="text-gray-600 mt-4">
+            {user?.role === "user" && hasDailyCheckIn === null
+              ? "Checking your daily status..."
+              : "Loading your journey..."}
+          </Text>
+        </View>
+      );
     }
-  }, [user, isLoading, segments, isNavigationReady]);
 
-  if (isLoading || !isNavigationReady) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f3f4f6' }}>
-        <ActivityIndicator size="large" color="#7bf163" />
-      </View>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="(tabs)/(user)" />
+        <Stack.Screen name="(tabs)/(host)" />
+        <Stack.Screen name="daily-check-in" />
+        <Stack.Screen name="index" />
+        {/* for non tabs */}
+        <Stack.Screen name="(user)" />
+      </Stack>
     );
   }
-
-  return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(onboarding)" />
-      <Stack.Screen name="(tabs)" />
-    </Stack>
-  );
-}

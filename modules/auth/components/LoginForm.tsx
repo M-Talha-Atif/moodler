@@ -1,30 +1,40 @@
 // modules/auth/components/LoginForm.tsx - UPDATED WITH EXPO ICONS
-import { View, Text, TextInput, Pressable, ToastAndroid, TouchableOpacity } from 'react-native';
-import { useState } from 'react';
-import { useRouter } from 'expo-router';
-import { useAuthStore } from '@/store/useAuthStore';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ToastAndroid,
+  TouchableOpacity,
+} from "react-native";
+import { useState } from "react";
+import { useAuthStore } from "@/store/useAuthStore";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function LoginForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
-  const { isLoading, error, login, setError, clearError } = useAuthStore();
+  const { error, login, setError, clearError } = useAuthStore();
+  const [buttonLoading, setButtonLoading] = useState(false);
 
   const handleSubmit = async () => {
     if (!email || !password) {
-      setError('Please fill all fields');
+      setError("Please fill all fields");
       return;
     }
 
     try {
       clearError();
+      setButtonLoading(true);
       await login(email, password);
-      ToastAndroid.show('✅ Login successful!', ToastAndroid.SHORT);
+      ToastAndroid.show("✅ Login successful!", ToastAndroid.SHORT);
     } catch (err) {
-      console.error('Login error:', err);
-      ToastAndroid.show('❌ Login failed', ToastAndroid.SHORT);
+      console.error("Login error:", err);
+      setButtonLoading(false);
+      ToastAndroid.show("❌ Login failed", ToastAndroid.SHORT);
+    } finally {
+      setButtonLoading(false);
     }
   };
 
@@ -42,10 +52,12 @@ export default function LoginForm() {
           </Text>
         </View>
       )}
-      
+
       {/* Email Input */}
       <View className="space-y-3">
-        <Text className="text-gray-900 text-sm font-semibold">Email Address</Text>
+        <Text className="text-gray-900 text-sm font-semibold">
+          Email Address
+        </Text>
         <View className="relative">
           <TextInput
             className="w-full bg-white border border-gray-200 rounded-xl p-5 text-gray-900 text-base focus:border-[#7bf163]"
@@ -55,11 +67,11 @@ export default function LoginForm() {
             onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
-            editable={!isLoading}
+            editable={!buttonLoading}
           />
         </View>
       </View>
-      
+
       {/* Password Input with Eye Icon */}
       <View className="space-y-3">
         <Text className="text-gray-900 text-sm font-semibold">Password</Text>
@@ -71,12 +83,12 @@ export default function LoginForm() {
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
-            editable={!isLoading}
+            editable={!buttonLoading}
           />
           <TouchableOpacity
             className="absolute right-4 top-4"
             onPress={togglePasswordVisibility}
-            disabled={isLoading}
+            disabled={buttonLoading}
           >
             {showPassword ? (
               <Ionicons name="eye-off" size={20} color="#6B7280" />
@@ -89,19 +101,17 @@ export default function LoginForm() {
 
       {/* Spacing between fields and button */}
       <View className="h-2" />
-      
+
       {/* Login Button */}
       <Pressable
         className={`w-full rounded-xl p-5 mt-4 shadow-sm ${
-          isLoading 
-            ? 'bg-gray-400' 
-            : 'bg-[#7bf163] active:bg-[#6bd953]'
+          buttonLoading ? "bg-gray-400" : "bg-[#7bf163] active:bg-[#6bd953]"
         }`}
         onPress={handleSubmit}
-        disabled={isLoading}
+        disabled={buttonLoading}
       >
         <Text className="text-white text-center font-bold text-lg">
-          {isLoading ? 'Signing In...' : 'Sign In'}
+          {buttonLoading ? "Signing In..." : "Sign In"}
         </Text>
       </Pressable>
 

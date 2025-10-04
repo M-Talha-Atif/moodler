@@ -1,24 +1,29 @@
-// src/services/apiClient.ts
-import axios from 'axios';
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Tumhara existing API code adapt karta hun
-const baseURL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.100.6:3000';
+// const baseURL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.100.6:3000";
+const baseURL = 'https://soft-years-roll.loca.lt'
 
 const api = axios.create({
   baseURL,
   timeout: 10000,
 });
 
-// Request interceptor - token automatically add karega
+// Token inject automatically
 api.interceptors.request.use(
   async (config) => {
-    const token = ''; // Temporary
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      const token = await AsyncStorage.getItem("auth_token");
+      console.log(token);
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (err) {
+      console.error("❌ Error reading token from storage:", err);
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 export default api;

@@ -1,9 +1,9 @@
 // app/(onboarding)/index.tsx
-import OnboardingScreen from '@/modules/onboarding/components/OnboardingScreen';
-import { useEffect } from 'react';
-import { useAuthStore } from '@/store/useAuthStore';
-import { useRouter } from 'expo-router';
-import { View, ActivityIndicator, Text } from 'react-native';
+import OnboardingScreen from "@/modules/onboarding/components/OnboardingScreen";
+import { useEffect } from "react";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useRouter } from "expo-router";
+import { View, ActivityIndicator, Text } from "react-native";
 
 export default function OnboardingPage() {
   const { user, isLoading } = useAuthStore();
@@ -12,7 +12,7 @@ export default function OnboardingPage() {
   useEffect(() => {
     // If user is already authenticated and completed onboarding, redirect to main app
     if (!isLoading && user?.onboardingCompleted) {
-      router.replace('/(tabs)');
+      router.replace("/(tabs)");
     }
   }, [user, isLoading, router]);
 
@@ -26,7 +26,7 @@ export default function OnboardingPage() {
     );
   }
 
-//   // If user already completed onboarding, show nothing (will redirect)
+  //   // If user already completed onboarding, show nothing (will redirect)
   if (user?.onboardingCompleted) {
     return (
       <View className="flex-1 justify-center items-center bg-gray-50">
