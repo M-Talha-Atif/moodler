@@ -9,6 +9,7 @@ import HostCard from '../components/HostCard';
 import BookingButton from '../components/BookingButton';
 import BookingStatus from '../components/BookingStatus';
 import InfoSection from '../components/InfoSection';
+import Header from '@/modules/common/Header';
 
 export default function ExperienceDetailScreen() {
   const {
@@ -34,6 +35,8 @@ export default function ExperienceDetailScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
+
+      <Header title="Experience Details" showBackButton />
       <ScrollView 
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 120 }}

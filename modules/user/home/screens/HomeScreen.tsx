@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MotiView } from "moti";
+import { useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useHome } from "../hooks/useHome";
 import StreakWidget from "../components/StreakWidget";
@@ -22,21 +23,10 @@ export default function HomeScreen() {
   const router = useRouter();
   const { homeData, loading, error, refetch } = useHome();
 
-  const handleJoinExperience = (experience: Experience) => {
-    Alert.alert(
-      "Join Experience",
-      `Are you sure you want to join "${experience.title}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        { 
-          text: "Join", 
-          onPress: () => {
-            Alert.alert("Success", `You've joined ${experience.title}!`);
-          }
-        }
-      ]
+  const handleJoinExperience = useCallback(
+      (experience: Experience) => router.push({ pathname: "/experienceDetail", params: { id: experience.id } }),
+      [router]
     );
-  };
 
   const handleRetry = () => {
     refetch();

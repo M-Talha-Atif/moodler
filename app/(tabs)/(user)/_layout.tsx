@@ -47,7 +47,7 @@ export default function UserTabs() {
         name="experienceDetail"
         options={{
           href: null, // hides it from tab bar
-          headerShown: true,
+          headerShown: false,
           title: "Experience Detail",
         }}
       />

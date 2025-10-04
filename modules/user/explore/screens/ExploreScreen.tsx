@@ -1,12 +1,14 @@
 // ExploreScreen.tsx - FIXED
 import { useEffect, useState, useRef, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { View } from "moti";
 import { router } from "expo-router";
 import { fetchExperiencesForUser } from "../services/exploreService";
 import { Experience } from "@/modules/user/home/services/homeService";
 import ExperienceList from "../components/ExperienceList";
 import FiltersSection from "../components/FiltersSection";
 import SearchBar from "../components/SearchBar";
+import Header from "@/modules/common/Header";
 
 export default function ExploreScreen() {
     const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -114,6 +116,8 @@ export default function ExploreScreen() {
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50">
+            <Header title="Explore Section" />
+            <View className="mt-12"/>  
             <SearchBar value={search} onChange={setSearch} />
             <FiltersSection
                 cultureFilter={cultureFilter}

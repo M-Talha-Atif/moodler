@@ -122,7 +122,6 @@ export default function BookingsScreen() {
       {/*  Gradient Header */}
       <Header
         title="My Bookings"
-        showBackButton
       />
       <FlatList
         data={bookings}

@@ -86,7 +86,7 @@ export const fetchBookings = async (
   const mappedData: Booking[] = rawData.map((rawBooking: any) => ({
     id: rawBooking.id || "",
     title: rawBooking.experience?.title || "Untitled Experience",
-    status:
+  status:
       (rawBooking.status as "confirmed" | "waitlisted" | "cancelled") ||
       "confirmed",
     date: rawBooking.experience?.date || "",

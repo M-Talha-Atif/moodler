@@ -15,7 +15,7 @@ interface HeaderProps {
 
 export default function Header({
   title,
-  showBackButton = true,
+  showBackButton = false,
   rightContent,
   gradientColors = ["#3B82F6", "#6366F1"],
   height = 80, // Default mid-height
