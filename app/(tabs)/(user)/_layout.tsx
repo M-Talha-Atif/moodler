@@ -1,10 +1,24 @@
-// app/(tabs)/(user)/_layout.tsx
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function UserTabs() {
   return (
-    <Tabs screenOptions={{ headerShown: false }} initialRouteName="index">
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: "#4ADE80", //  primary (vibrant green)
+        tabBarInactiveTintColor: "#94A3B8", // muted foreground
+        tabBarStyle: {
+          backgroundColor: "#FFFFFF", // clean white base
+          borderTopColor: "#E2E8F0", // subtle border
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "600",
+        },
+      }}
+      initialRouteName="index"
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -42,29 +56,27 @@ export default function UserTabs() {
         }}
       />
 
-      {/*  Hidden route inside tabs */}
+      {/* Hidden Screens */}
       <Tabs.Screen
         name="experienceDetail"
         options={{
-          href: null, // hides it from tab bar
+          href: null,
           headerShown: false,
           title: "Experience Detail",
         }}
       />
-      {/* Hidden route inside tabs */}
       <Tabs.Screen
         name="notifications"
         options={{
-          href: null, // hides it from tab bar
+          href: null,
           headerShown: true,
           title: "Notifications",
         }}
       />
-      {/* Hidden route inside tabs */}
       <Tabs.Screen
         name="bookingDetail"
         options={{
-          href: null, // hides it from tab bar
+          href: null,
           headerShown: false,
           title: "Booking Detail",
         }}
