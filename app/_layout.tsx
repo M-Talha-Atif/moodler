@@ -6,9 +6,7 @@ import { View, ActivityIndicator, Text } from "react-native";
 import "../global.css";
 import { useDailyCheckInStore } from "@/modules/dailyCheckIn/store/useDailyCheckInStore";
 import { useMoodLog } from "@/modules/dailyCheckIn/hooks/useMoodLog";
-import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
-import { Poppins_400Regular } from '@expo-google-fonts/poppins';
-import { PlayfairDisplay_400Regular } from '@expo-google-fonts/playfair-display';
+import Animated, { FadeIn, FadeOut, ZoomIn } from "react-native-reanimated";
 
 export default function RootLayout() {
   const { user, isLoading, checkAuth } = useAuthStore();
@@ -18,12 +16,6 @@ export default function RootLayout() {
 
   const { hasDailyCheckIn, setHasDailyCheckIn } = useDailyCheckInStore();
   const { checkTodayMoodLog } = useMoodLog();
-
-  //  const [fontsLoaded] = useFonts({
-  //   Inter: Inter_400Regular,
-  //   Poppins: Poppins_400Regular,
-  //   PlayfairDisplay: PlayfairDisplay_400Regular,
-  // });
 
 
   // 🔍 Daily check-in fetch
@@ -113,7 +105,7 @@ export default function RootLayout() {
         <ActivityIndicator size="large" color="#6366f1" />
         <Text className="text-gray-600 mt-4">
           {user?.role === "user" && hasDailyCheckIn === null
-            ? "Checking your daily status..."
+            ? "Checking your mood status..."
             : "Loading your journey..."}
         </Text>
       </View>

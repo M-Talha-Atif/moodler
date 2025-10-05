@@ -7,6 +7,6 @@ interface DailyCheckInState {
 }
 
 export const useDailyCheckInStore = create<DailyCheckInState>((set) => ({
-  hasDailyCheckIn: false,
+  hasDailyCheckIn: null,
   setHasDailyCheckIn: (val) => set({ hasDailyCheckIn: val }),
 }));
