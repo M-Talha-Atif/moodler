@@ -133,8 +133,9 @@ export default function BookingsScreen() {
         onEndReached={loadMore}
         onEndReachedThreshold={0.3}
         contentContainerStyle={{
-          paddingTop: HEADER_HEIGHT - 20, // 👈 push content below header
+          paddingTop: HEADER_HEIGHT - 20, //push content below header
           paddingBottom: 100,
+          paddingHorizontal:16,
           backgroundColor: "white",
         }}
         ListHeaderComponent={

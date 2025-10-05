@@ -6,40 +6,48 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Light Theme Colors - Clean & Consistent
         background: "#FFFFFF",
-        foreground: "#111827", // Dark gray for better readability
+        foreground: "#0F172A", // Deep slate for better contrast
         card: "#FFFFFF",
         "card-foreground": "#111827",
-        primary: "#7bf163", // Your brand green
+
+        // 🟢 Primary Gradient Family
+        primary: "#4ADE80", // Fresh green base (like Tailwind’s emerald-400)
         "primary-foreground": "#FFFFFF",
-        secondary: "#F8FAFC", // Light gray
-        "secondary-foreground": "#1E293B",
-        muted: "#F1F5F9",
-        "muted-foreground": "#64748B", // Medium gray
-        accent: "#10B981", // Emerald accent
+
+        // 💫 Complementary Emerald Accent
+        accent: "#16A34A", // Deep emerald for gradient pairing
         "accent-foreground": "#FFFFFF",
-        destructive: "#EF4444", // Red for errors
-        border: "#E2E8F0", // Light border
-        input: "#FFFFFF",
-        ring: "#7bf163", // Focus ring color
 
-        // Additional Brand Colors
-        "brand-green": "#7bf163",
-        "brand-green-light": "#9EF486",
-        "brand-green-dark": "#5ECD4A",
+        // 🩶 Secondary Neutrals
+        secondary: "#F3F4F6", // Slightly softer neutral
+        "secondary-foreground": "#1E293B",
+        muted: "#F8FAFC",
+        "muted-foreground": "#64748B",
 
-        // Semantic Colors for Components
+        // ❤️ Feedback Colors
+        destructive: "#EF4444",
         success: "#10B981",
         warning: "#F59E0B",
         error: "#EF4444",
         info: "#3B82F6",
+
+        // ✨ UI Details
+        border: "#E2E8F0",
+        input: "#FFFFFF",
+        ring: "#34D399", // Softer ring glow
+
+        // 🌿 Brand Gradient Family (for buttons, highlights, progress)
+        "brand-green-light": "#A3E635", // light lime
+        "brand-green": "#4ADE80",       // mid green (vibrant)
+        "brand-green-dark": "#059669",  // dark emerald (depth)
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
-        display: ["Playfair Display", "serif"],
-        accent: ["Geist", "system-ui", "sans-serif"],
+        poppins: ["Poppins", "system-ui", "sans-serif"],
+        playfair: ["PlayfairDisplay", "serif"],
       },
+
       fontSize: {
         xs: ["12px", "16px"],
         sm: ["14px", "20px"],

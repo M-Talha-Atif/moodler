@@ -17,7 +17,7 @@ export default function Header({
   title,
   showBackButton = false,
   rightContent,
-  gradientColors = ["#3B82F6", "#6366F1"],
+  gradientColors =["#16a34a", "#22c55e", "#4ade80"],
   height = 80, // Default mid-height
 }: HeaderProps) {
   const router = useRouter();

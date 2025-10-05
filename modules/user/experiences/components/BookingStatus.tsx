@@ -18,7 +18,7 @@ export default function BookingStatus({ isBooked, bookingStatus }: BookingStatus
     >
       <View className="bg-success/10 p-4 rounded-2xl border border-success/20">
         <Text className="text-success font-semibold text-center text-sm">
-          ✅ You have already booked this experience {bookingStatus && `(${bookingStatus})`}
+          You have already booked this experience {bookingStatus && `(${bookingStatus})`}
         </Text>
       </View>
     </MotiView>

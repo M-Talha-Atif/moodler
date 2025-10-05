@@ -22,8 +22,8 @@ export default function ExperienceHeader({ image, title, description }: Experien
         accessibilityLabel={`Image for ${title}`}
       />
       
-      <View className="p-5 space-y-4">
-        <Text className="text-3xl font-bold text-foreground font-display">
+      <View className="p-5 space-y-4 font-poppins">
+        <Text className="text-2xl font-bold font-poppins">
           {title}
         </Text>
         

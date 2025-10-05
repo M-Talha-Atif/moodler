@@ -2,7 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // const baseURL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.100.6:3000";
-const baseURL = 'https://eighty-falcons-dream.loca.lt'
+const baseURL = ''
 
 const api = axios.create({
   baseURL,
@@ -13,6 +13,7 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     try {
+      // await AsyncStorage.removeItem("auth_token");
       const token = await AsyncStorage.getItem("auth_token");
       console.log(token);
       if (token) {

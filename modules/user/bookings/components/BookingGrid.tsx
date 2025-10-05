@@ -87,7 +87,7 @@ export default function BookingGrid({
       ListFooterComponent={renderFooter}
       ListEmptyComponent={renderEmpty}
       contentContainerStyle={[
-        { flexGrow: 1, paddingVertical: 8 },
+        { flexGrow: 1, paddingVertical: 8  },
         bookings.length === 0 && { flex: 1 }
       ]}
       className="flex-1 bg-gray-50"

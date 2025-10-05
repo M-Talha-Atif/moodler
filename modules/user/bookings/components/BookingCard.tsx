@@ -1,19 +1,20 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
-import { Calendar, MapPin, DollarSign } from "lucide-react-native";
+import { View, Text, Image } from "react-native";
+import { Calendar, MapPin } from "lucide-react-native";
 import { Booking } from "../services/bookingService";
 import dayjs from "dayjs";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useCallback } from "react";
+import Button from "@/modules/common/components/Button";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface BookingCardProps {
   booking: Booking;
 }
 
 const statusConfig = {
-  confirmed: { label: "Confirmed", color: "bg-green-100 border-green-200 text-green-800" },
-  waitlisted: { label: "Waitlisted", color: "bg-yellow-100 border-yellow-200 text-yellow-800" },
-  cancelled: { label: "Cancelled", color: "bg-red-100 border-red-200 text-red-800" },
+  confirmed: { label: "Confirmed", color: "#10B981" },
+  waitlisted: { label: "Waitlisted", color: "#F59E0B" },
+  cancelled: { label: "Cancelled", color: "#EF4444" },
 };
 
 export default function BookingCard({ booking }: BookingCardProps) {
@@ -21,7 +22,7 @@ export default function BookingCard({ booking }: BookingCardProps) {
 
   const status = statusConfig[booking.status] || {
     label: "Unknown",
-    color: "bg-gray-100 border-gray-200 text-gray-800",
+    color: "#6B7280",
   };
 
   const formattedDate = booking.date
@@ -38,7 +39,6 @@ export default function BookingCard({ booking }: BookingCardProps) {
     [booking.experienceId, router]
   );
 
-  // ✅ Decide button text & action based on booking status
   const isCancelled = booking.status === "cancelled";
   const buttonLabel = isCancelled ? "Book Again" : "View Booking";
   const handlePress = isCancelled
@@ -46,65 +46,76 @@ export default function BookingCard({ booking }: BookingCardProps) {
     : navigateToBookingDetails;
 
   return (
-    <View className="bg-white rounded-2xl border border-gray-100 shadow-sm mb-4 mx-3 overflow-hidden">
-      <View className="flex-row items-center p-4">
-        {/* Image */}
-        <View className="mr-4">
-          <Image
-            source={{ uri: booking.image || "https://via.placeholder.com/80" }}
-            className="w-16 h-16 rounded-full border border-gray-200"
-          />
-        </View>
-
-        {/* Details */}
-        <View className="flex-1">
-          <Text className="text-base font-bold text-gray-900" numberOfLines={1}>
-            {booking.title}
+    <View className="bg-white rounded-3xl border border-gray-100 shadow-sm mb-5 overflow-hidden mx-3">
+      {/* Image */}
+      <View className="relative">
+        <Image
+          source={{ uri: booking.image || "https://via.placeholder.com/400x200" }}
+          className="w-full h-40"
+          resizeMode="cover"
+        />
+        {/* Overlay Badge */}
+        <View className="absolute top-3 left-3 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full">
+          <Text className="text-white text-xs font-medium">
+            {status.label}
           </Text>
-
-          <View className="flex-row items-center mt-1">
-            <MapPin size={14} color="#6B7280" className="mr-1" />
-            <Text className="text-xs text-gray-600" numberOfLines={1}>
-              {booking.location || "Location not available"}
-            </Text>
-          </View>
-
-          <View className="flex-row items-center mt-1">
-            <Calendar size={14} color="#6B7280" className="mr-1" />
-            <Text className="text-xs text-gray-600">{formattedDate}</Text>
-          </View>
-
-          <View className="flex-row items-center mt-1">
-            <DollarSign size={14} color="#6B7280" className="mr-1" />
-            <Text className="text-xs text-gray-600">
-              {booking.price ? `$${booking.price}` : "Price unavailable"}
-            </Text>
-          </View>
         </View>
       </View>
 
-      {/* Footer Row */}
-      <View className="flex-row items-center justify-between px-4 pb-4">
-        <View className={`px-3 py-1 rounded-full border ${status.color}`}>
-          <Text className="text-xs font-semibold">{status.label}</Text>
-        </View>
+      {/* Content */}
+      <View className="p-4">
+        {/* Title & Price */}
+        <View className="flex-row justify-between items-start mb-2">
+          <Text
+            className="text-lg font-semibold text-gray-900 flex-1 mr-2 leading-6"
+            numberOfLines={2}
+          >
+            {booking.title}
+          </Text>
 
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={handlePress}
-          className="rounded-full overflow-hidden"
-        >
           <LinearGradient
-            colors={isCancelled ? ["#10B981", "#059669"] : ["#3B82F6", "#6366F1"]}
+            colors={["#7bf163", "#10B981"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            className="px-4 py-1.5 rounded-full"
+            className="px-3 py-1.5 rounded-full"
           >
-            <Text className="text-white text-sm font-semibold">
-              {buttonLabel}
+            <Text className="text-white text-sm font-bold">
+              {booking.price ? `$${booking.price}` : "Free"}
             </Text>
           </LinearGradient>
-        </TouchableOpacity>
+        </View>
+
+        {/* Meta Info: Location + Date (Column) */}
+        <View
+          className="flex-col space-y-2 mb-4 px-3 py-2 rounded-xl"
+          style={{
+            backgroundColor: "rgba(123, 241, 99, 0.06)",
+            borderWidth: 1,
+            borderColor: "rgba(123, 241, 99, 0.15)",
+          }}
+        >
+          {/* Location */}
+          <View className="flex-row items-start space-x-2 flex-wrap">
+            <View className="bg-rose-50 p-1.5 rounded-full">
+              <MapPin size={12} color="#E11D48" />
+            </View>
+            <Text className="text-gray-700 text-[11px] font-medium flex-shrink mt-1">
+              {booking.location || "Location unavailable"}
+            </Text>
+          </View>
+
+          {/* Date */}
+          <View className="flex-row items-center space-x-2">
+            <View className="bg-emerald-50 p-1.5 rounded-full">
+              <Calendar size={12} color="#059669" />
+            </View>
+            <Text className="text-gray-700 text-[11px] font-medium">{formattedDate}</Text>
+          </View>
+        </View>
+
+
+        {/* CTA */}
+        <Button variant="primary" title={buttonLabel} onPress={handlePress} />
       </View>
     </View>
   );

@@ -1,36 +1,34 @@
-// src/modules/user/home/screens/HomeScreen.tsx
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Image,
-  Alert,
-  RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { MotiView } from "moti";
-import { useCallback } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useCallback } from "react";
 import { useHome } from "../hooks/useHome";
 import StreakWidget from "../components/StreakWidget";
 import MoodWidget from "../components/MoodWidget";
 import RecommendedExperiences from "../components/RecommendedExperiences";
 import { Experience } from "../services/homeService";
+import DashboardHeader from "@/modules/user/home/components/DashboardHeader";
 
 export default function HomeScreen() {
   const router = useRouter();
   const { homeData, loading, error, refetch } = useHome();
 
   const handleJoinExperience = useCallback(
-      (experience: Experience) => router.push({ pathname: "/experienceDetail", params: { id: experience.id } }),
-      [router]
-    );
+    (experience: Experience) =>
+      router.push({
+        pathname: "/experienceDetail",
+        params: { id: experience.id },
+      }),
+    [router]
+  );
 
-  const handleRetry = () => {
-    refetch();
-  };
+  const handleRetry = () => refetch();
 
   if (loading && !homeData) {
     return (
@@ -62,82 +60,49 @@ export default function HomeScreen() {
   }
 
   return (
-    <ScrollView
-      className="flex-1 bg-gray-50"
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 32 }}
-      refreshControl={
-        <RefreshControl
-          refreshing={loading && !!homeData}
-          onRefresh={refetch}
-          colors={["#7bf163"]}
-          tintColor="#7bf163"
-        />
-      }
-    >
+    <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header */}
-      <View className="bg-white px-6 pt-12 pb-6">
-        <View className="flex-row justify-between items-center mb-6">
-          <MotiView
-            from={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <Text className="text-2xl font-bold text-gray-900">
-              {homeData?.greeting}, {homeData?.userName} 👋
-            </Text>
-            <Text className="text-gray-600 mt-1">
-              Ready to make today meaningful?
-            </Text>
-          </MotiView>
+      <DashboardHeader
+        userName={homeData?.userName}
+        profilePic={homeData?.profilePic}
+        greeting={homeData?.greeting}
+      />
 
-          {/* Profile + Notifications */}
-          <View className="flex-row items-center space-x-4">
-            <TouchableOpacity
-              onPress={() => router.push("/notifications")}
-              className="relative"
-            >
-              <Ionicons
-                name="notifications-outline"
-                size={24}
-                color="#374151"
-              />
-              <View className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
-            </TouchableOpacity>
+      <View className="mt-16" />
 
-            <TouchableOpacity onPress={() => router.push("/profile")}>
-              <Image
-                source={{ uri: homeData?.profilePic }}
-                className="w-9 h-9 rounded-full border border-gray-200"
-                // defaultSource={require('../../../../assets/images/default-avatar.png')}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-
-      {/* Mood */}
+      {/* Mood Widget */}
       {homeData?.currentMood && (
         <View className="mx-6 mb-4">
           <MoodWidget mood={homeData.currentMood} />
         </View>
       )}
 
-      {/* Streak */}
+      {/* Streak Widget */}
       {homeData?.streak !== undefined && (
         <View className="mx-6 mb-4">
           <StreakWidget streak={homeData.streak} />
         </View>
       )}
 
-      {/* Recommended */}
-      <View className="mx-6">
+      {/* For You Today Section */}
+      <View className="mx-6 mt-4 flex-1">
+        <View className="flex-row justify-between items-center mb-3">
+          <Text className="text-xl font-bold text-gray-900">For You Today</Text>
+          <TouchableOpacity onPress={() => console.log("👀 See all clicked")}>
+            <Text className="text-green-600 font-semibold">See All</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Only this scrolls */}
         <RecommendedExperiences
           experiences={homeData?.recommendedExperiences || []}
           onJoinExperience={handleJoinExperience}
-          loading={loading}
+          loading={loading && !homeData?.recommendedExperiences?.length}
           error={error}
+          refreshing={loading && !!homeData}
+          onRefresh={refetch}
         />
       </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 }
