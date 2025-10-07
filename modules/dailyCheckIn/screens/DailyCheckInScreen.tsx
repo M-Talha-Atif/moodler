@@ -1,13 +1,15 @@
 // src/modules/dailyCheckIn/screens/DailyCheckInScreen.tsx
 import {
   View,
-  Text,
   ScrollView,
   Dimensions,
   Alert,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import Button from "@/components/ui/button";
+import Input from "@/components/ui/input";
+import IconCard from "@/components/ui/iconCard";
 import { useState, useRef } from "react";
 import { MotiView } from "moti";
 import MoodWheel from "../components/MoodWheel";
@@ -18,6 +20,16 @@ import SubmitButton from "../components/SubmitButton";
 import { useMoodLog } from "../hooks/useMoodLog";
 import { useRouter } from "expo-router";
 import { useDailyCheckInStore } from "../store/useDailyCheckInStore";
+import { Text } from "@/components/ui/text";
+import { Icon } from "lucide-react-native";
+import Card from "@/components/ui/card";
+import Separator from "@/components/ui/separator";
+import SearchBar from "@/components/ui/searchBar";
+import ChipSelector from "@/components/ui/chipSelector";
+import DatePicker from "@/components/ui/datePicker";
+import ProgressBar from "@/components/ui/progressBar";
+import ImageCard from "@/components/ui/imageCard";
+
 
 
 const { width } = Dimensions.get("window");
@@ -58,14 +70,14 @@ export default function DailyCheckInScreen() {
 
       await submitMoodLog(payload);
 
-      setHasDailyCheckIn(true); 
+      setHasDailyCheckIn(true);
 
       Alert.alert("Success", "Your daily check-in has been saved!", [
-      {
-        text: "OK",
-        onPress: () => router.replace("/(tabs)/(user)"), // ✅ navigate after OK
-      },
-    ]);
+        {
+          text: "OK",
+          onPress: () => router.replace("/(tabs)/(user)"), // ✅ navigate after OK
+        },
+      ]);
     } catch (err) {
       console.error("Mood log submit error:", err);
       Alert.alert("Error", "Failed to submit check-in");
@@ -73,6 +85,10 @@ export default function DailyCheckInScreen() {
   };
 
   const isFormValid = mood && (photo || voice);
+
+  const [selectedTime, setSelectedTime] = useState<Date | null>(null);
+
+  const [showAlert, setShowAlert] = useState(true);
 
   return (
     <KeyboardAvoidingView
@@ -129,6 +145,74 @@ export default function DailyCheckInScreen() {
               </MotiView>
             )}
           </MotiView>
+
+
+
+{/* 
+          <View style={{ padding: 20 }}>
+            <DatePicker
+              label="Select Time"
+              mode="time"
+              value={selectedTime}
+              onChange={setSelectedTime}
+              backgroundColor="#e5e7eb"
+              borderColor="#030303"
+              borderRadius={10}
+              fontFamily="Nunito"
+              accentColor="#ff6347"  // custom highlight color
+              themeVariant="light"
+            />
+
+
+            <Text
+              style={{
+                marginTop: 20,
+                fontFamily: "Nunito",
+                color: "#030303",
+                fontSize: 16,
+              }}
+            >
+              Selected Time:{" "}
+              {selectedTime
+                ? selectedTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                : "No time selected"}
+            </Text>
+          </View> */}
+{/* 
+          <View style={{ padding: 10 }}>
+
+
+            <ImageCard     
+              image={require("../../../assets/images/dis1.jpeg")}
+              title="Sunset Hike"
+              subtitle="Adventure Experience"
+              leftTag={{ label: "New", bgColor: "#0066FF" }}
+              rightTag={{ label: "Popular", bgColor: "#FF4D4D" }}
+              footerLeft="$40"
+              footerRight="Lahore • 12 Oct"
+              onPress={() => console.log("Card pressed!")}
+            />
+
+
+          </View> */}
+
+
+
+
+          {/* <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Icon name="user" size={20} />
+            <Separator orientation="vertical" type="dotted" length={25} color="#000" margin={6} />
+            <Icon name="bell" size={20} />
+          </View> */}
+
+
+          {/* <ChipSelector
+            options={["Happy", "Sad", "Angry", "Excited", "Calm"]}
+            multiSelect
+            selectedColor="#030303"
+            unselectedColor="#d3d3d3"
+            onChange={(selected) => console.log("Selected:", selected)}
+          /> */}
 
           {/* Voice Recorder */}
           <View style={{ marginTop: verticalSpacing }}>

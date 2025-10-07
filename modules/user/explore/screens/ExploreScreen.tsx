@@ -9,6 +9,7 @@ import ExperienceList from "../components/ExperienceList";
 import FiltersSection from "../components/FiltersSection";
 import SearchBar from "../components/SearchBar";
 import Header from "@/modules/common/Header";
+import { Text } from "@/components/ui/text";
 
 export default function ExploreScreen() {
     const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -28,7 +29,7 @@ export default function ExploreScreen() {
     // FIXED: Remove loading from dependencies
     const fetchData = useCallback(async (pageNum = 1, append = false) => {
         if (!isMountedRef.current) return;
-        
+
         // Cancel previous request
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
@@ -37,7 +38,7 @@ export default function ExploreScreen() {
 
         // Don't fetch if already loading for initial load
         if (loading && !append) return;
-        
+
         setLoading(true);
 
         try {
@@ -78,7 +79,7 @@ export default function ExploreScreen() {
         isMountedRef.current = true;
         // Initial load
         fetchData(1, false);
-        
+
         return () => {
             isMountedRef.current = false;
             if (abortControllerRef.current) {
@@ -90,7 +91,7 @@ export default function ExploreScreen() {
     // FIXED: Filter changes - reset and fetch
     useEffect(() => {
         if (!isMountedRef.current) return;
-        
+
         setPage(1);
         setExperiences([]);
         fetchData(1, false);
@@ -117,17 +118,24 @@ export default function ExploreScreen() {
     return (
         <SafeAreaView className="flex-1 bg-gray-50">
             <Header title="Explore Section" />
-            <View className="mt-12"/>  
+            <View className="mt-12" />
             <SearchBar value={search} onChange={setSearch} />
-            <FiltersSection
-                cultureFilter={cultureFilter}
-                setCultureFilter={setCultureFilter}
-                outcomeFilter={outcomeFilter}
-                setOutcomeFilter={setOutcomeFilter}
-                timeFilter={timeFilter}
-                setTimeFilter={setTimeFilter}
-                onClear={handleClearFilters}
-            />
+            <View className="mb-2 mt-4" style={{ overflow: "visible", zIndex: 10 }}>
+                <FiltersSection
+                    cultureFilter={cultureFilter}
+                    setCultureFilter={setCultureFilter}
+                    outcomeFilter={outcomeFilter}
+                    setOutcomeFilter={setOutcomeFilter}
+                    timeFilter={timeFilter}
+                    setTimeFilter={setTimeFilter}
+                    onClear={handleClearFilters}
+                />
+
+            </View>
+            <Text variant="display" color="foreground">
+                Daily Check-In
+            </Text>
+
 
             <ExperienceList
                 data={experiences}

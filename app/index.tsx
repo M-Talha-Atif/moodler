@@ -1,7 +1,10 @@
 // app/index.tsx
 import { View, Text, ActivityIndicator } from "react-native";
+;
+
 
 export default function Index() {
+
   return (
     <View className="flex-1 bg-background justify-center items-center">
       <View className="items-center mb-8">

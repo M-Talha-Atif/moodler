@@ -1,11 +1,18 @@
-// app/(tabs)/(host)/settings.tsx
 import { View, Text, TouchableOpacity } from "react-native";
 import { useAuthStore } from "@/store/useAuthStore";
-export default function HostSettings() {
+
+export default function ProfileScreen() {
   const { logout } = useAuthStore();
-   const handleLogout = async () => {
-    await logout;
-   }
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <View className="flex-1 items-center justify-center">
       <Text>Host Settings Screen</Text>
@@ -16,11 +23,9 @@ export default function HostSettings() {
         className="rounded-2xl overflow-hidden shadow-lg shadow-red-200"
       >
         <Text className="text-yellow text-center font-bold text-base">
-          {"Logout"}
+          Logout
         </Text>
       </TouchableOpacity>
     </View>
-
-
   );
 }

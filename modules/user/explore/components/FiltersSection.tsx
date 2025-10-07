@@ -1,8 +1,24 @@
-import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
+import Dropdown from "@/modules/common/components/DropDown";
 
-const CULTURE_TAGS = ["all", "beach", "music", "dance", "food", "art", "nature"];
-const OUTCOME_TAGS = ["all", "happiness", "calmness", "relief", "excitement"];
-const TIME_FILTERS = ["anytime", "today", "this_week", "this_month"];
+const CULTURE_TAGS = ["all", "beach", "music", "dance", "food", "art", "nature"] as const;
+const OUTCOME_TAGS = ["all", "happiness", "calmness", "relief", "excitement"] as const;
+const TIME_FILTERS = ["anytime", "today", "this_week", "this_month"] as const;
+
+type FilterValue =
+  | (typeof CULTURE_TAGS)[number]
+  | (typeof OUTCOME_TAGS)[number]
+  | (typeof TIME_FILTERS)[number];
+
+interface FiltersSectionProps {
+  cultureFilter: (typeof CULTURE_TAGS)[number];
+  setCultureFilter: (value: (typeof CULTURE_TAGS)[number]) => void;
+  outcomeFilter: (typeof OUTCOME_TAGS)[number];
+  setOutcomeFilter: (value: (typeof OUTCOME_TAGS)[number]) => void;
+  timeFilter: (typeof TIME_FILTERS)[number];
+  setTimeFilter: (value: (typeof TIME_FILTERS)[number]) => void;
+  onClear: () => void;
+}
 
 export default function FiltersSection({
   cultureFilter,
@@ -12,43 +28,16 @@ export default function FiltersSection({
   timeFilter,
   setTimeFilter,
   onClear,
-}: any) {
+}: FiltersSectionProps) {
   const hasActiveFilters =
     cultureFilter !== "all" ||
     outcomeFilter !== "all" ||
     timeFilter !== "anytime";
 
-  const renderFilterRow = (title: string, tags: string[], selected: string, setSelected: (t: string) => void) => (
-    <View>
-      <Text className="text-sm font-medium text-gray-700 mb-2">{title}</Text>
-      <FlatList
-        horizontal
-        data={tags}
-        keyExtractor={(item) => item}
-        showsHorizontalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => setSelected(item)}
-            className={`px-4 py-2 rounded-full mr-2 ${
-              selected === item ? "bg-green-500" : "bg-gray-100"
-            }`}
-          >
-            <Text
-              className={`text-sm font-medium ${
-                selected === item ? "text-white" : "text-gray-700"
-              }`}
-            >
-              {item.replace("_", " ")}
-            </Text>
-          </TouchableOpacity>
-        )}
-      />
-    </View>
-  );
-
   return (
-    <View className="bg-white px-4 py-3 border-b border-gray-200">
-      <View className="flex-row justify-between items-center mb-3">
+    <View className="bg-white px-4 py-4 border-b border-gray-200 rounded-3xl mx-4 mt-3 mb-5 shadow-sm">
+      {/* Header */}
+      <View className="flex-row justify-between items-center mb-4">
         <Text className="text-lg font-bold text-gray-900">Filters</Text>
         {hasActiveFilters && (
           <TouchableOpacity onPress={onClear}>
@@ -57,10 +46,43 @@ export default function FiltersSection({
         )}
       </View>
 
-      <View className="space-y-3">
-        {renderFilterRow("Culture", CULTURE_TAGS, cultureFilter, setCultureFilter)}
-        {renderFilterRow("Outcome", OUTCOME_TAGS, outcomeFilter, setOutcomeFilter)}
-        {renderFilterRow("Time", TIME_FILTERS, timeFilter, setTimeFilter)}
+      {/* Dropdown filters */}
+      <View className="flex-row gap-4">
+        <View className="flex-1 z-30">
+          <Dropdown<(typeof CULTURE_TAGS)[number]>
+            label="Culture"
+            options={CULTURE_TAGS.map((item) => ({
+              label: item.charAt(0).toUpperCase() + item.slice(1).replace("_", " "),
+              value: item.toLowerCase(),
+            }))}
+            selectedValue={cultureFilter}
+            onSelect={setCultureFilter}
+          />
+        </View>
+
+        <View className="flex-1 z-20">
+          <Dropdown<(typeof OUTCOME_TAGS)[number]>
+            label="Outcome"
+            options={OUTCOME_TAGS.map((item) => ({
+              label: item.charAt(0).toUpperCase() + item.slice(1).replace("_", " "),
+              value: item.toLowerCase(),
+            }))}
+            selectedValue={outcomeFilter}
+            onSelect={setOutcomeFilter}
+          />
+        </View>
+
+        <View className="flex-1 z-10">
+          <Dropdown<(typeof TIME_FILTERS)[number]>
+            label="Time"
+            options={TIME_FILTERS.map((item) => ({
+              label: item.charAt(0).toUpperCase() + item.slice(1).replace("_", " "),
+              value: item.toLowerCase(),
+            }))}
+            selectedValue={timeFilter}
+            onSelect={setTimeFilter}
+          />
+        </View>
       </View>
     </View>
   );

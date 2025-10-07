@@ -1,14 +1,43 @@
+import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { MotiView } from "moti";
 import { Filter, X } from "lucide-react-native";
+import Dropdown from "@/modules/common/components/DropDown";
+
+interface Filters {
+  status: string;
+  timeFilter: string;
+}
+
+interface FilterProps {
+  filters: Filters;
+  onFilterChange: (key: keyof Filters, value: string) => void;
+  hasActiveFilters: boolean;
+  onClearFilters: () => void;
+}
+
+const STATUS_OPTIONS = [
+  { label: "All", value: "all" },
+  { label: "Confirmed", value: "confirmed" },
+  { label: "Waitlisted", value: "waitlisted" },
+  { label: "Cancelled", value: "cancelled" },
+];
+
+const TIME_OPTIONS = [
+  { label: "Anytime", value: "anytime" },
+  { label: "Today", value: "today" },
+  { label: "Tomorrow", value: "tomorrow" },
+  { label: "This Weekend", value: "weekend" },
+  { label: "Next Week", value: "next-week" },
+];
 
 export default function SearchAndFilters({
   filters,
   onFilterChange,
   hasActiveFilters,
   onClearFilters,
-}: any) {
+}: FilterProps) {
   const currentStatus = filters?.status || "all";
   const currentTimeFilter = filters?.timeFilter || "anytime";
 
@@ -32,7 +61,6 @@ export default function SearchAndFilters({
           <TouchableOpacity
             onPress={onClearFilters}
             className="flex-row items-center px-3 py-1.5 rounded-full bg-gray-100"
-            accessibilityLabel="Clear all filters"
           >
             <X size={14} className="text-gray-600 mr-1" />
             <Text className="text-sm text-gray-600 font-medium">Clear</Text>
@@ -42,47 +70,25 @@ export default function SearchAndFilters({
 
       {/* Filter Controls */}
       <View className="flex-row gap-4">
-        {/* Status Filter */}
-        <View className="flex-1">
-          <Text className="text-sm font-semibold text-gray-700 mb-2 ml-1">
-            Status
-          </Text>
-          <View className="rounded-2xl border border-gray-200 bg-gray-50 overflow-hidden shadow-xs">
-            <Picker
-              selectedValue={currentStatus}
-              onValueChange={(value) => onFilterChange("status", value)}
-              style={{ height: 52 }}
-              dropdownIconColor="#6B7280"
-            >
-              <Picker.Item label="All" value="all" />
-              <Picker.Item label="Confirmed" value="confirmed" />
-              <Picker.Item label="Waitlisted" value="waitlisted" />
-              <Picker.Item label="Cancelled" value="cancelled" />
-            </Picker>
-          </View>
+        <View className="flex-1 z-4">
+          <Dropdown
+            label="Status"
+            options={STATUS_OPTIONS}
+            selectedValue={currentStatus}
+            onSelect={(v) => onFilterChange("status", v)}
+          />
         </View>
 
-        {/* Time Filter */}
-        <View className="flex-1">
-          <Text className="text-sm font-semibold text-gray-700 mb-2 ml-1">
-            When
-          </Text>
-          <View className="rounded-2xl border border-gray-200 bg-gray-50 overflow-hidden shadow-xs">
-            <Picker
-              selectedValue={currentTimeFilter}
-              onValueChange={(value) => onFilterChange("timeFilter", value)}
-              style={{ height: 52 }}
-              dropdownIconColor="#6B7280"
-            >
-              <Picker.Item label="Anytime" value="anytime" />
-              <Picker.Item label="Today" value="today" />
-              <Picker.Item label="Tomorrow" value="tomorrow" />
-              <Picker.Item label="This Weekend" value="weekend" />
-              <Picker.Item label="Next Week" value="next-week" />
-            </Picker>
-          </View>
+        <View className="flex-1 z-4">
+          <Dropdown
+            label="When"
+            options={TIME_OPTIONS}
+            selectedValue={currentTimeFilter}
+            onSelect={(v) => onFilterChange("timeFilter", v)}
+          />
         </View>
       </View>
+
     </MotiView>
   );
 }

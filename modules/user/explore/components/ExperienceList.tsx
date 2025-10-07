@@ -1,6 +1,7 @@
-import { View, FlatList, Text, ActivityIndicator, RefreshControl } from "react-native";
+import { View, FlatList, Text, RefreshControl } from "react-native";
 import ExperienceCard from "../../home/components/ExperienceCard";
 import { Experience } from "@/modules/user/home/services/homeService";
+import ExperienceLoadingSkeleton from "./ExperienceLoadingSkeleton";
 
 export default function ExperienceList({
   data,
@@ -19,6 +20,15 @@ export default function ExperienceList({
   onLoadMore: () => void;
   onPress: (exp: Experience) => void;
 }) {
+  // 🔹 Show full-page skeleton only when initially loading and no data yet
+  if (loading && data.length === 0) {
+    return (
+      <View className="flex-1 bg-gray-50 pt-4">
+        <ExperienceLoadingSkeleton />
+      </View>
+    );
+  }
+
   return (
     <FlatList
       data={data}
@@ -29,17 +39,21 @@ export default function ExperienceList({
         </View>
       )}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#22c55e"]} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={["#22c55e"]}
+        />
       }
       onEndReached={onLoadMore}
       onEndReachedThreshold={0.3}
       ListFooterComponent={
-        loading ? (
+        loading && data.length > 0 ? (
           <View className="py-4">
-            <ActivityIndicator size="small" color="#22c55e" />
+            <ExperienceLoadingSkeleton />
           </View>
         ) : !hasMore && data.length > 0 ? (
-          <View className="py-4 items-center">
+          <View className="py-6 items-center">
             <Text className="text-gray-500">No more experiences</Text>
           </View>
         ) : null
@@ -47,11 +61,18 @@ export default function ExperienceList({
       ListEmptyComponent={
         !loading && (
           <View className="flex-1 justify-center items-center py-20">
-            <Text className="text-gray-500 text-lg mb-2">No experiences found</Text>
+            <Text className="text-gray-500 text-lg mb-2">
+              No experiences found
+            </Text>
           </View>
         )
       }
-      contentContainerStyle={data.length === 0 ? { flex: 1 } : undefined}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{
+        flexGrow: 1,
+        backgroundColor: "#F9FAFB",
+        paddingBottom: 100,
+      }}
     />
   );
 }

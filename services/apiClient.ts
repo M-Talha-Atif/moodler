@@ -2,7 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // const baseURL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.100.6:3000";
-const baseURL = 'https://processor-adapted-lafayette-burke.trycloudflare.com'
+const baseURL = 'https://infections-contributions-horses-techno.trycloudflare.com'
 
 const api = axios.create({
   baseURL,

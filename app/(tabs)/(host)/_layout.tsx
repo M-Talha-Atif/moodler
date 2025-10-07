@@ -4,7 +4,20 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function HostTabs() {
   return (
-    <Tabs screenOptions={{ headerShown: false }} initialRouteName="index">
+    <Tabs screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: "#4ADE80", //  primary (vibrant green)
+        tabBarInactiveTintColor: "#94A3B8", // muted foreground
+        tabBarStyle: {
+          backgroundColor: "#FFFFFF", // clean white base
+          borderTopColor: "#E2E8F0", // subtle border
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "600",
+        },
+      }}
+      initialRouteName="index">
       <Tabs.Screen
         name="index"
         options={{
@@ -15,7 +28,7 @@ export default function HostTabs() {
         }}
       />
       <Tabs.Screen
-        name="experiences"
+        name="manageExperiences"
         options={{
           title: "Experiences",
           tabBarIcon: ({ color, size }) => (
@@ -24,12 +37,30 @@ export default function HostTabs() {
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="profile"
         options={{
-          title: "Settings",
+          title: "Profile",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings-outline" size={size} color={color} />
+            <Ionicons name="person-outline" size={size} color={color} />
           ),
+        }}
+      />
+      {/* Hidden Screens */}
+      <Tabs.Screen
+        name="createExperience"
+        options={{
+          href: null,
+          headerShown: false,
+          title: "Create Experience",
+        }}
+      />
+
+      <Tabs.Screen
+        name="updateExperience"
+        options={{
+          href: null,
+          headerShown: false,
+          title: "Update Experience",
         }}
       />
     </Tabs>

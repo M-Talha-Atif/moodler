@@ -7,6 +7,8 @@ import "../global.css";
 import { useDailyCheckInStore } from "@/modules/dailyCheckIn/store/useDailyCheckInStore";
 import { useMoodLog } from "@/modules/dailyCheckIn/hooks/useMoodLog";
 import Animated, { FadeIn, FadeOut, ZoomIn } from "react-native-reanimated";
+import * as Font from "expo-font";
+import { useFonts } from "expo-font"
 
 export default function RootLayout() {
   const { user, isLoading, checkAuth } = useAuthStore();
@@ -16,6 +18,11 @@ export default function RootLayout() {
 
   const { hasDailyCheckIn, setHasDailyCheckIn } = useDailyCheckInStore();
   const { checkTodayMoodLog } = useMoodLog();
+
+  const [fontsLoaded] = useFonts({
+    Nunito: require("../assets/fonts/Nunito-Regular.ttf"),
+  });
+
 
 
   // 🔍 Daily check-in fetch
