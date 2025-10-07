@@ -6,6 +6,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  TouchableOpacity
 } from "react-native";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
@@ -29,6 +30,7 @@ import ChipSelector from "@/components/ui/chipSelector";
 import DatePicker from "@/components/ui/datePicker";
 import ProgressBar from "@/components/ui/progressBar";
 import ImageCard from "@/components/ui/imageCard";
+import AlertDialog from "@/components/ui/alertDialog";
 
 
 
@@ -90,6 +92,8 @@ export default function DailyCheckInScreen() {
 
   const [showAlert, setShowAlert] = useState(true);
 
+  const [showDialog, setShowDialog] = useState(false);
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: "#f9fafb" }}
@@ -147,8 +151,26 @@ export default function DailyCheckInScreen() {
           </MotiView>
 
 
+          <AlertDialog
+            visible={showDialog}
+            title="Delete Experience?"
+            message="Are you sure you want to delete this experience? This action cannot be undone."
+            confirmText="Yes, Delete"
+            cancelText="Cancel"
+            onConfirm={() => {
+              setShowDialog(false);
+              console.log("Deleted");
+            }}
+            onCancel={() => setShowDialog(false)}
+          />;
 
-{/* 
+          <TouchableOpacity onPress={() => setShowDialog(true)}>
+            <Text>Show Alert</Text>
+          </TouchableOpacity>;
+
+
+
+          {/* 
           <View style={{ padding: 20 }}>
             <DatePicker
               label="Select Time"
@@ -178,7 +200,7 @@ export default function DailyCheckInScreen() {
                 : "No time selected"}
             </Text>
           </View> */}
-{/* 
+          {/* 
           <View style={{ padding: 10 }}>
 
 
