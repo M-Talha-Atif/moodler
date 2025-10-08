@@ -1,24 +1,49 @@
-// app/index.tsx
-import { View, Text, ActivityIndicator } from "react-native";
-;
+import React from "react";
+import { Text } from "@/components/ui/text";
+import Container from "@/components/ui/container";
+import Logo from "@/assets/images/logo.svg";
 
 
 export default function Index() {
-
   return (
-    <View className="flex-1 bg-background justify-center items-center">
-      <View className="items-center mb-8">
-        <Text className="text-4xl font-bold text-primary mb-2">Moodler</Text>
-        <Text className="text-lg text-muted-foreground">
-          Your Emotional Companion
-        </Text>
-      </View>
+    <Container
+      backgroundColor="#fff"
+      padding={32}
+      style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+    >
+      {/* Logo */}
+      <Logo width={80} height={80} />
 
-      <ActivityIndicator size="large" color="#6366f1" />
-
-      <Text className="text-sm text-muted-foreground absolute bottom-10">
-        Made with 💙
+      {/* Title */}
+      <Text
+        variant="display"
+        style={{
+          color: "#030303",
+          fontSize: 24,
+          fontFamily: "Nunito",
+          fontWeight: "700",
+          lineHeight: 28,
+          textAlign: "center",
+          marginTop: 12,
+        }}
+      >
+        Moodly
       </Text>
-    </View>
+
+      {/* Subtitle */}
+      <Text
+        variant="body"
+        style={{
+          color: "#030303",
+          fontSize: 16,
+          fontFamily: "Nunito",
+          lineHeight: 21,
+          textAlign: "center",
+          marginTop: 6,
+        }}
+      >
+        Your Emotional Companion
+      </Text>
+    </Container>
   );
 }

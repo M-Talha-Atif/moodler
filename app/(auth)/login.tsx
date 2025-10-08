@@ -1,49 +1,76 @@
-// app/(auth)/login.tsx - FIXED
-import { View, Text, ScrollView } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { Text } from "@/components/ui/text";
+import Logo from "@/assets/images/logo.svg";
 import { Link } from "expo-router";
-import LoginForm from "@/modules/auth/components/LoginForm";
+import LoginForm from "@/modules/auth/components/LoginForm"; // or SignupForm
+import ScreenWrapper from "@/components/ui/layout/screenWrapper";
 
 export default function LoginScreen() {
   return (
-    <ScrollView
-      className="flex-1 bg-white"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-    >
-      <View className="flex-1 px-6 justify-center">
-        {/* Header */}
-        <View className="mb-12">
-          <Text className="text-4xl font-bold text-gray-900 text-center mb-3">
-            Welcome Back
-          </Text>
-          <Text className="text-gray-600 text-center text-base">
-            Sign in to your account
-          </Text>
-        </View>
+    <ScreenWrapper title="Moodly" subtitle="Login to your account">
 
-        {/* Login Form */}
-        <LoginForm />
+      <LoginForm />
 
-        {/* Sign Up Link */}
-        <View className="flex-row justify-center mt-8">
-          <Text className="text-gray-600 text-sm">Don't have an account? </Text>
-          <Link href="/signup" asChild>
-            <Text className="text-[#7bf163] font-semibold text-sm">
-              Sign up
-            </Text>
-          </Link>
-        </View>
+      <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 24 }}>
+        <Text style={{ color: "#6B7280" }}>New to Moodly? </Text>
+        <Link href="/(auth)/signup" asChild>
+          <TouchableOpacity>
+            <Text style={{ fontWeight: "700", color: "#030303" }}>Sign up</Text>
+          </TouchableOpacity>
+        </Link>
       </View>
-    </ScrollView>
+    </ScreenWrapper>
   );
 }
 
-// Test Onboarding Button - FIXED PATH
-//       <TouchableOpacity
-//         onPress={() => router.push('/daily-check-in')}
-//         className="mt-4 p-4 bg-blue-500 rounded-xl"
-//       >
-//         <Text className="text-white text-center font-semibold">
-//           🚀 Test daily check in Screen
-//         </Text>
-//       </TouchableOpacity>
+const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+    backgroundColor: "#FAFAF8",
+  },
+  container: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: 32,
+  },
+  title: {
+    fontFamily: "Nunito",
+    fontWeight: "700",
+    fontSize: 28,
+    color: "#030303",
+    marginTop: 12,
+  },
+  subtitle: {
+    fontFamily: "Nunito",
+    color: "#6B7280",
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 8
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 24,
+  },
+  footerText: {
+    color: "#6B7280",
+    fontSize: 14,
+  },
+  linkText: {
+    fontWeight: "700",
+    fontSize: 14,
+    color: "#030303",
+  },
+});

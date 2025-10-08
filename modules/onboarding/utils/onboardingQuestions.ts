@@ -1,12 +1,6 @@
 // src/features/onboarding/utils/onboardingQuestions.ts
 const onboardingQuestions = [
   {
-    id: "mood",
-    text: "How are you feeling today?",
-    type: "emoji",
-    options: ["😄", "🙂", "😐", "😕", "😢"],
-  },
-  {
     id: "goals",
     text: "What would you like to achieve?",
     type: "chips",

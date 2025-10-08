@@ -1,33 +1,16 @@
-import { View, Text, Image } from "react-native";
-import { Calendar, MapPin } from "lucide-react-native";
-import { Booking } from "../services/bookingService";
-import dayjs from "dayjs";
+import { View, Text, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useCallback } from "react";
 import Button from "@/modules/common/components/Button";
-import { LinearGradient } from "expo-linear-gradient";
+import { Booking } from "../services/bookingService";
+import { MotiView } from "moti";
 
 interface BookingCardProps {
   booking: Booking;
 }
 
-const statusConfig = {
-  confirmed: { label: "Confirmed", color: "#10B981" },
-  waitlisted: { label: "Waitlisted", color: "#F59E0B" },
-  cancelled: { label: "Cancelled", color: "#EF4444" },
-};
-
 export default function BookingCard({ booking }: BookingCardProps) {
   const router = useRouter();
-
-  const status = statusConfig[booking.status] || {
-    label: "Unknown",
-    color: "#6B7280",
-  };
-
-  const formattedDate = booking.date
-    ? dayjs(booking.date).format("MMM D, YYYY")
-    : "Date not set";
 
   const navigateToBookingDetails = useCallback(
     () => router.push({ pathname: "/bookingDetail", params: { id: booking.id } }),
@@ -46,77 +29,112 @@ export default function BookingCard({ booking }: BookingCardProps) {
     : navigateToBookingDetails;
 
   return (
-    <View className="bg-white rounded-3xl border border-gray-100 shadow-sm mb-5 overflow-hidden mx-3">
+    <MotiView
+      from={{ opacity: 0, translateY: 6 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{ type: "timing", duration: 250 }}
+      style={styles.card}
+    >
       {/* Image */}
-      <View className="relative">
+      <View style={styles.imageContainer}>
         <Image
           source={{ uri: booking.image || "https://via.placeholder.com/400x200" }}
-          className="w-full h-40"
+          style={styles.image}
           resizeMode="cover"
         />
-        {/* Overlay Badge */}
-        <View className="absolute top-3 left-3 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full">
-          <Text className="text-white text-xs font-medium">
-            {status.label}
-          </Text>
-        </View>
       </View>
 
       {/* Content */}
-      <View className="p-4">
-        {/* Title & Price */}
-        <View className="flex-row justify-between items-start mb-2">
-          <Text
-            className="text-lg font-semibold text-gray-900 flex-1 mr-2 leading-6"
-            numberOfLines={2}
-          >
-            {booking.title}
+      <View style={styles.content}>
+        {/* Title */}
+        <Text style={styles.title} numberOfLines={2}>
+          {booking.title}
+        </Text>
+
+        {/* Mood Context (replacing meta info) */}
+        {booking.mood && (
+          <Text style={styles.subtitle}>
+            For when you feel {booking.mood.toLowerCase()}.
           </Text>
+        )}
 
-          <LinearGradient
-            colors={["#7bf163", "#10B981"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="px-3 py-1.5 rounded-full"
-          >
-            <Text className="text-white text-sm font-bold">
-              {booking.price ? `$${booking.price}` : "Free"}
-            </Text>
-          </LinearGradient>
-        </View>
-
-        {/* Meta Info: Location + Date (Column) */}
-        <View
-          className="flex-col space-y-2 mb-4 px-3 py-2 rounded-xl"
-          style={{
-            backgroundColor: "rgba(123, 241, 99, 0.06)",
-            borderWidth: 1,
-            borderColor: "rgba(123, 241, 99, 0.15)",
-          }}
-        >
-          {/* Location */}
-          <View className="flex-row items-start space-x-2 flex-wrap">
-            <View className="bg-rose-50 p-1.5 rounded-full">
-              <MapPin size={12} color="#E11D48" />
-            </View>
-            <Text className="text-gray-700 text-[11px] font-medium flex-shrink mt-1">
-              {booking.location || "Location unavailable"}
+        {/* Price + CTA */}
+        <View style={styles.bottomRow}>
+          <View style={styles.pricePill}>
+            <Text style={styles.priceText}>
+              {booking.price === 0 ? "Free" : `$${booking.price}`}
             </Text>
           </View>
 
-          {/* Date */}
-          <View className="flex-row items-center space-x-2">
-            <View className="bg-emerald-50 p-1.5 rounded-full">
-              <Calendar size={12} color="#059669" />
-            </View>
-            <Text className="text-gray-700 text-[11px] font-medium">{formattedDate}</Text>
-          </View>
+          <Button
+            variant="primary"
+            title={buttonLabel}
+            onPress={handlePress}
+            style={styles.joinButton}
+          />
         </View>
-
-
-        {/* CTA */}
-        <Button variant="primary" title={buttonLabel} onPress={handlePress} />
       </View>
-    </View>
+    </MotiView>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: "#FAFAF8", // same as mood/streak cards
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E8E8E6",
+    overflow: "hidden",
+    width: "100%",
+    marginBottom: 16,
+  },
+  imageContainer: {
+    height: 140,
+    width: "100%",
+    backgroundColor: "#E8E8E6",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
+  content: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  title: {
+    fontFamily: "Nunito",
+    fontSize: 16,
+    color: "#030303",
+    marginBottom: 6,
+    lineHeight: 22,
+  },
+  subtitle: {
+    fontFamily: "Nunito",
+    fontSize: 13,
+    color: "#555",
+    lineHeight: 20,
+    marginBottom: 18,
+  },
+  bottomRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  pricePill: {
+    borderWidth: 1,
+    borderColor: "#030303",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  priceText: {
+    fontFamily: "Nunito",
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#030303",
+  },
+  joinButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+  },
+});

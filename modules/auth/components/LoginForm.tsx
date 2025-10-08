@@ -1,128 +1,140 @@
-// modules/auth/components/LoginForm.tsx - UPDATED WITH EXPO ICONS
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  ToastAndroid,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Pressable, StyleSheet } from "react-native";
 import { useState } from "react";
-import { useAuthStore } from "@/store/useAuthStore";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useRouter } from "expo-router";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const { error, login, setError, clearError } = useAuthStore();
-  const [buttonLoading, setButtonLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async () => {
     if (!email || !password) {
       setError("Please fill all fields");
       return;
     }
-
     try {
       clearError();
-      setButtonLoading(true);
+      setIsLoading(true);
       await login(email, password);
-      ToastAndroid.show("✅ Login successful!", ToastAndroid.SHORT);
     } catch (err) {
       console.error("Login error:", err);
-      setButtonLoading(false);
-      ToastAndroid.show("❌ Login failed", ToastAndroid.SHORT);
     } finally {
-      setButtonLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
-    <View className="space-y-8">
-      {/* Error Message */}
+    <View style={styles.container}>
       {error && (
-        <View className="bg-red-50 border border-red-200 rounded-xl p-4 mb-2">
-          <Text className="text-red-700 text-sm text-center font-medium">
-            {error}
-          </Text>
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
 
-      {/* Email Input */}
-      <View className="space-y-3">
-        <Text className="text-gray-900 text-sm font-semibold">
-          Email Address
-        </Text>
-        <View className="relative">
-          <TextInput
-            className="w-full bg-white border border-gray-200 rounded-xl p-5 text-gray-900 text-base focus:border-[#7bf163]"
-            placeholder="Enter your email address"
-            placeholderTextColor="#9CA3AF"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            editable={!buttonLoading}
-          />
-        </View>
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Email Address</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your email"
+          placeholderTextColor="#9CA3AF"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          editable={!isLoading}
+        />
       </View>
 
-      {/* Password Input with Eye Icon */}
-      <View className="space-y-3">
-        <Text className="text-gray-900 text-sm font-semibold">Password</Text>
-        <View className="relative">
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Password</Text>
+        <View style={styles.passwordWrapper}>
           <TextInput
-            className="w-full bg-white border border-gray-200 rounded-xl p-5 text-gray-900 text-base pr-12 focus:border-[#7bf163]"
+            style={[styles.input, { paddingRight: 40 }]}
             placeholder="Enter your password"
             placeholderTextColor="#9CA3AF"
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
-            editable={!buttonLoading}
+            editable={!isLoading}
           />
           <TouchableOpacity
-            className="absolute right-4 top-4"
-            onPress={togglePasswordVisibility}
-            disabled={buttonLoading}
+            style={styles.eyeIcon}
+            onPress={() => setShowPassword(!showPassword)}
+            disabled={isLoading}
           >
-            {showPassword ? (
-              <Ionicons name="eye-off" size={20} color="#6B7280" />
-            ) : (
-              <Ionicons name="eye" size={20} color="#6B7280" />
-            )}
+            <Ionicons
+              name={showPassword ? "eye-off" : "eye"}
+              size={20}
+              color="#6B7280"
+            />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Spacing between fields and button */}
-      <View className="h-2" />
-
-      {/* Login Button */}
       <Pressable
-        className={`w-full rounded-xl p-5 mt-4 shadow-sm ${
-          buttonLoading ? "bg-gray-400" : "bg-[#7bf163] active:bg-[#6bd953]"
-        }`}
+        style={[
+          styles.button,
+          { backgroundColor: isLoading ? "#9CA3AF" : "#030303" },
+        ]}
         onPress={handleSubmit}
-        disabled={buttonLoading}
+        disabled={isLoading}
       >
-        <Text className="text-white text-center font-bold text-lg">
-          {buttonLoading ? "Signing In..." : "Sign In"}
+        <Text style={styles.buttonText}>
+          {isLoading ? "Signing In..." : "Sign In"}
         </Text>
       </Pressable>
 
-      {/* Forgot Password Link */}
-      <View className="flex-row justify-center pt-2">
-        <TouchableOpacity>
-          <Text className="text-[#7bf163] font-semibold text-sm">
-            Forgot your password?
-          </Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { gap: 24 },
+  errorBox: {
+    backgroundColor: "#FEF2F2",
+    borderColor: "#FCA5A5",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 10,
+  },
+  errorText: {
+    color: "#B91C1C",
+    fontSize: 13,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  inputGroup: { gap: 6 },
+  label: { fontSize: 14, fontWeight: "600", color: "#1F2937" },
+  input: {
+    width: "100%",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#E5E7EB",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+    color: "#111827",
+  },
+  passwordWrapper: { position: "relative" },
+  eyeIcon: { position: "absolute", right: 12, top: "30%" },
+  button: {
+    marginTop: 8,
+    borderRadius: 9,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  buttonText: { color: "#EFEFE7", fontWeight: "700", fontSize: 16 },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 8,
+  },
+  footerText: { color: "#6B7280", fontSize: 14 },
+  link: { color: "#030303", fontWeight: "700", fontSize: 14 },
+});

@@ -1,8 +1,8 @@
-// components/RoleSelector.tsx
-import { View, Text, TouchableOpacity } from "react-native";
+import React from "react";
+import { View, TouchableOpacity, StyleSheet, useColorScheme } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import { Text } from "@/components/ui/text";
 
 interface RoleSelectorProps {
   selectedRole: "user" | "host";
@@ -15,109 +15,121 @@ export default function RoleSelector({
   setSelectedRole,
   isLoading,
 }: RoleSelectorProps) {
+  const theme = useColorScheme();
+  const isDark = theme === "dark";
+
+  const colors = {
+    bg: isDark ? "#1F2937" : "#F9FAFB",
+    border: isDark ? "#374151" : "#E5E7EB",
+    text: isDark ? "#F3F4F6" : "#111827",
+    subText: isDark ? "#9CA3AF" : "#6B7280",
+    activeUser: "#10B981",
+    activeHost: "#3B82F6",
+  };
+
   return (
-    <View className="flex-row space-x-4">
+    <View style={styles.container}>
       {/* User Role */}
       <TouchableOpacity
-        className="flex-1 rounded-2xl shadow-md"
+        activeOpacity={0.9}
         onPress={() => setSelectedRole("user")}
         disabled={isLoading}
-        activeOpacity={0.8}
+        style={[
+          styles.card,
+          { backgroundColor: colors.bg, borderColor: colors.border },
+          selectedRole === "user" && {
+            borderColor: colors.activeUser,
+            backgroundColor: isDark ? "#064E3B" : "#ECFDF5",
+          },
+        ]}
       >
-        <LinearGradient
-          colors={
-            selectedRole === "user"
-              ? ["#4ade80", "#22c55e"] // green when selected
-              : ["#f3f4f6", "#e5e7eb"] // gray when not selected
-          }
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{ padding: 16, borderRadius: 16 }}
+        <View
+          style={[
+            styles.iconWrapper,
+            { backgroundColor: colors.border },
+            selectedRole === "user" && { backgroundColor: colors.activeUser },
+          ]}
         >
-          <View className="items-center space-y-2">
-            <View
-              className={`p-3 rounded-full ${
-                selectedRole === "user" ? "bg-green-600" : "bg-gray-300"
-              }`}
-            >
-              <Ionicons
-                name="person"
-                size={20}
-                color={selectedRole === "user" ? "white" : "#6B7280"}
-              />
-            </View>
-            <Text
-              style={{
-                fontWeight: "600",
-                textAlign: "center",
-                color: selectedRole === "user" ? "white" : "#374151", // white text when selected
-              }}
-            >
-              User
-            </Text>
-            <Text
-              style={{
-                fontSize: 12,
-                textAlign: "center",
-                color: selectedRole === "user" ? "white" : "#6B7280", // muted when not selected
-              }}
-            >
-              Join experiences
-            </Text>
-          </View>
-        </LinearGradient>
+          <Ionicons
+            name="person"
+            size={22}
+            color={selectedRole === "user" ? "#fff" : colors.subText}
+          />
+        </View>
+        <Text style={[styles.roleTitle, { color: colors.text }]}>User</Text>
+        <Text style={[styles.roleDesc, { color: colors.subText }]}>
+          Join experiences
+        </Text>
       </TouchableOpacity>
 
       {/* Host Role */}
       <TouchableOpacity
-        className="flex-1 rounded-2xl shadow-md"
+        activeOpacity={0.9}
         onPress={() => setSelectedRole("host")}
         disabled={isLoading}
-        activeOpacity={0.8}
+        style={[
+          styles.card,
+          { backgroundColor: colors.bg, borderColor: colors.border },
+          selectedRole === "host" && {
+            borderColor: colors.activeHost,
+            backgroundColor: isDark ? "#1E3A8A" : "#EFF6FF",
+          },
+        ]}
       >
-        <LinearGradient
-          colors={
-            selectedRole === "host"
-              ? ["#60a5fa", "#2563eb"] // blue when selected
-              : ["#f3f4f6", "#e5e7eb"] // gray when not selected
-          }
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{ padding: 16, borderRadius: 16 }}
+        <View
+          style={[
+            styles.iconWrapper,
+            { backgroundColor: colors.border },
+            selectedRole === "host" && { backgroundColor: colors.activeHost },
+          ]}
         >
-          <View className="items-center space-y-2">
-            <View
-              className={`p-3 rounded-full ${
-                selectedRole === "host" ? "bg-blue-600" : "bg-gray-300"
-              }`}
-            >
-              <FontAwesome
-                name="star"
-                size={20}
-                color={selectedRole === "host" ? "white" : "#6B7280"}
-              />
-            </View>
-            <Text
-              style={{
-                fontWeight: "600",
-                textAlign: "center",
-                color: selectedRole === "host" ? "white" : "#374151", // white text when selected
-              }}
-            >
-              Host
-            </Text>
-            <Text
-              style={{
-                fontSize: 12,
-                textAlign: "center",
-                color: selectedRole === "host" ? "white" : "#6B7280",
-              }}
-            >
-              Create experiences
-            </Text>
-          </View>
-        </LinearGradient>
+          <FontAwesome
+            name="star"
+            size={20}
+            color={selectedRole === "host" ? "#fff" : colors.subText}
+          />
+        </View>
+        <Text style={[styles.roleTitle, { color: colors.text }]}>Host</Text>
+        <Text style={[styles.roleDesc, { color: colors.subText }]}>
+          Create experiences
+        </Text>
       </TouchableOpacity>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 8,
+  },
+  card: {
+    flex: 1,
+    borderRadius: 12,
+    borderWidth: 1.2,
+    borderColor: "#E5E7EB",
+    backgroundColor: "#F9FAFB",
+    alignItems: "center",
+    paddingVertical: 14, // reduced from 22
+    justifyContent: "center",
+  },
+  iconWrapper: {
+    backgroundColor: "#E5E7EB",
+    padding: 8, // smaller icon area
+    borderRadius: 50,
+    marginBottom: 6,
+  },
+  roleTitle: {
+    color: "#030303",
+    fontWeight: "700",
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  roleDesc: {
+    color: "#6B7280",
+    fontSize: 12,
+    textAlign: "center",
+  },
+});
+

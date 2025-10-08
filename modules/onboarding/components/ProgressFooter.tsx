@@ -1,5 +1,8 @@
 // src/features/onboarding/components/ProgressFooter.tsx
-import { View, Text, TouchableOpacity } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import ProgressBar from "@/components/ui/progressBar";
+import Button from "@/components/ui/button";
 
 interface ProgressFooterProps {
   step: number;
@@ -14,25 +17,57 @@ export default function ProgressFooter({
   onNext,
   disabled,
 }: ProgressFooterProps) {
-  return (
-    <View className="flex-row items-center justify-between w-full border-t border-gray-200 pt-6 mt-4">
-      {/* Step Info */}
-      <Text className="text-gray-600 text-sm">
-        Step {step + 1} of {total}
-      </Text>
+  const progress = (step + 1) / total;
+  const isLast = step === total - 1;
 
-      {/* Next Button */}
-      <TouchableOpacity
+  return (
+    <View style={styles.footerContainer}>
+      {/* 🟦 Progress Bar */}
+      <View style={styles.progressWrapper}>
+        <ProgressBar
+          progress={progress}
+          height={8}
+          backgroundColor="#E8E8E6"
+          fillColor="#030303"
+          borderRadius={4}
+        />
+        <Text style={styles.stepText}>
+          Step {step + 1} of {total}
+        </Text>
+      </View>
+
+      {/* 🪷 Next / Finish Button */}
+      <Button
+        title={isLast ? "Finish" : "Next"}
         onPress={onNext}
         disabled={disabled}
-        className={`px-6 py-3 rounded-xl ${
-          disabled ? "bg-gray-400" : "bg-[#7bf163]"
-        }`}
-      >
-        <Text className="text-white font-semibold text-base">
-          {step === total - 1 ? "Finish" : "Next"}
-        </Text>
-      </TouchableOpacity>
+        backgroundColor={disabled ? "#D1D5DB" : "#030303"}
+        textColor="#EFEFE7"
+        width="100%"
+        height={46}
+        borderRadius={9}
+      />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  footerContainer: {
+    width: "100%",
+    paddingTop: 16,
+    marginTop: 32,
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+    gap: 16,
+  },
+  progressWrapper: {
+    gap: 8,
+  },
+  stepText: {
+    fontFamily: "Nunito",
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#6B7280",
+    textAlign: "right",
+  },
+});

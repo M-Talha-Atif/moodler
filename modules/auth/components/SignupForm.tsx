@@ -1,16 +1,7 @@
-// modules/auth/components/SignupForm.tsx
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  ToastAndroid,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Pressable, StyleSheet, ToastAndroid } from "react-native";
 import { useState } from "react";
-import { useRouter } from "expo-router";
-import { useAuthStore } from "@/store/useAuthStore";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuthStore } from "@/store/useAuthStore";
 import RoleSelector from "./RoleSelector";
 
 export default function SignupForm() {
@@ -29,17 +20,14 @@ export default function SignupForm() {
       setError("Please fill all fields");
       return;
     }
-
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
       return;
     }
-
     try {
       clearError();
       await signup(name, email, password, selectedRole);
@@ -50,31 +38,16 @@ export default function SignupForm() {
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
-  };
-
   return (
-    <View className="space-y-8">
-      {/* Error Message */}
+    <View style={styles.container}>
       {error && (
-        <View className="bg-red-50 border border-red-200 rounded-xl p-4">
-          <Text className="text-red-700 text-sm text-center font-medium">
-            {error}
-          </Text>
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
 
-      {/* Role Picker - Using RoleSelector Component */}
-      <View className="space-y-4">
-        <Text className="text-gray-900 text-sm font-semibold text-center">
-          Choose Your Role
-        </Text>
-
+      <View style={{ gap: 12 }}>
+        <Text style={styles.roleTitle}>Choose Your Role</Text>
         <RoleSelector
           selectedRole={selectedRole}
           setSelectedRole={setSelectedRole}
@@ -82,11 +55,10 @@ export default function SignupForm() {
         />
       </View>
 
-      {/* Name Input */}
-      <View className="space-y-3">
-        <Text className="text-gray-900 text-sm font-semibold">Full Name</Text>
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Full Name</Text>
         <TextInput
-          className="w-full bg-white border border-gray-200 rounded-xl p-4 text-gray-900 text-base"
+          style={styles.input}
           placeholder="Enter your full name"
           placeholderTextColor="#9CA3AF"
           value={name}
@@ -95,14 +67,11 @@ export default function SignupForm() {
         />
       </View>
 
-      {/* Email Input */}
-      <View className="space-y-3">
-        <Text className="text-gray-900 text-sm font-semibold">
-          Email Address
-        </Text>
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Email Address</Text>
         <TextInput
-          className="w-full bg-white border border-gray-200 rounded-xl p-4 text-gray-900 text-base"
-          placeholder="Enter your email address"
+          style={styles.input}
+          placeholder="Enter your email"
           placeholderTextColor="#9CA3AF"
           value={email}
           onChangeText={setEmail}
@@ -112,12 +81,11 @@ export default function SignupForm() {
         />
       </View>
 
-      {/* Password Input */}
-      <View className="space-y-3">
-        <Text className="text-gray-900 text-sm font-semibold">Password</Text>
-        <View className="relative">
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Password</Text>
+        <View style={styles.passwordWrapper}>
           <TextInput
-            className="w-full bg-white border border-gray-200 rounded-xl p-4 text-gray-900 text-base pr-12"
+            style={[styles.input, { paddingRight: 40 }]}
             placeholder="Create a password"
             placeholderTextColor="#9CA3AF"
             value={password}
@@ -126,30 +94,25 @@ export default function SignupForm() {
             editable={!isLoading}
           />
           <TouchableOpacity
-            className="absolute right-4 top-4"
-            onPress={togglePasswordVisibility}
+            style={styles.eyeIcon}
+            onPress={() => setShowPassword(!showPassword)}
             disabled={isLoading}
           >
-            {showPassword ? (
-              <Ionicons name="eye-off" size={20} color="#6B7280" />
-            ) : (
-              <Ionicons name="eye" size={20} color="#6B7280" />
-            )}
+            <Ionicons
+              name={showPassword ? "eye-off" : "eye"}
+              size={20}
+              color="#6B7280"
+            />
           </TouchableOpacity>
         </View>
-        <Text className="text-gray-500 text-xs">
-          Must be at least 6 characters
-        </Text>
+        <Text style={styles.hint}>Must be at least 6 characters</Text>
       </View>
 
-      {/* Confirm Password Input */}
-      <View className="space-y-3">
-        <Text className="text-gray-900 text-sm font-semibold">
-          Confirm Password
-        </Text>
-        <View className="relative">
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Confirm Password</Text>
+        <View style={styles.passwordWrapper}>
           <TextInput
-            className="w-full bg-white border border-gray-200 rounded-xl p-4 text-gray-900 text-base pr-12"
+            style={[styles.input, { paddingRight: 40 }]}
             placeholder="Confirm your password"
             placeholderTextColor="#9CA3AF"
             value={confirmPassword}
@@ -158,31 +121,28 @@ export default function SignupForm() {
             editable={!isLoading}
           />
           <TouchableOpacity
-            className="absolute right-4 top-4"
-            onPress={toggleConfirmPasswordVisibility}
+            style={styles.eyeIcon}
+            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
             disabled={isLoading}
           >
-            {showConfirmPassword ? (
-              <Ionicons name="eye-off" size={20} color="#6B7280" />
-            ) : (
-              <Ionicons name="eye" size={20} color="#6B7280" />
-            )}
+            <Ionicons
+              name={showConfirmPassword ? "eye-off" : "eye"}
+              size={20}
+              color="#6B7280"
+            />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Spacing */}
-      <View className="h-2" />
-
-      {/* Signup Button */}
       <Pressable
-        className={`w-full rounded-xl p-4 shadow-sm ${
-          isLoading ? "bg-gray-400" : "bg-[#7bf163] active:bg-[#6bd953]"
-        }`}
+        style={[
+          styles.button,
+          { backgroundColor: isLoading ? "#9CA3AF" : "#030303" },
+        ]}
         onPress={handleSubmit}
         disabled={isLoading}
       >
-        <Text className="text-white text-center font-bold text-lg">
+        <Text style={styles.buttonText}>
           {isLoading
             ? "Creating Account..."
             : `Sign Up as ${selectedRole === "user" ? "User" : "Host"}`}
@@ -191,3 +151,48 @@ export default function SignupForm() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { gap: 24 },
+  errorBox: {
+    backgroundColor: "#FEF2F2",
+    borderColor: "#FCA5A5",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 10,
+  },
+  errorText: {
+    color: "#B91C1C",
+    fontSize: 13,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  roleTitle: {
+    color: "#111827",
+    fontSize: 14,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  inputGroup: { gap: 6 },
+  label: { fontSize: 14, fontWeight: "600", color: "#1F2937" },
+  input: {
+    width: "100%",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#E5E7EB",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+    color: "#111827",
+  },
+  passwordWrapper: { position: "relative" },
+  eyeIcon: { position: "absolute", right: 12, top: "30%" },
+  hint: { fontSize: 12, color: "#6B7280" },
+  button: {
+    marginTop: 8,
+    borderRadius: 9,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  buttonText: { color: "#EFEFE7", fontWeight: "700", fontSize: 16 },
+});

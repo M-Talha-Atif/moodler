@@ -91,6 +91,9 @@ export default function RootLayout() {
       if (hasDailyCheckIn === false) {
         if (segments[0] !== "daily-check-in") {
           router.replace("/daily-check-in");
+          // router.replace("/(auth)/login");
+          // router.replace("/onboarding");
+          // router.replace("/(auth)/signup");
         }
       } else if (hasDailyCheckIn === true) {
         if (segments[0] !== "(tabs)" || segments[1] !== "(user)") {
@@ -101,23 +104,6 @@ export default function RootLayout() {
 
 
   }, [user, isLoading, segments, isNavigationReady, hasDailyCheckIn, router]);
-
-  // 🌀 Loader
-  if (
-    !isNavigationReady ||
-    (user?.role === "user" && hasDailyCheckIn === null)
-  ) {
-    return (
-      <View className="flex-1 justify-center items-center bg-background">
-        <ActivityIndicator size="large" color="#6366f1" />
-        <Text className="text-gray-600 mt-4">
-          {user?.role === "user" && hasDailyCheckIn === null
-            ? "Checking your mood status..."
-            : "Loading your journey..."}
-        </Text>
-      </View>
-    );
-  }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

@@ -111,7 +111,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         themeVariant={themeVariant}
         display={Platform.OS === "ios" ? "spinner" : "default"}
         pickerStyle={{
-          accentColor, // 💡 Android accent color
+          accentColor, // Android accent color
         }}
       />
     </View>

@@ -1,13 +1,14 @@
+import React, { useCallback } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   ActivityIndicator,
+  StyleSheet,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useCallback } from "react";
 import { useHome } from "../hooks/useHome";
 import StreakWidget from "../components/StreakWidget";
 import MoodWidget from "../components/MoodWidget";
@@ -30,79 +31,146 @@ export default function HomeScreen() {
 
   const handleRetry = () => refetch();
 
+  // --- Loading State ---
   if (loading && !homeData) {
     return (
-      <View className="flex-1 bg-gray-50 justify-center items-center">
-        <ActivityIndicator size="large" color="#7bf163" />
-        <Text className="text-gray-600 mt-4">Loading your journey...</Text>
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="small" color="#030303" />
+        <Text style={styles.loadingText}>Loading your journey...</Text>
       </View>
     );
   }
 
+  // --- Error State ---
   if (error && !homeData) {
     return (
-      <View className="flex-1 bg-gray-50 justify-center items-center p-6">
-        <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
-        <Text className="text-red-600 text-lg mb-2 mt-4 text-center">
-          {error || "Failed to load data"}
-        </Text>
-        <Text className="text-gray-500 text-sm mb-6 text-center">
+      <View style={styles.centerContainer}>
+        <Ionicons name="alert-circle-outline" size={42} color="#030303" />
+        <Text style={styles.errorTitle}>{error || "Something went wrong"}</Text>
+        <Text style={styles.errorSubtitle}>
           Please check your connection and try again
         </Text>
-        <TouchableOpacity
-          className="bg-green-500 px-6 py-3 rounded-xl"
-          onPress={handleRetry}
-        >
-          <Text className="text-white font-semibold">Try Again</Text>
+
+        <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
+          <Text style={styles.retryText}>Retry</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
+  // --- Main UI ---
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <DashboardHeader
-        userName={homeData?.userName}
-        profilePic={homeData?.profilePic}
-        greeting={homeData?.greeting}
-      />
-
-      <View className="mt-16" />
-
-      {/* Mood Widget */}
-      {homeData?.currentMood && (
-        <View className="mx-6 mb-4">
-          <MoodWidget mood={homeData.currentMood} />
-        </View>
-      )}
-
-      {/* Streak Widget */}
-      {homeData?.streak !== undefined && (
-        <View className="mx-6 mb-4">
-          <StreakWidget streak={homeData.streak} />
-        </View>
-      )}
-
-      {/* For You Today Section */}
-      <View className="mx-6 mt-4 flex-1">
-        <View className="flex-row justify-between items-center mb-3">
-          <Text className="text-xl font-bold text-gray-900">For You Today</Text>
-          <TouchableOpacity onPress={() => console.log("👀 See all clicked")}>
-            <Text className="text-green-600 font-semibold">See All</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Only this scrolls */}
-        <RecommendedExperiences
-          experiences={homeData?.recommendedExperiences || []}
-          onJoinExperience={handleJoinExperience}
-          loading={loading && !homeData?.recommendedExperiences?.length}
-          error={error}
-          refreshing={loading && !!homeData}
-          onRefresh={refetch}
+    <SafeAreaView style={styles.safeArea}>
+      {/* Sticky Header */}
+      <View style={styles.stickyHeader}>
+        <DashboardHeader
+          userName={homeData?.userName}
+          profilePic={homeData?.profilePic}
+          greeting={homeData?.greeting}
         />
+      </View>
+
+      {/* Content (non-scrollable wrapper) */}
+      <View style={styles.contentWrapper}>
+        {/* Spacer under sticky header */}
+        <View style={{ height: 60 }} />
+
+        {/* Mood */}
+        {homeData?.currentMood && (
+          <View style={styles.section}>
+            <MoodWidget mood={homeData.currentMood} />
+          </View>
+        )}
+
+        {/* Streak */}
+        {homeData?.streak !== undefined && (
+          <View style={styles.section}>
+            <StreakWidget streak={homeData.streak} />
+          </View>
+        )}
+
+        {/* Recommended Experiences (already scrollable) */}
+        <View style={[styles.section, { flex: 1 }]}>
+          <RecommendedExperiences
+            experiences={homeData?.recommendedExperiences || []}
+            onJoinExperience={handleJoinExperience}
+            loading={loading && !homeData?.recommendedExperiences?.length}
+            error={error}
+            refreshing={loading && !!homeData}
+            onRefresh={refetch}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#FAFAF8",
+  },
+  stickyHeader: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#FAFAF8",
+    paddingTop: 10,
+    paddingBottom: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#E5E7EB",
+  },
+  contentWrapper: {
+    flex: 1,
+    backgroundColor: "#FAFAF8",
+  },
+  section: {
+    marginHorizontal: 24,
+    marginTop: 24,
+  },
+  centerContainer: {
+    flex: 1,
+    backgroundColor: "#FAFAF8",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  loadingText: {
+    color: "#6B7280",
+    fontSize: 13,
+    marginTop: 8,
+    fontFamily: "Nunito",
+  },
+  errorTitle: {
+    color: "#030303",
+    fontSize: 15,
+    fontWeight: "600",
+    textAlign: "center",
+    marginTop: 16,
+    fontFamily: "Nunito",
+  },
+  errorSubtitle: {
+    color: "#6B7280",
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: 8,
+    marginBottom: 24,
+    lineHeight: 16,
+    fontFamily: "Nunito",
+  },
+  retryButton: {
+    borderWidth: 1,
+    borderColor: "#030303",
+    borderRadius: 999,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+  },
+  retryText: {
+    color: "#030303",
+    fontSize: 13,
+    fontWeight: "600",
+    textAlign: "center",
+    fontFamily: "Nunito",
+  },
+});

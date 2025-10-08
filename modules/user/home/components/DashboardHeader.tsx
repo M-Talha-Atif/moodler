@@ -1,10 +1,11 @@
+// src/components/layout/DashboardHeader.tsx
 import React from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { View, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { MotiView } from "moti";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Text } from "@/components/ui/text";
 
 interface DashboardHeaderProps {
   userName?: string;
@@ -12,8 +13,9 @@ interface DashboardHeaderProps {
   greeting?: string;
   onProfilePress?: () => void;
   onNotificationPress?: () => void;
-  gradientColors?: string[];
   height?: number;
+  backgroundColor?: string;
+  showNotification?: boolean;
 }
 
 export default function DashboardHeader({
@@ -22,8 +24,9 @@ export default function DashboardHeader({
   greeting = "Hello",
   onProfilePress,
   onNotificationPress,
-  gradientColors = ["#16a34a", "#22c55e", "#4ade80"],
   height = 80,
+  backgroundColor = "#FAFAF8",
+  showNotification = true,
 }: DashboardHeaderProps) {
   const router = useRouter();
 
@@ -31,56 +34,86 @@ export default function DashboardHeader({
     <MotiView
       from={{ opacity: 0, translateY: -8 }}
       animate={{ opacity: 1, translateY: 0 }}
-      transition={{ type: "timing", duration: 350 }}
-      className="w-full absolute top-0 left-0 z-50"
+      transition={{ type: "timing", duration: 300 }}
+      style={[
+        styles.container,
+        { backgroundColor, height },
+      ]}
     >
-      <LinearGradient
-        colors={gradientColors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="w-full shadow-sm"
-        style={{
-          height,
-          paddingHorizontal: 16,
-        }}
-      >
-        <SafeAreaView edges={["top"]} className="flex-1 justify-center">
-          <View className="flex-row items-center justify-between">
-            {/* Profile Icon */}
-            <TouchableOpacity
-              onPress={onProfilePress || (() => router.push("/profile"))}
-            >
-              <Image
-                source={
-                  profilePic
-                    ? { uri: profilePic }
-                    : require("@/assets/images/default-avatar.png")
-                }
-                className="w-10 h-10 rounded-full border border-white/30"
-              />
-            </TouchableOpacity>
+      <SafeAreaView edges={["top"]} style={styles.safeArea}>
+        <View style={styles.row}>
+          {/* Profile Icon */}
+          <TouchableOpacity
+            onPress={onProfilePress || (() => router.push("/profile"))}
+          >
+            <Image
+              source={
+                profilePic
+                  ? { uri: profilePic }
+                  : require("@/assets/images/default-avatar.png")
+              }
+              style={styles.avatar}
+            />
+          </TouchableOpacity>
 
-            {/* Greeting */}
-            <MotiView
-              from={{ opacity: 0, translateY: -10 }}
-              animate={{ opacity: 1, translateY: 0 }}
-            >
-              <Text className="text-xl font-semibold text-white text-center">
-                {greeting}, {userName} 👋
-              </Text>
-            </MotiView>
+          {/* Greeting */}
+          <MotiView
+            from={{ opacity: 0, translateY: -6 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: "timing", duration: 400 }}
+          >
+            <Text className="text-lg font-semibold text-[#030303]">
+              {greeting}, {userName} 👋
+            </Text>
+          </MotiView>
 
-            {/* Notification Icon */}
+          {/* Notification Icon */}
+          {showNotification && (
             <TouchableOpacity
               onPress={
                 onNotificationPress || (() => router.push("/notifications"))
               }
+              style={styles.iconContainer}
             >
-              <Ionicons name="notifications-outline" size={26} color="white" />
+              <Ionicons name="notifications-outline" size={24} color="#030303" />
             </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
+          )}
+        </View>
+      </SafeAreaView>
     </MotiView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#E5E7EB",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 1,
+    elevation: 1,
+    zIndex: 10,
+  },
+  safeArea: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 9999,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  iconContainer: {
+    padding: 4,
+  },
+});

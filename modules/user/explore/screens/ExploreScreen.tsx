@@ -132,10 +132,6 @@ export default function ExploreScreen() {
                 />
 
             </View>
-            <Text variant="display" color="foreground">
-                Daily Check-In
-            </Text>
-
 
             <ExperienceList
                 data={experiences}

@@ -1,89 +1,106 @@
 // src/modules/dailyCheckIn/components/TextAreaWithSentiment.tsx
-import { View, Text, TextInput } from "react-native";
-import { MotiView } from "moti";
+import React from "react";
+import { View, TextInput, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { MotiView } from "moti";
+import { Text } from "@/components/ui/text";
 
-interface TextAreaWithSentimentProps {
-  value: string;
-  onChange: (text: string) => void;
-}
-
-export default function TextAreaWithSentiment({
-  value,
-  onChange,
-}: TextAreaWithSentimentProps) {
+export default function TextAreaWithSentiment({ value, onChange }) {
   const getSentiment = (text: string) => {
-    if (
-      text.includes("sad") ||
-      text.includes("angry") ||
-      text.includes("bad")
-    ) {
-      return "negative";
-    } else if (
-      text.includes("happy") ||
-      text.includes("good") ||
-      text.includes("great")
-    ) {
-      return "positive";
-    }
+    if (text.match(/sad|angry|bad/)) return "negative";
+    if (text.match(/happy|good|great/)) return "positive";
     return "neutral";
   };
 
   const sentiment = getSentiment(value.toLowerCase());
-
-  const sentimentConfig = {
+  const config = {
     positive: {
-      color: "bg-green-100 border-green-500",
-      icon: <Ionicons name="happy" size={16} color="#16a34a" />,
-      label: "Positive",
+      bg: "#E6F9EE",
+      border: "#16a34a",
+      icon: "happy-outline",
+      text: "You seem in good spirits 🌿",
     },
     negative: {
-      color: "bg-red-100 border-red-500",
-      icon: <Ionicons name="sad" size={16} color="#dc2626" />,
-      label: "Negative",
+      bg: "#FEF2F2",
+      border: "#FCA5A5",
+      icon: "sad-outline",
+      text: "It’s okay to feel that 💭",
     },
     neutral: {
-      color: "bg-blue-100 border-blue-500",
-      icon: <Ionicons name="neutral" size={16} color="#2563eb" />,
-      label: "Neutral",
+      bg: "#EFF6FF",
+      border: "#93C5FD",
+      icon: "remove-circle-outline",
+      text: "Balanced energy ⚖️",
     },
-  };
-
-  const current = sentimentConfig[sentiment];
+  }[sentiment];
 
   return (
-    <MotiView
-      className="space-y-4"
-      from={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 500, delay: 200 }}
-    >
-      <Text className="text-lg font-semibold text-gray-900">
-        How are you feeling today?
-      </Text>
-
+    <View style={styles.container}>
+      <Text style={styles.title}>Reflect on your day 💬</Text>
       <TextInput
         value={value}
         onChangeText={onChange}
-        placeholder="Today I'm feeling..."
+        placeholder="Write freely... how are you feeling today?"
+        placeholderTextColor="#9CA3AF"
         multiline
-        numberOfLines={4}
-        className="min-h-[120px] text-lg p-4 rounded-2xl border border-gray-300 bg-white"
+        numberOfLines={5}
         textAlignVertical="top"
+        style={styles.input}
       />
-
-      {value ? (
+      {value.length > 2 && (
         <MotiView
-          from={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className={`flex-row items-center self-start px-3 py-2 rounded-full border ${current.color}`}
+          from={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          style={[styles.sentiment, { backgroundColor: config.bg, borderColor: config.border }]}
         >
-          {current.icon}
-          <Text className="ml-2 font-medium text-gray-800">
-            {current.label} sentiment
-          </Text>
+          <Ionicons name={config.icon} size={16} color={config.border} />
+          <Text style={styles.sentimentText}>{config.text}</Text>
         </MotiView>
-      ) : null}
-    </MotiView>
+      )}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#F9FAFB",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    padding: 16,
+  },
+  title: {
+    fontFamily: "Nunito",
+    fontWeight: "700",
+    fontSize: 16,
+    color: "#030303",
+    marginBottom: 12,
+  },
+  input: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    padding: 14,
+    fontSize: 15,
+    fontFamily: "Nunito",
+    color: "#030303",
+    minHeight: 120,
+  },
+  sentiment: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    marginTop: 12,
+    borderWidth: 1,
+  },
+  sentimentText: {
+    marginLeft: 8,
+    fontFamily: "Nunito",
+    fontWeight: "600",
+    color: "#030303",
+  },
+});

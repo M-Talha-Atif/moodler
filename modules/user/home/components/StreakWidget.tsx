@@ -1,36 +1,93 @@
-import { LinearGradient } from "expo-linear-gradient";
+// src/components/widgets/StreakWidget.tsx
+import React from "react";
+import { View, StyleSheet } from "react-native";
 import { MotiView } from "moti";
-import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Text } from "@/components/ui/text";
 
 interface StreakWidgetProps {
   streak: number;
 }
 
 export default function StreakWidget({ streak }: StreakWidgetProps) {
+  const level =
+    streak >= 30 ? "🔥 Veteran"
+    : streak >= 10 ? "⚡ Consistent"
+    : streak >= 3 ? "🌱 Getting Started"
+    : "💡 Let's Go!";
+
+  const color =
+    streak >= 30 ? "#EA580C" // deep orange
+    : streak >= 10 ? "#F59E0B" // amber
+    : "#7BF163"; // soft green for early streaks
+
   return (
     <MotiView
-      from={{ opacity: 0, scale: 0.9 }}
+      from={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="rounded-2xl shadow-lg overflow-hidden"
+      transition={{ type: "timing", duration: 300 }}
+      style={[styles.card, { borderColor: color + "40" }]}
     >
-      <LinearGradient
-        colors={["#4ade80", "#22c55e"]} // green-400 to green-500
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={{ padding: 16, borderRadius: 16 }}
-      >
-        <View className="flex-row items-center justify-between">
-          <View>
-            <Text className="text-white text-sm font-semibold mb-1">
-              Current Streak
-            </Text>
-            <Text className="text-white text-2xl font-bold">{streak} days</Text>
-            <Text className="text-white/80 text-xs mt-1">Keep going! 🔥</Text>
-          </View>
-          <Ionicons name="flame" size={32} color="white" />
+      <View style={styles.row}>
+        {/* Left: Text Section */}
+        <View style={styles.textSection}>
+          <Text className="text-xs font-medium text-gray-500">
+            Current Streak
+          </Text>
+          <Text
+            className="font-bold mt-1"
+            style={{ fontSize: 22, color: "#030303" }}
+          >
+            {streak} days
+          </Text>
+          <Text
+            className="text-sm mt-1"
+            style={{ color: "#6B7280" }}
+            numberOfLines={1}
+          >
+            {level}
+          </Text>
         </View>
-      </LinearGradient>
+
+        {/* Right: Icon */}
+        <View
+          style={[
+            styles.iconWrapper,
+            { backgroundColor: color + "20" },
+          ]}
+        >
+          <Ionicons name="flame" size={28} color={color} />
+        </View>
+      </View>
     </MotiView>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  textSection: {
+    flex: 1,
+  },
+  iconWrapper: {
+    width: 48,
+    height: 48,
+    borderRadius: 9999,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

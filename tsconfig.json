@@ -17,6 +17,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "svg.d.ts",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
     "node_modules/@expo/metro-runtime/**/*.ts",

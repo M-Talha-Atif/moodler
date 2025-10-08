@@ -36,6 +36,7 @@ interface AuthState {
   completeOnboarding: () => Promise<void>;
   fetchDailyCheckIn: () => Promise<void>;
 }
+// set,get being used by login,signup etc that's concept of closure because it remembers the environment of outside function
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
