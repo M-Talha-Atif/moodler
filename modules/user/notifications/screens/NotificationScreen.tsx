@@ -1,11 +1,12 @@
-// src/modules/user/notifications/screens/NotificationsScreen.tsx
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNotifications } from '../hooks/useNotification';
-import LoadingSkeleton from '../components/LoadingSkeleton';
-import NotificationHeader from '../components/NotificationHeader';
-import ErrorState from '../components/ErrorState';
-import NotificationList from '../components/NotificationList';
-import MarkAllButton from '../components/MarkAllButton';
+import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { View, StyleSheet } from "react-native";
+import { CheckCircle2 } from "lucide-react-native";
+import Header from "@/modules/common/Header";
+import { useNotifications } from "../hooks/useNotification";
+import LoadingSkeleton from "../components/LoadingSkeleton";
+import ErrorState from "../components/ErrorState";
+import NotificationList from "../components/NotificationList";
 
 export default function NotificationsScreen() {
   const {
@@ -15,32 +16,42 @@ export default function NotificationsScreen() {
     handleMarkAsRead,
     handleMarkAllAsRead,
     hasUnreadNotifications,
-    refetch
+    refetch,
   } = useNotifications();
 
-  if (loading) {
-    return <LoadingSkeleton />;
-  }
-
-  if (error) {
-    return <ErrorState error={error} onRetry={refetch} />;
-  }
+  if (loading) return <LoadingSkeleton />;
+  if (error) return <ErrorState error={error} onRetry={refetch} />;
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <NotificationHeader 
-        hasNotifications={Object.values(groupedNotifications).some(group => group.length > 0)}
-        onMarkAllAsRead={handleMarkAllAsRead}
-      />
-      
-      <NotificationList
-        groupedNotifications={groupedNotifications}
-        onMarkAsRead={handleMarkAsRead}
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <Header
+        title="Notifications"
+        showBackButton
+        rightIcon={
+          hasUnreadNotifications ? (
+            <CheckCircle2 size={22} color="#030303" />
+          ) : undefined
+        }
+        onRightPress={hasUnreadNotifications ? handleMarkAllAsRead : undefined}
       />
 
-      {hasUnreadNotifications && (
-        <MarkAllButton onPress={handleMarkAllAsRead} />
-      )}
+      <View style={styles.listWrapper}>
+        <NotificationList
+          groupedNotifications={groupedNotifications}
+          onMarkAsRead={handleMarkAsRead}
+        />
+      </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FAFAF8",
+  },
+  listWrapper: {
+    flex: 1,
+    paddingTop: 6,
+  },
+});

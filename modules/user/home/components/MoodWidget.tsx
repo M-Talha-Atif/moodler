@@ -33,12 +33,43 @@ const moodConfig: Record<
     color: "#A78BFA",
     message: "Rest and recharge 💤",
   },
+  angry: {
+    icon: "flash-outline",
+    color: "#F87171",
+    message: "Feeling frustrated 😡",
+  },
+  excited: {
+    icon: "rocket-outline",
+    color: "#FACC15",
+    message: "Full of energy! 🚀",
+  },
+  neutral: {
+    icon: "ellipse-outline",
+    color: "#6B7280",
+    message: "Calm and steady 😐",
+  },
+  fear: {
+    icon: "alert-circle-outline",
+    color: "#FBBF24",
+    message: "Feeling anxious 😨",
+  },
+  frustrated: {
+    icon: "remove-circle-outline",
+    color: "#EF4444",
+    message: "Annoyed or stuck 😤",
+  },
+  wonder: {
+    icon: "help-circle-outline",
+    color: "#8B5CF6",
+    message: "Curious and amazed 🤔✨",
+  },
   default: {
     icon: "sparkles-outline",
     color: "#22C55E",
     message: "Keep shining ✨",
   },
 };
+
 
 export default function MoodWidget({ mood }: MoodWidgetProps) {
   const config = moodConfig[mood.toLowerCase()] || moodConfig.default;

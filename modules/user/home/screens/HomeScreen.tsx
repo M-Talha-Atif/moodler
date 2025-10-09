@@ -1,3 +1,4 @@
+//src/mpdules/user/home/screens
 import React, { useCallback } from "react";
 import {
   View,
@@ -16,16 +17,14 @@ import RecommendedExperiences from "../components/RecommendedExperiences";
 import { Experience } from "../services/homeService";
 import DashboardHeader from "@/modules/user/home/components/DashboardHeader";
 
+
 export default function HomeScreen() {
   const router = useRouter();
   const { homeData, loading, error, refetch } = useHome();
 
   const handleJoinExperience = useCallback(
     (experience: Experience) =>
-      router.push({
-        pathname: "/experienceDetail",
-        params: { id: experience.id },
-      }),
+      router.push(`/(user)/experienceDetail?id=${experience.id}`), 
     [router]
   );
 

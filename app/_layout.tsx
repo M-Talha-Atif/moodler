@@ -9,6 +9,7 @@ import { useMoodLog } from "@/modules/dailyCheckIn/hooks/useMoodLog";
 import Animated, { FadeIn, FadeOut, ZoomIn } from "react-native-reanimated";
 import * as Font from "expo-font";
 import { useFonts } from "expo-font"
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function RootLayout() {
   const { user, isLoading, checkAuth } = useAuthStore();
@@ -56,7 +57,6 @@ export default function RootLayout() {
   useEffect(() => {
     if (!isNavigationReady || isLoading) return;
 
-    // Agar user hai aur role "user" hai aur abhi daily status null hai → wait karo
     if (user?.role === "user" && hasDailyCheckIn === null) {
       return;
     }
@@ -91,30 +91,36 @@ export default function RootLayout() {
       if (hasDailyCheckIn === false) {
         if (segments[0] !== "daily-check-in") {
           router.replace("/daily-check-in");
-          // router.replace("/(auth)/login");
-          // router.replace("/onboarding");
-          // router.replace("/(auth)/signup");
         }
-      } else if (hasDailyCheckIn === true) {
-        if (segments[0] !== "(tabs)" || segments[1] !== "(user)") {
+        return; // Add return here
+      }
+
+      // Only redirect if user is in wrong area (auth, host, etc)
+      // Don't redirect if already in user areas
+      if (hasDailyCheckIn === true) {
+        const validUserRoutes = ["(tabs)", "(user)"];
+
+        if (!validUserRoutes.includes(segments[0])) {
           router.replace("/(tabs)/(user)");
         }
       }
     }
-
-
   }, [user, isLoading, segments, isNavigationReady, hasDailyCheckIn, router]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="onboarding" />
-      <Stack.Screen name="(tabs)/(user)" />
-      <Stack.Screen name="(tabs)/(host)" />
-      <Stack.Screen name="daily-check-in" />
-      <Stack.Screen name="index" />
-      {/* for non tabs */}
-      <Stack.Screen name="(user)" />
-    </Stack>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen
+          name="(user)"
+          options={{ presentation: "modal", headerShown: false }}
+        />
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="(tabs)/(user)" />
+        <Stack.Screen name="(tabs)/(host)" />
+        <Stack.Screen name="daily-check-in" />
+        <Stack.Screen name="index" />
+      </Stack>
+    </GestureHandlerRootView>
   );
 }

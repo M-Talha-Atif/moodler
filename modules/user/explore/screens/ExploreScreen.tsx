@@ -1,15 +1,21 @@
-// ExploreScreen.tsx - FIXED
-import { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { View, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View } from "moti";
+import { Filter } from "lucide-react-native";
+import { Modalize } from "react-native-modalize";
 import { router } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
+// import SearchBar from "../components/SearchBar"; // ensure this is the new simple one
+import Header from "@/modules/common/Header";
+import ExperienceList from "../components/ExperienceList";
+import ExperienceBottomFilterSheet, {
+    CultureTag,
+    OutcomeTag,
+    TimeFilter,
+} from "../components/ExperienceBottomFilterSheet";
+import SearchBar from "@/components/ui/searchBar";
 import { fetchExperiencesForUser } from "../services/exploreService";
 import { Experience } from "@/modules/user/home/services/homeService";
-import ExperienceList from "../components/ExperienceList";
-import FiltersSection from "../components/FiltersSection";
-import SearchBar from "../components/SearchBar";
-import Header from "@/modules/common/Header";
-import { Text } from "@/components/ui/text";
 
 export default function ExploreScreen() {
     const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -18,119 +24,87 @@ export default function ExploreScreen() {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
 
-    const [cultureFilter, setCultureFilter] = useState("all");
-    const [outcomeFilter, setOutcomeFilter] = useState("all");
-    const [timeFilter, setTimeFilter] = useState("anytime");
+    const [filters, setFilters] = useState({
+        culture: "all" as CultureTag,
+        outcome: "all" as OutcomeTag,
+        timeFilter: "anytime" as TimeFilter,
+    });
     const [search, setSearch] = useState("");
 
-    const abortControllerRef = useRef<AbortController | null>(null);
-    const isMountedRef = useRef(true);
+    const abortController = useRef<AbortController | null>(null);
+    const sheetRef = useRef<Modalize>(null);
 
-    // FIXED: Remove loading from dependencies
-    const fetchData = useCallback(async (pageNum = 1, append = false) => {
-        if (!isMountedRef.current) return;
+    const fetchData = useCallback(
+        async (pageNum = 1, append = false) => {
+            if (loading && !append) return;
 
-        // Cancel previous request
-        if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
-        }
-        abortControllerRef.current = new AbortController();
-
-        // Don't fetch if already loading for initial load
-        if (loading && !append) return;
-
-        setLoading(true);
-
-        try {
-            const res = await fetchExperiencesForUser({
-                page: pageNum,
-                limit: 10,
-                search,
-                culture: cultureFilter,
-                outcome: outcomeFilter,
-                timeFilter,
-            });
-
-            if (!isMountedRef.current) return;
-
-            const items = res.data || [];
-            if (append) {
-                setExperiences(prev => [...prev, ...items]);
-            } else {
-                setExperiences(items);
+            if (!append) {
+                setExperiences([]); // clear list to show skeletons
+                setLoading(true);
             }
-            setHasMore(res.meta?.hasNextPage || items.length > 0);
-            setPage(pageNum);
-        } catch (err: any) {
-            if (!isMountedRef.current) return;
-            if (err.name !== "AbortError") {
-                console.error("Fetch error:", err);
-            }
-        } finally {
-            if (isMountedRef.current) {
+
+            abortController.current?.abort();
+            abortController.current = new AbortController();
+
+            try {
+                const res = await fetchExperiencesForUser({
+                    page: pageNum,
+                    limit: 10,
+                    search,
+                    ...filters,
+                });
+
+                const items: Experience[] = res?.data ?? [];
+                setExperiences((prev) => (append ? [...prev, ...items] : items));
+                setHasMore(res?.meta?.hasNextPage ?? items.length > 0);
+                setPage(pageNum);
+            } catch (err: any) {
+                if (err.name !== "AbortError") console.error("Fetch error:", err);
+            } finally {
                 setLoading(false);
                 setRefreshing(false);
             }
-        }
-    }, [cultureFilter, outcomeFilter, timeFilter, search]); // REMOVED loading
+        },
+        [filters, search, loading]
+    );
 
-    // FIXED: Use separate useEffect for initial load
+
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchData(1);
+            return () => abortController.current?.abort();
+        }, [])
+    );
+
     useEffect(() => {
-        isMountedRef.current = true;
-        // Initial load
-        fetchData(1, false);
+        fetchData(1);
+    }, [filters, search]);
 
-        return () => {
-            isMountedRef.current = false;
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
-            }
-        };
-    }, []);
-
-    // FIXED: Filter changes - reset and fetch
-    useEffect(() => {
-        if (!isMountedRef.current) return;
-
-        setPage(1);
-        setExperiences([]);
-        fetchData(1, false);
-    }, [cultureFilter, outcomeFilter, timeFilter, search]);
-
-    const onRefresh = useCallback(() => {
+    const onRefresh = () => {
         setRefreshing(true);
-        setPage(1);
-        fetchData(1, false);
-    }, [fetchData]);
+        fetchData(1);
+    };
 
     const loadMore = () => {
-        if (!hasMore || loading || refreshing) return;
-        fetchData(page + 1, true);
+        if (hasMore && !loading && !refreshing) fetchData(page + 1, true);
     };
 
     const handleClearFilters = () => {
-        setCultureFilter("all");
-        setOutcomeFilter("all");
-        setTimeFilter("anytime");
+        setFilters({ culture: "all", outcome: "all", timeFilter: "anytime" });
         setSearch("");
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
-            <Header title="Explore Section" />
-            <View className="mt-12" />
-            <SearchBar value={search} onChange={setSearch} />
-            <View className="mb-2 mt-4" style={{ overflow: "visible", zIndex: 10 }}>
-                <FiltersSection
-                    cultureFilter={cultureFilter}
-                    setCultureFilter={setCultureFilter}
-                    outcomeFilter={outcomeFilter}
-                    setOutcomeFilter={setOutcomeFilter}
-                    timeFilter={timeFilter}
-                    setTimeFilter={setTimeFilter}
-                    onClear={handleClearFilters}
-                />
+        <SafeAreaView style={styles.container}>
+            <Header
+                title="Explore"
+                rightIcon={<Filter size={22} color="#030303" />}
+                onRightPress={() => sheetRef.current?.open()}
+            />
 
+            <View style={styles.searchSection}>
+                <SearchBar value={search} onChangeText={setSearch} placeholder="Search Experiences.." />
             </View>
 
             <ExperienceList
@@ -140,13 +114,31 @@ export default function ExploreScreen() {
                 refreshing={refreshing}
                 onRefresh={onRefresh}
                 onLoadMore={loadMore}
-                onPress={(exp) => {
+                onPress={(exp) =>
                     router.push({
                         pathname: "/(tabs)/(user)/experienceDetail",
                         params: { id: exp.id },
-                    });
-                }}
+                    })
+                }
+            />
+
+            <ExperienceBottomFilterSheet
+                ref={sheetRef}
+                initialFilters={filters}
+                onApply={setFilters}
+                onClear={handleClearFilters}
             />
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#FAFAF8",
+    },
+    searchSection: {
+        marginTop: 12,
+        paddingHorizontal: 16,
+    },
+});

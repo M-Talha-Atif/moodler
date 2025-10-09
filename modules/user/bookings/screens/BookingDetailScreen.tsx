@@ -1,14 +1,12 @@
-import { useEffect, useState } from "react";
-import { View, Text, Image, ScrollView, ActivityIndicator, Alert, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Image, StyleSheet, ScrollView, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Calendar, MapPin, User, Clock, ArrowRight, Users } from "lucide-react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import dayjs from "dayjs";
-import Header from "@/modules/common/Header";
+import { Ionicons } from "@expo/vector-icons";
+import { Text } from "@/components/ui/text";
+import Separator from "@/components/ui/separator";
+import Button from "@/components/ui/button";
 import { fetchBookingDetail, deleteBooking } from "../services/bookingService";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Button from "@/modules/common/components/Button";
 
 export default function BookingDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -47,7 +45,6 @@ export default function BookingDetailScreen() {
               Alert.alert("Booking cancelled successfully");
               router.back();
             } catch (err) {
-              console.error("Error cancelling booking:", err);
               Alert.alert("Failed to cancel booking");
             } finally {
               setDeleting(false);
@@ -60,185 +57,201 @@ export default function BookingDetailScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" color="#3B82F6" />
-      </SafeAreaView>
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#030303" />
+        <Text style={styles.loadingText}>Loading booking details...</Text>
+      </View>
     );
   }
 
   if (!booking) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-background">
-        <Text className="text-gray-600">Booking not found.</Text>
-      </SafeAreaView>
+      <View style={styles.centerContainer}>
+        <Ionicons name="search-outline" size={40} color="#030303" />
+        <Text style={styles.errorText}>Booking not found</Text>
+      </View>
     );
   }
 
   return (
-    <>
-      <SafeAreaView className="flex-1 bg-slate-50">
-        <Header title="Booking Details" showBackButton />
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Hero Image */}
-        <View className="relative mb-4 mt-8">
-          <Image
-            source={{
-              uri: booking.image || "https://via.placeholder.com/400x200",
-            }}
-            className="w-full h-48"
-          />
-        </View>
-        <View className="flex-1">
-
-          <ScrollView
-            className="flex-1"
-            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 60, paddingTop: 12 }}
-            showsVerticalScrollIndicator={false}
-          >
-
-
-            {/* Main Card */}
-            <View className="bg-white rounded-3xl shadow-md shadow-black/10 p-5 mb-8 border border-gray-100">
-              {/* Title */}
-              <Text className="text-2xl font-bold text-gray-900 mb-5 leading-tight">
-                {booking.title}
-              </Text>
-
-              {/* Info Grid */}
-              <View className="space-y-5 mb-4">
-                {/* Host */}
-                <View className="flex-row items-center  mt-4">
-                  <View className="bg-blue-50 p-3 rounded-2xl mr-4">
-                    <User size={20} color="#3B82F6" />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-sm text-gray-500 font-medium">Host</Text>
-                    <Text className="text-gray-900 font-semibold">
-                      {booking.hostName || "Unknown"}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Location */}
-                <View className="flex-row items-center mt-4">
-                  <View className="bg-green-50 p-3 rounded-2xl mr-4">
-                    <MapPin size={20} color="#10B981" />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-sm text-gray-500 font-medium">Location</Text>
-                    <Text className="text-gray-900 font-semibold">{booking.location}</Text>
-                  </View>
-                  <ArrowRight size={18} color="#9CA3AF" />
-                </View>
-
-                {/* Date & Time Row */}
-                <View className="flex-row space-x-3 mt-4">
-                  {/* Date */}
-                  <View className="flex-1 flex-row items-center">
-                    <View className="bg-purple-50 p-3 rounded-2xl mr-4">
-                      <Calendar size={20} color="#8B5CF6" />
-                    </View>
-                    <View className="flex-1 mt-2">
-                      <Text className="text-sm text-gray-500 font-medium">Date</Text>
-                      <Text className="text-gray-900 font-semibold">
-                        {dayjs(booking.date).format("MMM D, YYYY")}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Time */}
-                  <View className="flex-1 flex-row items-center mt-2">
-                    <View className="bg-orange-50 p-3 rounded-2xl mr-4">
-                      <Clock size={20} color="#F59E0B" />
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-sm text-gray-500">Time</Text>
-                      <Text className="text-gray-900 font-semibold">
-                        {dayjs(booking.time).format("h:mm A")}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              </View>
-
-              {/* Divider */}
-              <View className="h-[1px] bg-gray-200 my-4" />
-
-              {/* Attendees */}
-              <View className="mt-4">
-                <View className="flex-row items-center mb-4 space-x-4">
-                  <Users size={20} color="#374151" className="mr-2" />
-                  <Text className="p-2 text-lg font-bold text-gray-900">Attendees</Text>
-                  <Text className="text-gray-500">({booking.attendees.length})</Text>
-                </View>
-
-                <View className="flex-row items-center">
-                  {booking.attendees.slice(0, 6).map((att: any, i: number) => (
-                    <View
-                      key={i}
-                      className="relative"
-                      style={{ marginLeft: i === 0 ? 0 : -12 }}
-                    >
-                      <Image
-                        source={{
-                          uri:
-                            att.avatarUrl ||
-                            `https://ui-avatars.com/api/?name=${att.name}&background=random`,
-                        }}
-                        className="w-12 h-12 rounded-full border-2 border-white shadow-sm"
-                      />
-                    </View>
-                  ))}
-
-                  {booking.attendees.length > 6 && (
-                    <View className="w-12 h-12 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center ml-2">
-                      <Text className="text-gray-500 font-semibold text-xs">
-                        +{booking.attendees.length - 6}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-
-              </View>
-            </View>
-
-
-          </ScrollView>
-
-        </View>
-
-      </SafeAreaView>
-
-
-      {/* Sticky Button outside scroll, respects bottom inset perfectly */}
-      <SafeAreaView
-        edges={["bottom"]}
-        className="absolute left-0 right-0 bottom-0 bg-transparent px-8 pb-2"
-      >
-        <Button
-          title="Cancel Booking"
-          variant="destructive"
-          onPress={handleCancelBooking}
+        <Image
+          source={{ uri: booking.image || "https://via.placeholder.com/400x200" }}
+          style={styles.headerImage}
+          resizeMode="cover"
         />
 
-        {/* <TouchableOpacity
-          activeOpacity={0.85}
+        {/* Title */}
+        <View style={styles.titleSection}>
+          <Text variant="display" style={{ flex: 1 }}>
+            {booking.title}
+          </Text>
+        </View>
+
+        {/* Key Info Section */}
+        <View style={styles.infoSection}>
+          {/* Row 1: Spots Left & Date */}
+          <View style={styles.topRow}>
+            <Text style={styles.infoTextBold}>{booking.spotsLeft} spots left</Text>
+            <Separator orientation="vertical" color="#DADADA" thickness={1} style={styles.verticalSep} />
+            <Text style={styles.infoText}>
+              {new Date(booking.date).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              })}
+            </Text>
+          </View>
+
+          {/* Row 2: Location */}
+          <View style={styles.bottomRow}>
+            <Ionicons name="location-outline" size={16} color="#030303" style={{ marginRight: 4 }} />
+            <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">
+              {booking.location}
+            </Text>
+          </View>
+        </View>
+
+        {/* Host Info */}
+        <View style={styles.section}>
+          <Text variant="header">Hosted by</Text>
+          <View style={styles.hostRow}>
+            <Image
+              source={{
+                uri:
+                  booking.hostAvatar ||
+                  `https://ui-avatars.com/api/?name=${booking.hostName}&background=random`,
+              }}
+              style={styles.hostAvatar}
+            />
+            <Text variant="body" style={styles.hostName}>
+              {booking.hostName || "Unknown"}
+            </Text>
+          </View>
+        </View>
+
+        {/* Attendees */}
+        <View style={styles.section}>
+          <Text variant="header">Attendees</Text>
+          <View style={styles.attendeesRow}>
+            {booking.attendees?.slice(0, 5).map((att: any, i: number) => (
+              <Image
+                key={i}
+                source={{
+                  uri: att.avatarUrl || `https://ui-avatars.com/api/?name=${att.name+"user"}&background=random`,
+                }}
+                style={[styles.attendeeAvatar, { marginLeft: i === 0 ? 0 : -10 }]}
+              />
+            ))}
+            {booking.attendees?.length > 5 && (
+              <View style={styles.extraAvatar}>
+                <Text style={styles.extraCount}>+{booking.attendees.length - 5}</Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* Description */}
+        <View style={styles.section}>
+          <Text variant="header">Booking Notes</Text>
+          <Text variant="body" style={styles.descriptionText}>
+            {booking.notes || "No additional notes for this booking."}
+          </Text>
+        </View>
+      </ScrollView>
+
+      {/* Sticky Button */}
+      <SafeAreaView edges={["bottom"]} style={styles.bookingWrapper}>
+        <Button
+          title="Cancel Booking"
           onPress={handleCancelBooking}
           disabled={deleting}
-          className="rounded-2xl overflow-hidden shadow-md shadow-red-200"
-        >
-          <LinearGradient
-            colors={deleting ? ["#9CA3AF", "#6B7280"] : ["#EF4444", "#DC2626"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="py-4 rounded-2xl"
-          >
-            <Text className="text-white text-center font-bold text-base tracking-wide">
-              {deleting ? "Cancelling..." : "Cancel Booking"}
-            </Text>
-          </LinearGradient>
-        </TouchableOpacity> */}
+        />
       </SafeAreaView>
-
-    </>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: "#FAFAF8" },
+  scrollContent: { paddingBottom: 120 },
+  headerImage: {
+    width: "100%",
+    height: 220,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  titleSection: { marginHorizontal: 24, marginTop: 16, flexDirection: "row", alignItems: "center" },
+
+  infoSection: {
+    backgroundColor: "#FAFAF8",
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginHorizontal: 24,
+    marginTop: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  bottomRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  verticalSep: { marginHorizontal: 10, height: 12 },
+  infoText: { fontSize: 13, color: "#4B5563", fontFamily: "Nunito" },
+  infoTextBold: { fontSize: 13, color: "#111827", fontFamily: "Nunito-Bold" },
+  locationText: { fontSize: 13, color: "#111827", flexShrink: 1, fontFamily: "Nunito" },
+
+  section: { marginHorizontal: 24, marginVertical: 16 },
+  hostRow: { flexDirection: "row", alignItems: "center", marginTop: 8, gap: 12 },
+  hostAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: "#E8E8E6" },
+  hostName: { color: "#030303" },
+
+  attendeesRow: { flexDirection: "row", alignItems: "center", marginTop: 8 },
+  attendeeAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: "#FAFAF8",
+  },
+  extraAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#E8E8E6",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: -10,
+  },
+  extraCount: { fontSize: 12, fontFamily: "Nunito-Bold", color: "#555" },
+  descriptionText: { marginTop: 6, color: "#555", fontFamily: "Nunito" },
+
+  bookingWrapper: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 24,
+    paddingBottom: 12,
+    backgroundColor: "transparent",
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FAFAF8",
+    padding: 20,
+  },
+  loadingText: { marginTop: 12, fontSize: 16, color: "#666", fontFamily: "Nunito" },
+  errorText: { marginTop: 12, fontSize: 16, color: "#666", textAlign: "center", fontFamily: "Nunito" },
+});

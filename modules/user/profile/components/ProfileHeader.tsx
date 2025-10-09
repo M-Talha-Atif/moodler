@@ -1,5 +1,6 @@
+// ProfileHeader.tsx
 import React from "react";
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Edit3 } from "lucide-react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
@@ -9,20 +10,35 @@ interface ProfileHeaderProps {
   image: string;
 }
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, email, image }) => (
-  <Animated.View entering={FadeInDown.duration(500).springify()} className="items-center mb-8">
-    <Image source={{ uri: image }} className="w-28 h-28 rounded-full mb-3" />
-    <Text className="text-xl font-bold text-gray-900">{name}</Text>
-    <Text className="text-gray-500 text-sm">{email}</Text>
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, email, image }) => {
+  return (
+    <Animated.View entering={FadeInDown.duration(500).springify()} style={styles.container}>
+      <Image source={{ uri: image }} style={styles.avatar} />
+      <Text style={styles.name}>{name}</Text>
+      <Text style={styles.email}>{email}</Text>
+      <TouchableOpacity style={styles.editBtn} activeOpacity={0.8}>
+        <Edit3 size={16} color="#059669" />
+        <Text style={styles.editText}>Edit Profile</Text>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
 
-    <TouchableOpacity
-      activeOpacity={0.8}
-      className="flex-row items-center gap-2 mt-3 bg-emerald-100 px-4 py-2 rounded-full"
-    >
-      <Edit3 size={16} color="#059669" />
-      <Text className="text-emerald-600 font-semibold text-sm">Edit Profile</Text>
-    </TouchableOpacity>
-  </Animated.View>
-);
+const styles = StyleSheet.create({
+  container: { alignItems: "center", marginBottom: 32 },
+  avatar: { width: 112, height: 112, borderRadius: 56, marginBottom: 12 },
+  name: { fontSize: 20, fontWeight: "bold", color: "#111827" },
+  email: { fontSize: 14, color: "#6b7280" },
+  editBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+    backgroundColor: "#d1fae5",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 50,
+  },
+  editText: { color: "#059669", fontWeight: "600", fontSize: 14, marginLeft: 4 },
+});
 
 export default ProfileHeader;

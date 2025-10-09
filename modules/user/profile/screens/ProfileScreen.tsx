@@ -1,129 +1,86 @@
-import React, { useEffect, useState } from "react";
-import { View, ScrollView, TouchableOpacity, Text, ActivityIndicator } from "react-native";
-import Header from "@/modules/common/Header";
+// UserProfileScreen.tsx
+import React, { useState } from "react";
+import { ScrollView, View, TextInput, Image, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { LogOut } from "lucide-react-native";
 import { useAuthStore } from "@/store/useAuthStore";
-import StatCard from "@/modules/common/components/StatCard";
-import ProfileHeader from "../components/ProfileHeader";
-import MoodProgressChart from "@/modules/common/components/MoodProgressChart";
-import { getInsights, getMoodLogsByRange } from "../services/profileService";
+import { Text } from "@/components/ui/text";
+import ListItem from "@/components/ui/listItem";
+import Header from "@/modules/common/Header";
 
 export default function UserProfileScreen() {
   const { user, logout } = useAuthStore();
-  const [insights, setInsights] = useState<any>(null);
-  const [moodLogs, setMoodLogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [name, setName] = useState(user?.name || "Talha");
+  const [email, setEmail] = useState(user?.email || "talha@example.com");
 
-  const handleLogout = async () => await logout();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const insightsData = await getInsights(60);
-        const moodLogsData = await getMoodLogsByRange("2025-09-01", "2025-11-30");
-
-        setInsights(insightsData);
-        setMoodLogs(moodLogsData);
-      } catch (err: any) {
-        setError(err.message || "Something went wrong.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const userProfile = {
-    name: user?.name || "Talha",
-    email: user?.email || "talha@example.com",
-    image: "https://avatars.githubusercontent.com/u/9919?v=4",
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Logout", style: "destructive", onPress: logout },
+    ]);
   };
 
-  if (loading) {
-    return (
-      <View className="flex-1 items-center justify-center bg-gray-50">
-        <ActivityIndicator size="large" color="#10b981" />
-        <Text className="text-gray-500 mt-3">Loading profile...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View className="flex-1 items-center justify-center bg-gray-50 px-6">
-        <Text className="text-red-500 font-semibold mb-2">Error</Text>
-        <Text className="text-gray-500 text-center mb-4">{error}</Text>
-        <TouchableOpacity
-          onPress={() => {
-            setError(null);
-            setLoading(true);
-            setTimeout(() => {
-              // Retry after small delay
-              getInsights(60).then(setInsights).catch((e) => setError(e.message));
-            }, 300);
-          }}
-          className="bg-emerald-500 px-6 py-2 rounded-full"
-        >
-          <Text className="text-white font-semibold">Retry</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   return (
-    <View className="flex-1 bg-gray-50">
+    <ScrollView style={{ flex: 1, backgroundColor: "#f9fafb" }} contentContainerStyle={{ paddingBottom: 60 }}>
       <Header title="Profile" showBackButton={false} />
 
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 60 }}
-        className="flex-1 pt-24 px-4"
-        showsVerticalScrollIndicator={false}
-      >
-        {/* 👤 Profile Info */}
-        <ProfileHeader
-          name={userProfile.name}
-          email={userProfile.email}
-          image={userProfile.image}
+      {/* Profile Info */}
+      <View style={styles.profileSection}>
+        <Image
+          source={{ uri: user?.image || "https://avatars.githubusercontent.com/u/9919?v=4" }}
+          style={styles.avatar}
         />
+        <View style={styles.userInfo}>
+          <Text variant="header">{name}</Text>
+          <Text variant="caption" color="#6b7280">{email}</Text>
+        </View>
+      </View>
 
-        {/* 📊 Stats Section */}
-        {insights && (
-          <View className="flex-row justify-between mb-6">
-            <StatCard
-              title="Mood Average"
-              value={`${insights.moodAvg || 0}/10`}
-              subtitle="Last 60 days"
-              colors={["#34d399", "#10b981"]}
-            />
-            <StatCard
-              title="Total Bookings"
-              value={insights.experiences || 0}
-              subtitle="Confirmed Experiences"
-              colors={["#60a5fa", "#3b82f6"]}
-            />
-          </View>
-        )}
 
-        {/* 🧠 Mood Progress */}
-        <MoodProgressChart moodLogs={moodLogs} />
+      {/* Profile Actions */}
+      <View style={{ marginTop: 32 }}>
+        <ListItem title="Edit Profile" icon="pencil-outline" onPress={() => {}} />
+        <ListItem title="Change Password" icon="key-outline" onPress={() => {}} />
+        <ListItem title="Notifications" icon="notifications-outline" onPress={() => {}} />
+        <ListItem title="Insights" icon="bar-chart-outline" onPress={() => {}} />
+        <ListItem title="Privacy & Security" icon="shield-checkmark-outline" onPress={() => {}} />
+      </View>
 
-        {/* 🚪 Logout */}
-        <TouchableOpacity
-          onPress={handleLogout}
-          activeOpacity={0.8}
-          className="flex-row items-center justify-center bg-red-100 py-3 rounded-2xl mb-10"
-        >
-          <LogOut size={18} color="#dc2626" />
-          <Text className="text-red-600 font-semibold text-base ml-2">
-            Logout
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
+      {/* Logout Button */}
+      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+        <LogOut size={20} color="#fff" />
+        <Text variant="button" style={{ color: "#fff", marginLeft: 8 }}>Logout</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  profileSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  userInfo: {
+    marginLeft: 12,
+    justifyContent: "center",
+  },
+  avatar: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#d1d5db",
+  },
+  logoutBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#dc2626",
+    marginHorizontal: 20,
+    marginTop: 40,
+    paddingVertical: 12,
+    borderRadius: 16,
+  },
+});

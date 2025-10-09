@@ -1,7 +1,24 @@
-import { View, FlatList, Text, RefreshControl } from "react-native";
+import React from "react";
+import {
+  View,
+  FlatList,
+  Text,
+  RefreshControl,
+  StyleSheet,
+} from "react-native";
 import ExperienceCard from "../../home/components/ExperienceCard";
 import { Experience } from "@/modules/user/home/services/homeService";
 import ExperienceLoadingSkeleton from "./ExperienceLoadingSkeleton";
+
+interface Props {
+  data: Experience[];
+  loading: boolean;
+  hasMore: boolean;
+  refreshing: boolean;
+  onRefresh: () => void;
+  onLoadMore: () => void;
+  onPress: (exp: Experience) => void;
+}
 
 export default function ExperienceList({
   data,
@@ -11,19 +28,10 @@ export default function ExperienceList({
   onRefresh,
   onLoadMore,
   onPress,
-}: {
-  data: Experience[];
-  loading: boolean;
-  hasMore: boolean;
-  refreshing: boolean;
-  onRefresh: () => void;
-  onLoadMore: () => void;
-  onPress: (exp: Experience) => void;
-}) {
-  // 🔹 Show full-page skeleton only when initially loading and no data yet
+}: Props) {
   if (loading && data.length === 0) {
     return (
-      <View className="flex-1 bg-gray-50 pt-4">
+      <View style={styles.fullSkeleton}>
         <ExperienceLoadingSkeleton />
       </View>
     );
@@ -34,7 +42,7 @@ export default function ExperienceList({
       data={data}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
-        <View className="p-4">
+        <View style={styles.cardContainer}>
           <ExperienceCard experience={item} onJoin={onPress} />
         </View>
       )}
@@ -49,30 +57,63 @@ export default function ExperienceList({
       onEndReachedThreshold={0.3}
       ListFooterComponent={
         loading && data.length > 0 ? (
-          <View className="py-4">
+          <View style={styles.footerLoading}>
             <ExperienceLoadingSkeleton />
           </View>
         ) : !hasMore && data.length > 0 ? (
-          <View className="py-6 items-center">
-            <Text className="text-gray-500">No more experiences</Text>
+          <View style={styles.footerEnd}>
+            <Text style={styles.footerText}>No more experiences</Text>
           </View>
         ) : null
       }
       ListEmptyComponent={
-        !loading && (
-          <View className="flex-1 justify-center items-center py-20">
-            <Text className="text-gray-500 text-lg mb-2">
-              No experiences found
-            </Text>
-          </View>
-        )
+        !loading
+          ? () => (
+            <View style={styles.empty}>
+              <Text style={styles.emptyText}>No experiences found</Text>
+            </View>
+          )
+          : null
       }
+
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{
-        flexGrow: 1,
-        backgroundColor: "#F9FAFB",
-        paddingBottom: 100,
-      }}
+      contentContainerStyle={styles.contentContainer}
     />
   );
 }
+
+const styles = StyleSheet.create({
+  fullSkeleton: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+    paddingTop: 16,
+  },
+  cardContainer: {
+    padding: 16,
+  },
+  footerLoading: {
+    paddingVertical: 16,
+  },
+  footerEnd: {
+    paddingVertical: 24,
+    alignItems: "center",
+  },
+  footerText: {
+    color: "#6B7280",
+  },
+  empty: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 80,
+  },
+  emptyText: {
+    color: "#6B7280",
+    fontSize: 16,
+  },
+  contentContainer: {
+    flexGrow: 1,
+    backgroundColor: "#F9FAFB",
+    paddingBottom: 100,
+  },
+});

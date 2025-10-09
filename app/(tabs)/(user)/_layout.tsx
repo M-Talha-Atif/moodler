@@ -1,19 +1,23 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import React from "react";
 
 export default function UserTabs() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#4ADE80", //  primary (vibrant green)
-        tabBarInactiveTintColor: "#94A3B8", // muted foreground
+        tabBarActiveTintColor: "#030303", // main dark color
+        tabBarInactiveTintColor: "#8E8E8E", // muted gray
         tabBarStyle: {
-          backgroundColor: "#FFFFFF", // clean white base
-          borderTopColor: "#E2E8F0", // subtle border
+          backgroundColor: "#FAFAF8", // matches your app background
+          borderTopColor: "#E8E8E6", // subtle separator
+          paddingBottom: 8,
+  
         },
         tabBarLabelStyle: {
           fontSize: 12,
+          fontFamily: "Nunito",
           fontWeight: "600",
         },
       }}
@@ -53,32 +57,6 @@ export default function UserTabs() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
           ),
-        }}
-      />
-
-      {/* Hidden Screens */}
-      <Tabs.Screen
-        name="experienceDetail"
-        options={{
-          href: null,
-          headerShown: false,
-          title: "Experience Detail",
-        }}
-      />
-      <Tabs.Screen
-        name="notifications"
-        options={{
-          href: null,
-          headerShown: true,
-          title: "Notifications",
-        }}
-      />
-      <Tabs.Screen
-        name="bookingDetail"
-        options={{
-          href: null,
-          headerShown: false,
-          title: "Booking Detail",
         }}
       />
     </Tabs>

@@ -18,6 +18,9 @@ export interface Experience {
   price: number;
   location: string;
   date: string;
+  emotions: string[];
+  outcomes: string[];
+  culturalTags: string[];
   timezone: string;
   isBooked: boolean;
   bookingId?: string;

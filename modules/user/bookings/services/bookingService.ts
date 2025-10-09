@@ -8,8 +8,11 @@ export interface Booking {
   date: string;
   experienceId: string;
   image: string;
+  price: number;
+  sessionStartTime: string;
+  sessionEndTime: string;
   location: string;
-  createdAt?: string;
+  createdAt: string;
 }
 
 export interface BookingStats {
@@ -92,6 +95,8 @@ export const fetchBookings = async (
     date: rawBooking.experience?.date || "",
     price: rawBooking.experience?.price || 0,
     image: rawBooking.experience?.image,
+    sessionStartTime: rawBooking.experience?.sessionStartTime,
+    sessionEndTime: rawBooking.experience?.sessionEndTime,
     location: rawBooking.experience?.location,
     experienceId: rawBooking.experience?.id || "",
     createdAt: rawBooking.createdAt,

@@ -17,6 +17,7 @@ export default function DailyCheckInScreen() {
   const [note, setNote] = useState("");
   const [photo, setPhoto] = useState(null);
   const [voice, setVoice] = useState(null);
+  const [buttonSubmitLoading, setButtonSubmitLoading] = useState(false);
   const { submitMoodLog, isLoading } = useMoodLog();
   const { setHasDailyCheckIn } = useDailyCheckInStore();
   const router = useRouter();
@@ -34,14 +35,21 @@ export default function DailyCheckInScreen() {
 
     const payload = { moodLabel: mood.emotion, note, textSentiment: sentiment, photo, voice };
 
+    setButtonSubmitLoading(true);
+
     try {
+      
       await submitMoodLog(payload);
       setHasDailyCheckIn(true);
       Alert.alert("✨ Check-In Complete", "Your reflection has been saved.", [
         { text: "Continue", onPress: () => router.replace("/(tabs)/(user)") },
       ]);
     } catch {
+      setButtonSubmitLoading(false);
       Alert.alert("Oops!", "Something went wrong while saving your check-in.");
+    }
+    finally{
+      setButtonSubmitLoading(false);
     }
   };
 
@@ -96,7 +104,7 @@ export default function DailyCheckInScreen() {
         {/* 🪷 Sticky Button */}
         <View style={styles.stickyButtonWrapper}>
           <Button
-            title="Complete Check-In"
+            title={ buttonSubmitLoading ? "Submitting your vibes.." : "Submit your mood vibe"}
             onPress={handleSubmit}
             disabled={!mood || (!photo && !voice)}
             backgroundColor="#030303"

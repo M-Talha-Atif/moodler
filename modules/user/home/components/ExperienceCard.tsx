@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import { MotiView } from "moti";
-import Button from "@/modules/common/components/Button";
+import Button from "@/components/ui/button";
 import { Experience } from "../services/homeService";
 
 interface ExperienceCardProps {
@@ -32,10 +32,10 @@ export default function ExperienceCard({ experience, onJoin }: ExperienceCardPro
         <Text style={styles.title}>{experience.title}</Text>
 
         {/* Subtext */}
-        {experience.targetEmotions?.[0] && (
+        {experience.targetEmotion && (
           <Text style={styles.subtitle}>
             Crafted to lift you when you feel{" "}
-            {experience.targetEmotions[0].toLowerCase()}.
+            {experience.targetEmotion.toLowerCase()}.
           </Text>
         )}
 
@@ -47,7 +47,6 @@ export default function ExperienceCard({ experience, onJoin }: ExperienceCardPro
             </Text>
           </View>
           <Button
-            variant="primary"
             title="Join"
             onPress={() => onJoin(experience)}
             style={styles.joinButton}
@@ -60,7 +59,7 @@ export default function ExperienceCard({ experience, onJoin }: ExperienceCardPro
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FAFAF8", // consistent with mood/streak
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "#E8E8E6",

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 interface ChipSelectorProps {
   options: string[];
   multiSelect?: boolean;
+  defaultSelected?: string | string[];
   selectedColor?: string;
   unselectedColor?: string;
   textColor?: string;
@@ -29,6 +30,7 @@ interface ChipSelectorProps {
 const ChipSelector: React.FC<ChipSelectorProps> = ({
   options,
   multiSelect = false,
+  defaultSelected = [],
   selectedColor = "#030303",
   unselectedColor = "#d3d3d3",
   textColor = "#000",
@@ -43,7 +45,15 @@ const ChipSelector: React.FC<ChipSelectorProps> = ({
   chipStyle,
   textStyle,
 }) => {
-  const [selected, setSelected] = useState<string[]>([]);
+  const normalizeDefault = Array.isArray(defaultSelected)
+    ? defaultSelected
+    : [defaultSelected];
+
+  const [selected, setSelected] = useState<string[]>(normalizeDefault);
+
+  useEffect(() => {
+    setSelected(normalizeDefault);
+  }, [defaultSelected]);
 
   const toggleChip = (option: string) => {
     let newSelected;
@@ -55,7 +65,7 @@ const ChipSelector: React.FC<ChipSelectorProps> = ({
       newSelected = selected.includes(option) ? [] : [option];
     }
     setSelected(newSelected);
-    onChange && onChange(multiSelect ? newSelected : newSelected[0] || "");
+    onChange?.(multiSelect ? newSelected : newSelected[0] || "");
   };
 
   return (

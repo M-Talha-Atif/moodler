@@ -1,147 +1,103 @@
-// src/modules/common/components/MoodProgressChart.tsx
+// MoodProgressChart.tsx
 import React, { useState, useMemo } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import dayjs from "dayjs";
 
-// mood-to-value mapping
-const moodMap: Record<string, number> = {
-    sad: 1,
-    neutral: 2,
-    happy: 3,
-    angry: 4,
-    surprise: 5,
-};
-
-// emoji legend
-const emojiMap: Record<number, string> = {
-    1: "😢",
-    2: "😐",
-    3: "😊",
-    4: "😠",
-    5: "😲",
-};
+const moodMap: Record<string, number> = { sad: 1, neutral: 2, happy: 3, angry: 4, surprise: 5 };
+const emojiMap: Record<number, string> = { 1: "😢", 2: "😐", 3: "😊", 4: "😠", 5: "😲" };
 
 interface MoodProgressChartProps {
-    moodLogs: { createdAt: string; finalMood: string }[];
+  moodLogs: { createdAt: string; finalMood: string }[];
 }
 
-export default function MoodProgressChart({ moodLogs }: MoodProgressChartProps) {
-    const [weekOffset, setWeekOffset] = useState(0); // 0 = current week, -1 = previous week
+const MoodProgressChart: React.FC<MoodProgressChartProps> = ({ moodLogs }) => {
+  const [weekOffset, setWeekOffset] = useState(0);
 
-    // compute week days dynamically (Mon–Sun)
-    const weekDays = useMemo(() => {
-        const startOfWeek = dayjs().add(weekOffset, "week").startOf("week");
-        return Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, "day"));
-    }, [weekOffset]);
+  const weekDays = useMemo(() => {
+    const startOfWeek = dayjs().add(weekOffset, "week").startOf("week");
+    return Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, "day"));
+  }, [weekOffset]);
 
-    // merge API data with missing days
-    const moodData = weekDays.map((day) => {
-        const entry = moodLogs.find((m) => dayjs(m.createdAt).isSame(day, "day"));
-        const moodValue = entry ? moodMap[entry.finalMood] : 0;
-        return {
-            value: moodValue,
-            label: day.format("dd"), // short weekday label e.g. Mo, Tu
-            emoji: moodValue > 0 ? emojiMap[moodValue] : "⚪", // show white dot for no data
-        };
-    });
+  const moodData = weekDays.map((day) => {
+    const entry = moodLogs.find((m) => dayjs(m.createdAt).isSame(day, "day"));
+    const moodValue = entry ? moodMap[entry.finalMood] : 0;
+    return { value: moodValue, label: day.format("dd"), emoji: moodValue ? emojiMap[moodValue] : "⚪", key: day.format("YYYY-MM-DD") };
+  });
 
-    // dynamic title
-    const weekLabel = `${weekDays[0].format("MMM D")} - ${weekDays[6].format(
-        "MMM D"
-    )}`;
+  const weekLabel = `${weekDays[0].format("MMM D")} - ${weekDays[6].format("MMM D")}`;
 
-    return (
-        <Animated.View
-            entering={FadeInDown.delay(200).duration(600).springify()}
-            className="rounded-3xl mb-8 overflow-hidden shadow-sm"
+  return (
+    <Animated.View entering={FadeInDown.delay(200).duration(600).springify()} style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => setWeekOffset((p) => p - 1)} style={styles.navBtn}>
+          <ChevronLeft size={18} color="#000" />
+        </TouchableOpacity>
+        <Text style={styles.weekLabel}>{weekLabel}</Text>
+        <TouchableOpacity
+          onPress={() => setWeekOffset((p) => p + 1)}
+          disabled={weekOffset >= 0}
+          style={[styles.navBtn, weekOffset >= 0 && styles.disabledNav]}
         >
-            <LinearGradient
-                colors={["#ecfdf5", "#d1fae5"]}
-                className="p-5 rounded-3xl"
-            >
-                {/* Header */}
-                <View className="flex-row justify-between items-center mb-3">
-                    <TouchableOpacity
-                        onPress={() => setWeekOffset((p) => p - 1)}
-                        className="p-1 rounded-full bg-emerald-200/50"
-                    >
-                        <ChevronLeft size={18} color="#047857" />
-                    </TouchableOpacity>
+          <ChevronRight size={18} color="#000" />
+        </TouchableOpacity>
+      </View>
 
-                    <Text className="text-lg font-semibold text-emerald-800">
-                        {weekLabel}
-                    </Text>
+      <BarChart
+        data={moodData.map((m) => ({
+          value: m.value,
+          label: m.label,
+          frontColor: m.value ? "#000" : "#d1d5db",
+          gradientColor: m.value ? "#4b5563" : "#d1d5db",
+          key: m.key, // unique per day
+        }))}
+        barWidth={28}
+        spacing={12}
+        roundedTop
+        hideRules
+        hideYAxisText
+        noOfSections={5}
+        yAxisThickness={0}
+        initialSpacing={10}
+        animateOnDataChange
+        animationDuration={800}
+        xAxisLabelTextStyle={{ color: "#000", fontSize: 11, fontWeight: "600" }}
+        renderTooltip={(item) => (
+          <View style={styles.tooltip}>
+            <Text style={styles.tooltipText}>{item.value ? `${item.value} mood pts` : "No data"}</Text>
+          </View>
+        )}
+      />
 
-                    <TouchableOpacity
-                        onPress={() => setWeekOffset((p) => p + 1)}
-                        disabled={weekOffset >= 0}
-                        className={`p-1 rounded-full ${weekOffset >= 0 ? "opacity-40 bg-gray-200" : "bg-emerald-200/50"
-                            }`}
-                    >
-                        <ChevronRight size={18} color="#047857" />
-                    </TouchableOpacity>
-                </View>
+      <View style={styles.emojiRow}>
+        {moodData.map((m) => (
+          <Text key={m.key} style={styles.emoji}>{m.emoji}</Text>
+        ))}
+      </View>
 
-                {/* Bar chart */}
-                <BarChart
-                    data={moodData.map((m, index) => ({
-                        value: m.value,
-                        label: m.label,
-                        frontColor: m.value === 0 ? "#d1d5db" : "#10b981",
-                        gradientColor: m.value === 0 ? "#d1d5db" : "#34d399",
-                        key: String(index), // give each item a stable key
-                    }))}
-                    barWidth={28}
-                    spacing={12}
-                    roundedTop
-                    hideRules
-                    hideYAxisText
-                    noOfSections={5}
-                    yAxisThickness={0}
-                    initialSpacing={10}
-                    animateOnDataChange
-                    animationDuration={800}
-                    xAxisLabelTextStyle={{
-                        color: "#065f46",
-                        fontSize: 11,
-                        fontWeight: "600",
-                    }}
-                    renderTooltip={(item) => (
-                        <View className="bg-white rounded-xl px-2 py-1 shadow-md">
-                            <Text className="text-xs font-semibold text-gray-700">
-                                {item.value > 0 ? `${item.value} mood pts` : "No data"}
-                            </Text>
-                        </View>
-                    )}
-                />
+      <View style={styles.scaleContainer}>
+        <Text style={styles.scaleTitle}>Mood Scale:</Text>
+        <Text style={styles.scaleText}>1 😢 Sad | 2 😐 Neutral | 3 😊 Happy | 4 😠 Angry | 5 😲 Surprised</Text>
+      </View>
+    </Animated.View>
+  );
+};
 
-                {/* Emoji row */}
-                <View className="flex-row justify-between items-center mt-4 px-2">
-                    {moodData.map((m, i) => (
-                        <Text
-                            key={i}
-                            className="text-base"
-                            style={{ textAlign: "center", width: 28 }}
-                        >
-                            {m.emoji}
-                        </Text>
-                    ))}
-                </View>
+const styles = StyleSheet.create({
+  container: { borderRadius: 24, overflow: "hidden", marginBottom: 32, padding: 16, backgroundColor: "#fff" },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  navBtn: { padding: 6, borderRadius: 50, backgroundColor: "#e5e7eb" },
+  disabledNav: { opacity: 0.4, backgroundColor: "#f3f4f6" },
+  weekLabel: { fontSize: 16, fontWeight: "600", color: "#000" },
+  tooltip: { backgroundColor: "#fff", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, shadowColor: "#000", shadowOpacity: 0.1, shadowOffset: { width: 0, height: 2 }, shadowRadius: 4, elevation: 2 },
+  tooltipText: { fontSize: 12, fontWeight: "600", color: "#374151" },
+  emojiRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 12 },
+  emoji: { textAlign: "center", width: 28, fontSize: 16 },
+  scaleContainer: { marginTop: 16, backgroundColor: "rgba(0,0,0,0.05)", borderRadius: 16, padding: 8 },
+  scaleTitle: { fontSize: 12, fontWeight: "600", color: "#000", marginBottom: 2 },
+  scaleText: { fontSize: 10, color: "#4b5563" },
+});
 
-                {/* Mood scale */}
-                <View className="mt-4 bg-white/60 rounded-2xl px-3 py-2">
-                    <Text className="text-gray-700 font-semibold mb-1 text-sm">
-                        Mood Scale:
-                    </Text>
-                    <Text className="text-gray-600 text-xs">
-                        1 😢 Sad | 2 😐 Neutral | 3 😊 Happy | 4 😠 Angry | 5 😲 Surprised
-                    </Text>
-                </View>
-            </LinearGradient>
-        </Animated.View>
-    );
-}
+export default MoodProgressChart;

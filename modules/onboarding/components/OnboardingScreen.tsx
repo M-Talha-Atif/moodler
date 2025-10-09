@@ -8,7 +8,6 @@ import ChatBubble from "./ChatBubble";
 import QuestionInput from "./QuestionInput";
 import ProgressFooter from "./ProgressFooter";
 import onboardingQuestions from "../utils/onboardingQuestions";
-
 import {
   startOnboarding,
   answerQuestion,
@@ -17,6 +16,7 @@ import {
   completeOnboarding,
   getOnboardingStatus,
 } from "../services/onboardingService";
+import Logo from "@/assets/images/logo.svg";
 
 import { useAuthStore } from "@/store/useAuthStore";
 import ProgressBar from "@/components/ui/progressBar";
@@ -186,20 +186,6 @@ export default function OnboardingScreen() {
         )
       }
     >
-      {/* 🧭 Progress Header */}
-      <View style={styles.header}>
-        <ProgressBar
-          progress={
-            isBuildingProfile
-              ? progressValue / 100
-              : step / (onboardingQuestions.length - 1)
-          }
-          height={8}
-          backgroundColor="#E8E8E6"
-          fillColor="#030303"
-          borderRadius={4}
-        />
-      </View>
 
       {/* 🚨 Error Banner */}
       {error && (
@@ -237,7 +223,7 @@ export default function OnboardingScreen() {
             style={styles.stepContainer}
           >
             <View style={styles.emojiWrapper}>
-              <Text style={styles.emoji}>🤖</Text>
+               <Logo width={80} height={80} />
             </View>
 
             <ChatBubble sender="ai" text={currentQuestion?.text} />

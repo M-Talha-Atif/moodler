@@ -4,16 +4,17 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function HostTabs() {
   return (
-    <Tabs screenOptions={{
+    <Tabs   screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#4ADE80", //  primary (vibrant green)
-        tabBarInactiveTintColor: "#94A3B8", // muted foreground
+        tabBarActiveTintColor: "#030303", // main dark color
+        tabBarInactiveTintColor: "#8E8E8E", // muted gray
         tabBarStyle: {
-          backgroundColor: "#FFFFFF", // clean white base
-          borderTopColor: "#E2E8F0", // subtle border
+          backgroundColor: "#FAFAF8", // matches your app background
+          borderTopColor: "#E8E8E6", // subtle separator
         },
         tabBarLabelStyle: {
           fontSize: 12,
+          fontFamily: "Nunito",
           fontWeight: "600",
         },
       }}

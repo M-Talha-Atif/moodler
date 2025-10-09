@@ -1,19 +1,18 @@
-import { View, Text, TouchableOpacity } from 'react-native';
-import { MotiView } from 'moti';
-import { LinearGradient } from 'expo-linear-gradient';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import { 
-  Heart, 
-  Users, 
-  Target, 
-  CalendarDays, 
-  BookOpen, 
-  Bell 
-} from 'lucide-react-native';
-import { Notification } from '../services/notificationService';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { MotiView } from "moti";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import {
+  Heart,
+  Users,
+  Target,
+  CalendarDays,
+  BookOpen,
+  Bell,
+} from "lucide-react-native";
+import { Notification } from "../services/notificationService";
 
-// Enable "x minutes ago" formatting
 dayjs.extend(relativeTime);
 
 interface NotificationCardProps {
@@ -32,115 +31,110 @@ const iconMap = {
   general: Bell,
 };
 
-const iconColors = {
-  checkin: 'text-white',
-  community: 'text-white',
-  goal: 'text-white',
-  event: 'text-white',
-  booking_confirm: 'text-white',
-  booking_cancel: 'text-white',
-  general: 'text-white',
-};
-
-export default function NotificationCard({ 
-  notification, 
+export default function NotificationCard({
+  notification,
   onMarkAsRead,
-  delay = 0 
+  delay = 0,
 }: NotificationCardProps) {
+  const IconComponent = iconMap[notification.type] || Bell;
   const timeAgo = dayjs(notification.createdAt).fromNow();
-  const IconComponent = iconMap[notification.type];
-  const iconColor = iconColors[notification.type];
 
   const handlePress = () => {
-    if (!notification.read) {
-      onMarkAsRead(notification.id);
-    }
+    if (!notification.read) onMarkAsRead(notification.id);
   };
 
   return (
     <MotiView
-      from={{ opacity: 0, translateY: 10 }}
+      from={{ opacity: 0, translateY: 6 }}
       animate={{ opacity: 1, translateY: 0 }}
-      transition={{ type: 'spring', delay }}
+      transition={{ type: "timing", duration: 250, delay }}
+      style={styles.card}
     >
-      <TouchableOpacity
-        onPress={handlePress}
-        activeOpacity={0.8}
-        className="rounded-2xl shadow-lg overflow-hidden mb-3"
-      >
-        {notification.read ? (
-          // Read state - plain white background
-          <View className="bg-white p-4 rounded-2xl border border-gray-200">
-            <View className="flex-row items-start">
-              <View className="flex-shrink-0 p-2 mr-3">
-                <IconComponent 
-                  size={20} 
-                  className="text-gray-600" 
-                />
-              </View>
-              <View className="flex-1">
-                <View className="flex-row justify-between items-start mb-1">
-                  <Text className="text-gray-700 font-semibold text-base flex-1 mr-2" numberOfLines={2}>
-                    {notification.title}
-                  </Text>
-                  <Text className="text-gray-500 text-xs flex-shrink-0">
-                    {timeAgo}
-                  </Text>
-                </View>
-                <Text className="text-gray-600 text-sm leading-5 mb-2" numberOfLines={3}>
-                  {notification.message}
-                </Text>
-              </View>
-            </View>
+      <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
+        <View style={styles.row}>
+          <View style={styles.iconContainer}>
+            <IconComponent size={22} color="#030303" />
           </View>
-        ) : (
-          // Unread state - LinearGradient background (like StreakWidget)
-          <LinearGradient
-            colors={["#4ade80", "#22c55e"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={{ padding: 16, borderRadius: 16 }}
-          >
-            <View className="flex-row items-start">
-              <View className="flex-shrink-0 p-2 mr-3">
-                <IconComponent 
-                  size={20} 
-                  className="text-white" 
-                />
-              </View>
-              <View className="flex-1">
-                <View className="flex-row justify-between items-start mb-1">
-                  <Text className="text-white font-semibold text-base flex-1 mr-2" numberOfLines={2}>
-                    {notification.title}
-                  </Text>
-                  <Text className="text-white/90 text-xs flex-shrink-0">
-                    {timeAgo}
-                  </Text>
-                </View>
-                <Text className="text-white/90 text-sm leading-5 mb-2" numberOfLines={3}>
-                  {notification.message}
-                </Text>
-                
-                {/* Mark as Read Button */}
-                <MotiView
-                  from={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ type: 'spring', delay: delay + 200 }}
-                >
-                  <TouchableOpacity
-                    onPress={() => onMarkAsRead(notification.id)}
-                    className="self-start"
-                  >
-                    <Text className="text-white text-xs font-medium underline">
-                      Mark as Read
-                    </Text>
-                  </TouchableOpacity>
-                </MotiView>
-              </View>
+
+          <View style={styles.textContainer}>
+            <View style={styles.headerRow}>
+              <Text style={styles.title} numberOfLines={2}>
+                {notification.title}
+              </Text>
+              <Text style={styles.time}>{timeAgo}</Text>
             </View>
-          </LinearGradient>
-        )}
+
+            <Text style={styles.message} numberOfLines={3}>
+              {notification.message}
+            </Text>
+
+            {!notification.read && (
+              <TouchableOpacity onPress={() => onMarkAsRead(notification.id)}>
+                <Text style={styles.markRead}>Mark as Read</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
       </TouchableOpacity>
     </MotiView>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E8E8E6",
+    overflow: "hidden",
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  iconContainer: {
+    padding: 8,
+    marginRight: 12,
+    backgroundColor: "#E8E8E6",
+    borderRadius: 10,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 4,
+  },
+  title: {
+    fontFamily: "Nunito",
+    fontSize: 15,
+    color: "#030303",
+    fontWeight: "600",
+    flex: 1,
+    marginRight: 8,
+  },
+  time: {
+    fontFamily: "Nunito",
+    fontSize: 12,
+    color: "#666",
+  },
+  message: {
+    fontFamily: "Nunito",
+    fontSize: 13,
+    color: "#555",
+    lineHeight: 20,
+    marginBottom: 6,
+  },
+  markRead: {
+    fontFamily: "Nunito",
+    fontSize: 12,
+    color: "#030303",
+    fontWeight: "600",
+    textDecorationLine: "underline",
+  },
+});

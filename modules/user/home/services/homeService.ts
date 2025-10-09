@@ -10,23 +10,10 @@ export interface Host {
 export interface Experience {
   id: string;
   title: string;
-  description: string;
-  date: string;
-  location: string;
+  targetEmotion: string;
   image: string;
-  isVirtual: boolean;
-  sessionStartTime: string;
-  sessionEndTime: string;
   price: number;
-  timezone: string;
-  totalSpots: number;
-  spotsFilled: number;
-  targetEmotions: string[];
-  desiredOutcomes: string[];
-  language: string;
-  culturalTags: string[];
-  host: Host;
-  createdAt: string;
+
 }
 
 export interface HomeData {
