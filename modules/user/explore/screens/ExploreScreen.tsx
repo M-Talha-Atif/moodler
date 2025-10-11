@@ -116,7 +116,7 @@ export default function ExploreScreen() {
                 onLoadMore={loadMore}
                 onPress={(exp) =>
                     router.push({
-                        pathname: "/(tabs)/(user)/experienceDetail",
+                        pathname: "/experienceDetail",
                         params: { id: exp.id },
                     })
                 }

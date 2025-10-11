@@ -1,7 +1,5 @@
-// Premium version with more features
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Animated } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { MotiView } from "moti";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -10,7 +8,6 @@ interface BookingProps {
   booking: {
     bookingId: string;
     guestName: string;
-    experienceId: string;
     experienceTitle: string;
     date: string;
     amount: number;
@@ -22,65 +19,33 @@ interface BookingProps {
   onQuickAction?: (action: string, bookingId: string) => void;
 }
 
-export default function PremiumRecentBookingCard({ 
-  booking, 
-  onPress, 
-  onQuickAction 
+export default function SimpleRecentBookingCard({
+  booking,
+  onPress,
+  onQuickAction,
 }: BookingProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const getStatusConfig = (status: string) => {
-    const configs = {
-      confirmed: {
-        color: "#10B981",
-        bg: "#ECFDF5",
-        icon: "checkmark-circle" as const,
-        gradient: ["#4ADE80", "#16A34A"],
-        lightGradient: ["#DCFCE7", "#BBF7D0"],
-      },
-      pending: {
-        color: "#F59E0B",
-        bg: "#FFFBEB",
-        icon: "time" as const,
-        gradient: ["#F59E0B", "#D97706"],
-        lightGradient: ["#FEF3C7", "#FDE68A"],
-      },
-      completed: {
-        color: "#3B82F6",
-        bg: "#EFF6FF",
-        icon: "trophy" as const,
-        gradient: ["#3B82F6", "#1D4ED8"],
-        lightGradient: ["#DBEAFE", "#BFDBFE"],
-      },
-      cancelled: {
-        color: "#EF4444",
-        bg: "#FEF2F2",
-        icon: "close-circle" as const,
-        gradient: ["#EF4444", "#DC2626"],
-        lightGradient: ["#FECACA", "#FCA5A5"],
-      },
-    };
-    return configs[status as keyof typeof configs] || configs.pending;
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "confirmed":
+        return { bg: "#E6F4EA", color: "#15803D", icon: "checkmark-circle" };
+      case "pending":
+        return { bg: "#FEF3C7", color: "#B45309", icon: "time" };
+      case "completed":
+        return { bg: "#DBEAFE", color: "#1D4ED8", icon: "trophy" };
+      case "cancelled":
+        return { bg: "#FEE2E2", color: "#B91C1C", icon: "close-circle" };
+      default:
+        return { bg: "#F3F4F6", color: "#6B7280", icon: "alert-circle" };
+    }
   };
 
-  const statusConfig = getStatusConfig(booking.status);
+  const status = getStatusColor(booking.status);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return "Today";
-    } else if (date.toDateString() === tomorrow.toDateString()) {
-      return "Tomorrow";
-    } else {
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-      });
-    }
+  const formatDate = (date: string) => {
+    const d = new Date(date);
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
   const handlePress = () => {
@@ -89,187 +54,213 @@ export default function PremiumRecentBookingCard({
     onPress?.(booking.bookingId);
   };
 
-  const handleQuickAction = (action: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    onQuickAction?.(action, booking.bookingId);
-  };
-
   return (
     <MotiView
-      from={{ opacity: 0, translateY: 30, scale: 0.9 }}
-      animate={{ opacity: 1, translateY: 0, scale: 1 }}
-      transition={{ type: "spring", damping: 15 }}
+      from={{ opacity: 0, translateY: 8 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{ type: "timing", duration: 250 }}
+      style={styles.card}
     >
-      <TouchableOpacity
-        onPress={handlePress}
-        activeOpacity={0.95}
-        className="mb-4 mx-2"
-      >
-        <LinearGradient
-          colors={["#FFFFFF", "#F8FAFC"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          className="rounded-3xl p-6 shadow-2xl shadow-black/10 border border-white/80"
-        >
-          {/* Main Content */}
-          <View className="flex-row justify-between items-start mb-4">
-            {/* Experience Info */}
-            <View className="flex-1 mr-3">
-              <Text className="font-playfair text-xl font-bold text-gray-900 mb-2 leading-6">
-                {booking.experienceTitle}
-              </Text>
-              
-              <View className="flex-row items-center mb-3">
-                <View className="flex-row items-center bg-gray-50 rounded-full px-3 py-1.5 mr-2">
-                  <Ionicons name="person" size={14} color="#4ADE80" />
-                  <Text className="text-gray-700 text-sm font-semibold ml-1.5">
-                    {booking.guestName}
-                  </Text>
-                </View>
-                
-                {booking.guestCount && (
-                  <View className="flex-row items-center bg-blue-50 rounded-full px-3 py-1.5">
-                    <Ionicons name="people" size={14} color="#3B82F6" />
-                    <Text className="text-gray-700 text-sm font-semibold ml-1.5">
-                      {booking.guestCount} guests
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </View>
-
-            {/* Status with Glow Effect */}
-            <View className="relative">
-              <LinearGradient
-                colors={statusConfig.gradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                className="px-4 py-2 rounded-2xl shadow-lg shadow-black/20"
-              >
-                <View className="flex-row items-center">
-                  <Ionicons name={statusConfig.icon} size={14} color="white" />
-                  <Text className="text-white text-xs font-bold ml-2 capitalize">
-                    {booking.status}
-                  </Text>
-                </View>
-              </LinearGradient>
-            </View>
+      <TouchableOpacity activeOpacity={0.9} onPress={handlePress}>
+        {/* Header */}
+        <View style={styles.topRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.title}>{booking.experienceTitle}</Text>
+            <Text style={styles.subtitle}>{booking.guestName}</Text>
           </View>
 
-          {/* Details Row */}
-          <View className="flex-row justify-between items-center mb-4">
-            <View className="flex-row items-center space-x-4">
-              <View className="flex-row items-center">
-                <View className="w-8 h-8 rounded-full bg-green-50 items-center justify-center mr-2">
-                  <Ionicons name="calendar" size={16} color="#10B981" />
-                </View>
-                <View>
-                  <Text className="text-gray-900 text-sm font-bold">
-                    {formatDate(booking.date)}
-                  </Text>
-                  <Text className="text-gray-500 text-xs">
-                    {new Date(booking.date).toLocaleTimeString('en-US', {
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      hour12: true
-                    })}
-                  </Text>
-                </View>
-              </View>
+          <View
+            style={[
+              styles.statusPill,
+              { backgroundColor: status.bg },
+            ]}
+          >
+            <Ionicons name={status.icon as any} size={14} color={status.color} />
+            <Text style={[styles.statusText, { color: status.color }]}>
+              {booking.status}
+            </Text>
+          </View>
+        </View>
 
-              {booking.duration && (
-                <View className="flex-row items-center">
-                  <View className="w-8 h-8 rounded-full bg-blue-50 items-center justify-center mr-2">
-                    <Ionicons name="time" size={16} color="#3B82F6" />
-                  </View>
-                  <View>
-                    <Text className="text-gray-900 text-sm font-bold">
-                      {booking.duration}
-                    </Text>
-                    <Text className="text-gray-500 text-xs">Duration</Text>
-                  </View>
-                </View>
-              )}
-            </View>
-
-            {/* Amount with Currency */}
-            <View className="items-end">
-              <Text className="text-gray-500 text-xs font-medium mb-1">
-                Total
-              </Text>
-              <Text className="font-poppins text-2xl font-bold text-gray-900">
-                ${booking.amount}
-              </Text>
-            </View>
+        {/* Details */}
+        <View style={styles.detailsRow}>
+          <View style={styles.detailGroup}>
+            <Ionicons name="calendar" size={16} color="#030303" />
+            <Text style={styles.detailText}>{formatDate(booking.date)}</Text>
           </View>
 
-          {/* Quick Actions */}
-          {isExpanded && (
-            <MotiView
-              from={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              transition={{ type: "timing", duration: 300 }}
-              className="flex-row justify-between pt-4 border-t border-gray-100"
-            >
-              {booking.status === "pending" && (
-                <>
-                  <TouchableOpacity 
-                    className="flex-1 flex-row items-center justify-center bg-green-50 py-2 rounded-xl mr-2"
-                    onPress={() => handleQuickAction("confirm")}
-                  >
-                    <Ionicons name="checkmark" size={16} color="#10B981" />
-                    <Text className="text-green-700 text-sm font-semibold ml-2">
-                      Confirm
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    className="flex-1 flex-row items-center justify-center bg-red-50 py-2 rounded-xl"
-                    onPress={() => handleQuickAction("decline")}
-                  >
-                    <Ionicons name="close" size={16} color="#EF4444" />
-                    <Text className="text-red-700 text-sm font-semibold ml-2">
-                      Decline
-                    </Text>
-                  </TouchableOpacity>
-                </>
-              )}
-              
-              {booking.status === "confirmed" && (
-                <TouchableOpacity 
-                  className="flex-1 flex-row items-center justify-center bg-blue-50 py-2 rounded-xl"
-                  onPress={() => handleQuickAction("message")}
-                >
-                  <Ionicons name="chatbubble" size={16} color="#3B82F6" />
-                  <Text className="text-blue-700 text-sm font-semibold ml-2">
-                    Message Guest
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </MotiView>
+          {booking.duration && (
+            <View style={styles.detailGroup}>
+              <Ionicons name="time" size={16} color="#030303" />
+              <Text style={styles.detailText}>{booking.duration}</Text>
+            </View>
           )}
 
-          {/* Footer */}
-          <View className="flex-row justify-between items-center pt-3">
-            <View className="flex-row items-center">
-              <Ionicons name="key" size={12} color="#9CA3AF" />
-              <Text className="text-gray-500 text-xs font-medium ml-1">
-                #{booking.bookingId.slice(0, 6)}
+          {booking.guestCount && (
+            <View style={styles.detailGroup}>
+              <Ionicons name="people" size={16} color="#030303" />
+              <Text style={styles.detailText}>
+                {booking.guestCount} guests
               </Text>
             </View>
-            
-            <View className="flex-row items-center">
-              <Text className="text-gray-600 text-xs font-medium mr-2">
-                {isExpanded ? "Tap to collapse" : "Tap for details"}
-              </Text>
-              <Ionicons 
-                name={isExpanded ? "chevron-up" : "chevron-down"} 
-                size={14} 
-                color="#6B7280" 
-              />
-            </View>
+          )}
+        </View>
+
+        {/* Price */}
+        <View style={styles.footer}>
+          <Text style={styles.price}>${booking.amount}</Text>
+          <View style={styles.footerRight}>
+            <Text style={styles.footerText}>
+              {isExpanded ? "Collapse" : "Details"}
+            </Text>
+            <Ionicons
+              name={isExpanded ? "chevron-up" : "chevron-down"}
+              size={14}
+              color="#6B7280"
+            />
           </View>
-        </LinearGradient>
+        </View>
+
+        {/* Quick Actions */}
+        {isExpanded && (
+          <View style={styles.actionRow}>
+            {booking.status === "pending" && (
+              <>
+                <TouchableOpacity
+                  style={[styles.actionBtn, { backgroundColor: "#E6F4EA" }]}
+                  onPress={() => onQuickAction?.("confirm", booking.bookingId)}
+                >
+                  <Ionicons name="checkmark" size={14} color="#15803D" />
+                  <Text style={[styles.actionText, { color: "#15803D" }]}>
+                    Confirm
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.actionBtn, { backgroundColor: "#FEE2E2" }]}
+                  onPress={() => onQuickAction?.("decline", booking.bookingId)}
+                >
+                  <Ionicons name="close" size={14} color="#B91C1C" />
+                  <Text style={[styles.actionText, { color: "#B91C1C" }]}>
+                    Decline
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {booking.status === "confirmed" && (
+              <TouchableOpacity
+                style={[styles.actionBtn, { backgroundColor: "#DBEAFE" }]}
+                onPress={() => onQuickAction?.("message", booking.bookingId)}
+              >
+                <Ionicons name="chatbubble" size={14} color="#1D4ED8" />
+                <Text style={[styles.actionText, { color: "#1D4ED8" }]}>
+                  Message
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
       </TouchableOpacity>
     </MotiView>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E8E8E6",
+    padding: 16,
+    marginBottom: 14,
+  },
+  topRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  title: {
+    fontFamily: "Nunito",
+    fontSize: 15,
+    color: "#030303",
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  subtitle: {
+    fontFamily: "Nunito",
+    fontSize: 13,
+    color: "#555",
+  },
+  statusPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  statusText: {
+    fontFamily: "Nunito",
+    fontSize: 12,
+    fontWeight: "600",
+    textTransform: "capitalize",
+    marginLeft: 4,
+  },
+  detailsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginVertical: 10,
+    gap: 10,
+  },
+  detailGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  detailText: {
+    fontFamily: "Nunito",
+    fontSize: 13,
+    color: "#333",
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  price: {
+    fontFamily: "Poppins",
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#030303",
+  },
+  footerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  footerText: {
+    fontFamily: "Nunito",
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  actionRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 12,
+  },
+  actionBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
+    paddingVertical: 8,
+    marginHorizontal: 4,
+  },
+  actionText: {
+    fontFamily: "Nunito",
+    fontSize: 13,
+    fontWeight: "600",
+    marginLeft: 6,
+  },
+});

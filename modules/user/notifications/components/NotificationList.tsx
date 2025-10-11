@@ -27,7 +27,6 @@ export default function NotificationList({
         data={groups}
         keyExtractor={([label]) => label}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
         renderItem={({ item: [label, notes], index }) => (
           <NotificationGroup
             label={label}
@@ -44,11 +43,11 @@ export default function NotificationList({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9F9F8", // light neutral like your other screens
+    backgroundColor: "#F9F9F8", // light neutral
   },
   listContent: {
     paddingHorizontal: 16,
     paddingTop: 10,
-    paddingBottom: 100,
+    paddingBottom: 30,
   },
 });

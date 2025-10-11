@@ -2,7 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // const baseURL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.100.6:3000";
-const baseURL = 'https://obvious-singles-strap-respected.trycloudflare.com'
+const baseURL = 'https://parcel-flu-fish-slip.trycloudflare.com'
 const api = axios.create({
   baseURL,
   timeout: 10000,
@@ -19,7 +19,7 @@ api.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`;
       }
     } catch (err) {
-      console.error("❌ Error reading token from storage:", err);
+      console.error("Error reading token from storage:", err);
     }
     return config;
   },

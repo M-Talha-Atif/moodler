@@ -38,12 +38,16 @@ const ImageCard: React.FC<ImageCardProps> = ({
   onPress,
   style,
 }) => {
+  // ✅ Clone the image source to avoid frozen object issue
+  const normalizedImage =
+    typeof image === "number" ? image : JSON.parse(JSON.stringify(image));
+
   return (
     <TouchableOpacity activeOpacity={0.9} onPress={onPress}>
       <View style={[styles.card, style]}>
         {/* Image with tags */}
         <View>
-          <Image source={image} style={styles.image} resizeMode="cover" />
+          <Image source={normalizedImage} style={styles.image} resizeMode="cover" />
           {leftTag && (
             <View
               style={[
@@ -89,9 +93,7 @@ const ImageCard: React.FC<ImageCardProps> = ({
           {(footerLeft || footerRight) && (
             <View style={styles.footer}>
               {footerLeft && <Text style={styles.footerText}>{footerLeft}</Text>}
-              {footerRight && (
-                <Text style={styles.footerText}>• {footerRight}</Text>
-              )}
+              {footerRight && <Text style={styles.footerText}>• {footerRight}</Text>}
             </View>
           )}
         </View>

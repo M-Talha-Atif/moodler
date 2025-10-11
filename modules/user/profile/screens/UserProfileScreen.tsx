@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   ScrollView,
   View,
@@ -14,31 +14,41 @@ import ListItem from "@/components/ui/listItem";
 import Header from "@/modules/common/Header";
 import Skeleton from "@/modules/common/components/Skeleton";
 import { getProfileImage } from "../services/profileService";
-import { router } from "expo-router";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCancelableApi } from "@/hooks/useCanceleableApi";
+import AlertDialog from "@/components/ui/alertDialog";
 
-export default function HostProfileScreen() {
+
+export default function UserProfileScreen() {
   const { user, logout } = useAuthStore();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const fetchProfileImage = useCancelableApi(getProfileImage);
+  // Inside your component
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const handleEditProfile = useCallback(() => {
     console.log("First time rendered");
     router.push({
-      pathname: "/(host)/editProfile",
+      pathname: "/(user)/editProfile",
     });
   }, []); // runs only once (first render)
 
    const handleEditPassword = useCallback(() => {
-      console.log("First time rendered");
-      router.push({
-        pathname: "/(host)/editPassword",
-      });
-    }, []); // runs only once (first render)
+    console.log("First time rendered");
+    router.push({
+      pathname: "/(user)/editPassword",
+    });
+  }, []); // runs only once (first render)
 
-  // runs every time screen refocuses
+  const handleNotifications = useCallback(() => {
+    console.log("First time rendered");
+    router.push({
+      pathname: "/notifications",
+    });
+  }, []); // runs only once (first render)
+
+  /** Fetch profile image on mount */
   useFocusEffect(
     useCallback(() => {
       setIsLoading(true);
@@ -52,7 +62,7 @@ export default function HostProfileScreen() {
           console.error("Failed to fetch profile image:", err);
         })
         .finally(() => {
-          setIsLoading(false); 
+          setIsLoading(false);
         });
 
       // optional cleanup 
@@ -62,12 +72,17 @@ export default function HostProfileScreen() {
     }, [fetchProfileImage])
   );
 
-
   const handleLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to logout?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Logout", style: "destructive", onPress: logout },
-    ]);
+    setShowLogoutDialog(true);
+  };
+
+  const handleConfirmLogout = () => {
+    setShowLogoutDialog(false);
+    logout(); // your existing logout function
+  };
+
+  const handleCancelLogout = () => {
+    setShowLogoutDialog(false);
   };
 
   return (
@@ -85,8 +100,7 @@ export default function HostProfileScreen() {
           <Image
             source={
               avatarUrl
-                ? { uri: avatarUrl }
-                : require("@/assets/images/default-avatar.png")
+                ? { uri: avatarUrl } : require("@/assets/images/default-avatar.png")
             }
             style={styles.avatar}
           />
@@ -103,7 +117,7 @@ export default function HostProfileScreen() {
       <View style={{ marginTop: 32 }}>
         <ListItem title="Edit Profile" icon="pencil-outline" onPress={handleEditProfile} />
         <ListItem title="Change Password" icon="key-outline" onPress={handleEditPassword} />
-        <ListItem title="Notifications" icon="notifications-outline" onPress={() => { }} />
+        <ListItem title="Notifications" icon="notifications-outline" onPress={handleNotifications} />
         <ListItem title="Insights" icon="bar-chart-outline" onPress={() => { }} />
         <ListItem title="Privacy & Security" icon="shield-checkmark-outline" onPress={() => { }} />
       </View>
@@ -115,6 +129,17 @@ export default function HostProfileScreen() {
           Logout
         </Text>
       </TouchableOpacity>
+
+
+      <AlertDialog
+        visible={showLogoutDialog}
+        title="Logout"
+        message="Are you sure you want to logout?"
+        confirmText="Logout"
+        cancelText="Cancel"
+        onConfirm={handleConfirmLogout}
+        onCancel={handleCancelLogout}
+      />
     </ScrollView>
   );
 }

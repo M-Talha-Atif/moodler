@@ -73,7 +73,8 @@ export default function RootLayout() {
 
     // Host
     if (user.role === "host") {
-      if (segments[0] !== "(tabs)" || segments[1] !== "(host)") {
+      const validHostRoutes = ["(tabs)", "(host)"];
+       if (!validHostRoutes.includes(segments[0])) {
         router.replace("/(tabs)/(host)");
       }
       return;

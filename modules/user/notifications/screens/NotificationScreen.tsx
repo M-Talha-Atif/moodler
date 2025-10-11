@@ -19,22 +19,46 @@ export default function NotificationsScreen() {
     refetch,
   } = useNotifications();
 
-  if (loading) return <LoadingSkeleton />;
+  if (loading) return (
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <View style={styles.headerWrapper}>
+        <Header
+          title="Notifications"
+          showBackButton
+          rightIcon={
+            hasUnreadNotifications ? (
+              <CheckCircle2 size={22} color="#030303" />
+            ) : undefined
+          }
+          onRightPress={hasUnreadNotifications ? handleMarkAllAsRead : undefined}
+        />
+      </View>
+      <View style={styles.listWrapper}>
+        <LoadingSkeleton />
+      </View>
+
+    </SafeAreaView>
+  );
+
   if (error) return <ErrorState error={error} onRetry={refetch} />;
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      <Header
-        title="Notifications"
-        showBackButton
-        rightIcon={
-          hasUnreadNotifications ? (
-            <CheckCircle2 size={22} color="#030303" />
-          ) : undefined
-        }
-        onRightPress={hasUnreadNotifications ? handleMarkAllAsRead : undefined}
-      />
+      {/* Fixed header */}
+      <View style={styles.headerWrapper}>
+        <Header
+          title="Notifications"
+          showBackButton
+          rightIcon={
+            hasUnreadNotifications ? (
+              <CheckCircle2 size={22} color="#030303" />
+            ) : undefined
+          }
+          onRightPress={hasUnreadNotifications ? handleMarkAllAsRead : undefined}
+        />
+      </View>
 
+      {/* Scrollable list below header */}
       <View style={styles.listWrapper}>
         <NotificationList
           groupedNotifications={groupedNotifications}
@@ -50,8 +74,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FAFAF8",
   },
+  headerWrapper: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    backgroundColor: "#FAFAF8",
+  },
   listWrapper: {
     flex: 1,
-    paddingTop: 6,
+    paddingTop: 60, // space for header height
+    paddingBottom: 60, // space for header height
   },
 });

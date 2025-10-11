@@ -17,9 +17,7 @@ import {
   getOnboardingStatus,
 } from "../services/onboardingService";
 import Logo from "@/assets/images/logo.svg";
-
 import { useAuthStore } from "@/store/useAuthStore";
-import ProgressBar from "@/components/ui/progressBar";
 import ScreenWrapper from "@/components/ui/layout/screenWrapper";
 
 export default function OnboardingScreen() {
@@ -36,10 +34,10 @@ export default function OnboardingScreen() {
 
   useEffect(() => {
     const initOnboarding = async () => {
-      console.log("🚀 [Onboarding] Initializing...");
+      console.log("[Onboarding] Initializing...");
       try {
         if (!token) {
-          console.warn("⚠️ No token found — redirecting to login.");
+          console.warn("No token found — redirecting to login.");
           setError("Please login first");
           setIsLoading(false);
           setTimeout(() => router.replace("/(auth)/login"), 2000);
@@ -47,18 +45,18 @@ export default function OnboardingScreen() {
         }
 
         if (user?.onboardingCompleted) {
-          console.log("✅ User already completed onboarding — redirecting.");
+          console.log("User already completed onboarding — redirecting.");
           setIsLoading(false);
           router.replace("/(tabs)/(user)");
           return;
         }
 
-        console.log("🌐 Fetching onboarding status...");
+        console.log("Fetching onboarding status...");
         const statusRes = await getOnboardingStatus();
-        console.log("📡 Backend raw response:", statusRes);
+        console.log("Backend raw response:", statusRes);
 
         const status = statusRes?.data ?? { started: false, completed: false, currentStep: 0 };
-        console.log("🧭 Parsed onboarding status:", status);
+        console.log("Parsed onboarding status:", status);
 
         if (status.completed) {
           console.log("🏁 Onboarding completed — redirecting.");
@@ -68,20 +66,20 @@ export default function OnboardingScreen() {
         }
 
         if (!status.started) {
-          console.log("🆕 Starting fresh onboarding...");
+          console.log("Starting fresh onboarding...");
           await startOnboarding();
           setStep(0);
         } else {
-          console.log(`🔄 Resuming onboarding at step ${status.currentStep ?? 0}`);
+          console.log(`Resuming onboarding at step ${status.currentStep ?? 0}`);
           setStep(status.currentStep ?? 0);
         }
 
         setInput([]);
       } catch (err) {
-        console.error("💥 Failed to start onboarding:", err);
+        console.error(" Failed to start onboarding:", err);
         setError("Failed to start onboarding");
       } finally {
-        console.log("✅ [Onboarding] Initialization finished");
+        console.log("[Onboarding] Initialization finished");
         setIsLoading(false);
       }
     };
@@ -91,12 +89,12 @@ export default function OnboardingScreen() {
 
   const handleNext = async () => {
     if (!currentQuestion) {
-      console.warn("⚠️ No current question found for step:", step);
+      console.warn("No current question found for step:", step);
       return;
     }
 
-    console.log(`➡️ [Next] Handling question ${currentQuestion.id} (step ${step})`);
-    console.log("📝 User input:", input);
+    console.log(`[Next] Handling question ${currentQuestion.id} (step ${step})`);
+    console.log("User input:", input);
 
     try {
       setError(null);
@@ -113,14 +111,14 @@ export default function OnboardingScreen() {
         await answerQuestion(currentQuestion.id, normalized);
       }
 
-      console.log("✅ Answer saved successfully");
+      console.log(" Answer saved successfully");
       setInput([]);
 
       if (step < onboardingQuestions.length - 1) {
-        console.log("⏭️ Moving to next question...");
+        console.log("⏭Moving to next question...");
         setStep(step + 1);
       } else {
-        console.log("⚙️ Starting profile build animation...");
+        console.log(" Starting profile build animation...");
         setIsBuildingProfile(true);
 
         const interval = setInterval(() => {
@@ -130,11 +128,11 @@ export default function OnboardingScreen() {
               console.log("🏁 Profile build complete — marking onboarding done...");
               completeOnboarding()
                 .then(() => {
-                  console.log("✅ Onboarding completed successfully — navigating to tabs.");
+                  console.log(" Onboarding completed successfully — navigating to tabs.");
                   setTimeout(() => router.replace("/(tabs)/(user)"), 500);
                 })
                 .catch((err) => {
-                  console.error("❌ Failed to complete onboarding:", err);
+                  console.error("Failed to complete onboarding:", err);
                   setError("Failed to complete onboarding");
                   setIsBuildingProfile(false);
                 });
@@ -145,13 +143,13 @@ export default function OnboardingScreen() {
         }, 200);
       }
     } catch (err) {
-      console.error("💥 Something went wrong while answering:", err);
+      console.error("Something went wrong while answering:", err);
       setError("Something went wrong. Please try again.");
     }
   };
 
   if (isLoading) {
-    console.log("⏳ Still loading onboarding...");
+    console.log(" Still loading onboarding...");
     return (
       <ScreenWrapper scrollable={false} showLogo={false}>
         <View style={styles.loadingContainer}>
@@ -187,14 +185,14 @@ export default function OnboardingScreen() {
       }
     >
 
-      {/* 🚨 Error Banner */}
+      {/* Error Banner */}
       {error && (
         <View style={styles.errorBox}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
 
-      {/* 🌱 Main Body */}
+      {/* Main Body */}
       <View style={styles.content}>
         {isBuildingProfile ? (
           <MotiView

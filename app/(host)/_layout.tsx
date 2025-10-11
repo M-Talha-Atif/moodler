@@ -20,7 +20,7 @@ export default function UserLayout() {
         name="editProfile" 
         options={{ headerShown: false }} 
       />
-        <Stack.Screen 
+       <Stack.Screen 
         name="editPassword" 
         options={{ headerShown: false }} 
       />
