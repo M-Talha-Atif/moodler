@@ -1,47 +1,71 @@
-import React, { useEffect, useState } from "react";
-import { View, ScrollView, Text } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import React, { useState, useCallback } from "react";
+import { View, ScrollView, StyleSheet, Text } from "react-native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Plus } from "lucide-react-native";
 import { fetchExperiences, deleteExperience } from "../services/experience";
 import ExperienceCard from "../components/ExperienceCard";
 import Skeleton from "@/modules/common/components/Skeleton";
-import Button from "@/modules/common/components/Button";
+import Header from "@/modules/common/Header";
+import { useCancelableApi } from "@/hooks/useCanceleableApi";
 
 export default function ManageExperiencesScreen() {
   const [experiences, setExperiences] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation<any>();
 
-  const loadExperiences = async () => {
+  // Create cancelable versions of your API functions
+  const cancelableFetchExperiences = useCancelableApi(fetchExperiences);
+  const cancelableDeleteExperience = useCancelableApi(deleteExperience);
+
+  const loadExperiences = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await fetchExperiences();
+      const data = await cancelableFetchExperiences();
       setExperiences(data || []);
-    } catch (err) {
+    } catch (err: any) {
+      // Check if the error is due to abort (component unmounted)
+      if (err.name === 'AbortError') {
+        console.log('Fetch experiences request was cancelled');
+        return;
+      }
       console.error("Error fetching experiences:", err);
       setExperiences([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [cancelableFetchExperiences]);
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteExperience(id);
-      setExperiences(prev => prev.filter(exp => exp.id !== id));
-    } catch (err) {
+      await cancelableDeleteExperience(id);
+      setExperiences((prev) => prev.filter((exp) => exp.id !== id));
+    } catch (err: any) {
+      // Check if the error is due to abort
+      if (err.name === 'AbortError') {
+        console.log('Delete experience request was cancelled');
+        return;
+      }
       console.error("Error deleting experience:", err);
     }
   };
 
-  useEffect(() => {
-    loadExperiences();
-  }, []);
+  // Use focus effect to reload when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadExperiences();
+
+      // Optional: Cleanup function that runs when screen loses focus
+      return () => {
+        // Any cleanup needed when screen loses focus
+        console.log("ManageExperiencesScreen lost focus");
+      };
+    }, [loadExperiences])
+  );
 
   if (loading) {
     return (
-      <ScrollView className="p-4">
-        {[1, 2, 3].map(i => (
+      <ScrollView contentContainerStyle={styles.loaderContainer}>
+        {[1, 2, 3].map((i) => (
           <Skeleton key={i} height={160} width="100%" radius={16} style={{ marginBottom: 12 }} />
         ))}
       </ScrollView>
@@ -49,35 +73,64 @@ export default function ManageExperiencesScreen() {
   }
 
   return (
-    <View className="flex-1 px-4 pt-4 bg-gray-50">
-      {/* Header */}
-      <View className="flex-row justify-between items-center mb-4">
-        <Text className="text-2xl font-bold">Manage Experiences</Text>
-        <Button
-          title="Add New"
-          variant="gradient"
-          size="sm"
-          iconLeft={<Plus size={16} color="#fff" />}
-          onPress={() => navigation.navigate("CreateExperience")}
-        />
-      </View>
+    <View style={styles.container}>
+      <Header
+        title="Manage Experiences"
+        showBackButton
+        rightIcon={<Plus size={20} color="#030303" />}
+        onRightPress={() => navigation.navigate("CreateExperience")}
+      />
 
-      {experiences.length === 0 ? (
-        <View className="bg-white rounded-2xl p-6 items-center justify-center shadow-sm">
-          <Text className="text-gray-500">No experiences yet. Start by creating one.</Text>
-        </View>
-      ) : (
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {experiences.map(exp => (
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContainer}
+      >
+        {experiences.length === 0 ? (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyText}>No experiences yet. Start by creating one.</Text>
+          </View>
+        ) : (
+          experiences.map((exp) => (
             <ExperienceCard
               key={exp.id}
               experience={exp}
               onEdit={() => navigation.navigate("UpdateExperience", { id: exp.id })}
               onDelete={() => handleDelete(exp.id)}
             />
-          ))}
-        </ScrollView>
-      )}
+          ))
+        )}
+      </ScrollView>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+  },
+  loaderContainer: {
+    padding: 16,
+  },
+  scrollContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 24,
+  },
+  emptyBox: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  emptyText: {
+    color: "#6B7280",
+    fontSize: 15,
+  },
+})

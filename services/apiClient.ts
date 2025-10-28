@@ -2,10 +2,10 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // const baseURL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.100.6:3000";
-const baseURL = 'https://parcel-flu-fish-slip.trycloudflare.com'
+const baseURL = 'https://concerts-mitchell-expert-bread.trycloudflare.com'
 const api = axios.create({
   baseURL,
-  timeout: 10000,
+  timeout: 30000,
 });
 
 // Token inject automatically

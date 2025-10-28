@@ -24,6 +24,18 @@ export default function UserLayout() {
         name="editPassword" 
         options={{ headerShown: false }} 
       />
+      <Stack.Screen 
+        name="hostExperienceInput" 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="createExperience" 
+        options={{ headerShown: false }} 
+      />
+        <Stack.Screen 
+        name="editExperience" 
+        options={{ headerShown: false }} 
+      />
     </Stack>
   );
 }

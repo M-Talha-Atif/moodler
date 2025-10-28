@@ -1,131 +1,190 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import Toast from 'react-native-toast-message';
-import { experienceSchema, FormData } from '../validation/experienceSchema';
-import ExperienceBasicsSection from '../components/ExperienceBasicSection';
-import ExperienceTimingSection from '../components/ExperienceTimingSection';
-import ExperienceFocusSection from '../components/ExperienceFocusSection';
-import Button from '@/modules/common/components/Button';
-import Header from '@/modules/common/Header';
+import React, { useState, useEffect } from "react";
+import {
+    View,
+    ScrollView,
+    KeyboardAvoidingView,
+    StyleSheet,
+    Platform,
+} from "react-native";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Toast from "react-native-toast-message";
+import { experienceSchema, FormData } from "../validation/experienceSchema";
+import ExperienceBasicsSection from "../components/ExperienceBasicSection";
+import ExperienceTimingSection from "../components/ExperienceTimingSection";
+import ExperienceFocusSection from "../components/ExperienceFocusSection";
+import Button from "@/components/ui/button";
+import Header from "@/modules/common/Header";
+import { createExperience } from "../services/experience";
+import { useLocalSearchParams, router } from "expo-router";
 
-export default function CreateExperienceScreen({ navigation }: any) {
+export default function CreateExperienceScreen() {
     const { control, handleSubmit, setValue, watch, formState } = useForm<FormData>({
         resolver: zodResolver(experienceSchema),
-        mode: 'onChange',
+        mode: "onChange",
         defaultValues: {
-            language: 'English',
-            timezone: 'UTC+9',
+            language: "English",
+            timezone: "UTC+9",
+            isVirtual: false,
         } as any,
     });
+
     const [submitting, setSubmitting] = useState(false);
 
+    //  receiving JSON from previous screen
+    const params = useLocalSearchParams();
+    const aiResponse = params?.aiResponse
+        ? JSON.parse(params.aiResponse)
+        : null;
+
+    useEffect(() => {
+        if (aiResponse) {
+            setValue("title", aiResponse.title || "");
+            setValue("description", aiResponse.description || "");
+            setValue("culturalTags", aiResponse.culturalTags || []);
+            setValue("desiredOutcomes", aiResponse.desiredOutcomes || []);
+            setValue("targetEmotions", aiResponse.targetEmotions || []);
+            if (aiResponse.location) setValue("location", aiResponse.location);
+        }
+    }, [aiResponse, setValue]);
+
+    /**  Simplified showErrors — just shows first message */
     const showErrors = () => {
-        Object.entries(formState.errors).forEach(([_, err]: any) => {
-            Toast.show({ type: 'error', text1: err?.message });
+        const firstError =
+            Object.values(formState.errors)?.[0]?.message ||
+            "Please fill all required fields";
+
+        Toast.show({
+            type: "error",
+            text1: String(firstError),
+            position: "bottom",
+            visibilityTime: 2000,
         });
     };
 
-    // Helper to format date/time to ISO 8601
-    const formatToISO = (date: string, time?: string) => {
-        if (!date) return '';
-        if (!time) return new Date(date).toISOString();
-        // date: 2025-11-01, time: 19:00
-        return new Date(`${date}T${time}:00Z`).toISOString();
-    };
+    const onSubmit = async (data: FormData) => {
+        try {
+            setSubmitting(true);
 
-    const onSubmit = (data: FormData) => {
-        setSubmitting(true);
+            // Convert to valid ISO strings
+            const baseDate = data.date instanceof Date
+                ? data.date
+                : new Date(data.date as any);
 
-        // Format the payload as required
-        const payload = {
-            title: data.title,
-            description: data.description,
-            date: formatToISO(data.date).slice(0, 10) + "T00:00:00Z",
-            location: data.isVirtual ? "" : data.location,
-            image: data.image,
-            isVirtual: data.isVirtual,
-            sessionStartTime: formatToISO(data.date, data.sessionStartTime),
-            sessionEndTime: formatToISO(data.date, data.sessionEndTime),
-            price: Number(data.price),
-            timezone: "UTC+9",
-            totalSpots: Number(data.totalSpots),
-            spotsFilled: 0,
-            targetEmotions: data.targetEmotions,
-            desiredOutcomes: data.desiredOutcomes,
-            language: "English", // fixed for now
-            culturalTags: data.culturalTags,
-            meetLink: data.isVirtual ? data.meetLink : "",
-        };
+            const startTime = new Date(baseDate);
+            const endTime = new Date(baseDate);
 
-        // Show in the console as requested
-        // Remove meetLink from payload if onsite, remove location if virtual
-        if (payload.isVirtual) delete payload.location;
-        else delete payload.meetLink;
-        // Remove undefined keys
-        Object.keys(payload).forEach(
-            key => payload[key] === undefined && delete payload[key]
-        );
+            // Parse "hh:mm AM/PM" → hours/minutes
+            const parseTime = (timeStr: string) => {
+                const [time, modifier] = timeStr.split(" ");
+                let [hours, minutes] = time.split(":").map(Number);
+                if (modifier === "PM" && hours < 12) hours += 12;
+                if (modifier === "AM" && hours === 12) hours = 0;
+                return { hours, minutes };
+            };
 
-        console.log("--- Experience Payload ---");
-        Object.entries(payload).forEach(([key, value]) =>
-            console.log(
-                `"${key}": (${typeof value})`, value
-            )
-        );
-        console.log("--- Payload JSON ---");
-        console.log(JSON.stringify(payload, null, 2));
+            const { hours: startHours, minutes: startMinutes } = parseTime(data.sessionStartTime);
+            const { hours: endHours, minutes: endMinutes } = parseTime(data.sessionEndTime);
 
-        setTimeout(() => {
+            startTime.setHours(startHours, startMinutes, 0, 0);
+            endTime.setHours(endHours, endMinutes, 0, 0);
+
+            const payload = {
+                ...data,
+                date: baseDate.toISOString(),
+                sessionStartTime: startTime.toISOString(),
+                sessionEndTime: endTime.toISOString(),
+                price: Number(data.price),
+                totalSpots: Number(data.totalSpots),
+                spotsFilled: 0,
+                timezone: data.timezone || "UTC+9",
+                language: data.language || "English",
+                location: data.isVirtual ? "" : data.location,
+                meetLink: data.isVirtual ? data.meetLink : "",
+            };
+
+            if (payload.isVirtual) delete payload.location;
+            else delete payload.meetLink;
+
+            console.log("--- Final API Payload ---");
+            console.log(JSON.stringify(payload, null, 2));
+
+            const response = await createExperience(payload);
+            Toast.show({
+                type: "success",
+                text1: "Experience created successfully!",
+                position: "bottom",
+            });
+            // Expo Router navigation
+            setTimeout(() => router.back(), 800);
+        } catch (error: any) {
+            console.error("Error:", error);
+            Toast.show({
+                type: "error",
+                text1: error.message || "Failed to create experience",
+                position: "bottom",
+            });
+        } finally {
             setSubmitting(false);
-            Toast.show({ type: 'success', text1: 'Experience created!' });
-            navigation?.goBack?.();
-        }, 1500);
+        }
     };
+
 
     return (
-        <>
+        <View style={styles.container}>
             <Header title="Create Experience" showBackButton />
 
-            
             <KeyboardAvoidingView
-                className="flex-1 bg-white"
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                keyboardVerticalOffset={80}
+                style={styles.flex}
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
             >
-                <View className="mt-24" />
-
-
-                <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120, paddingTop: 16 }}>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContainer}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
                     <ExperienceBasicsSection control={control} watch={watch} setValue={setValue} />
                     <ExperienceTimingSection control={control} setValue={setValue} />
                     <ExperienceFocusSection control={control} setValue={setValue} />
                 </ScrollView>
-                <View
-                    style={{
-                        position: 'absolute',
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        paddingHorizontal: 16,
-                        paddingBottom: 24,
-                        backgroundColor: 'rgba(255,255,255,0.97)',
-                    }}
-                >
+
+                <View style={styles.footer}>
                     <Button
-                        title="Create Experience"
-                        loading={submitting}
-                        disabled={submitting}
-                        variant="primary"
-                        size="lg"
+                        title={submitting ? "Creating..." : "Create Experience"}
                         onPress={handleSubmit(onSubmit, showErrors)}
-                        className="w-full"
+                        disabled={submitting}
+                        backgroundColor="#030303"
+                        textColor="#EFEFE7"
+                        fontSize={16}
+                        width="100%"
+                        height={48}
                     />
                 </View>
+
                 <Toast />
             </KeyboardAvoidingView>
-        </>
-
+        </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: "#FFFFFF" },
+    flex: { flex: 1 },
+    scrollContainer: {
+        paddingHorizontal: 16,
+        paddingTop: 8,
+        paddingBottom: 120,
+    },
+    footer: {
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(255,255,255,0.97)",
+        paddingHorizontal: 16,
+        paddingBottom: 56,
+        paddingTop: 8,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: "#E5E7EB",
+    },
+});

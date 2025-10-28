@@ -34,6 +34,13 @@ export default function UserProfileScreen() {
     });
   }, []); // runs only once (first render)
 
+    const handleInsightsScreen = useCallback(() => {
+    console.log("First time rendered");
+    router.push({
+      pathname: "/(user)/insights",
+    });
+  }, []); // runs only once (first render)
+
    const handleEditPassword = useCallback(() => {
     console.log("First time rendered");
     router.push({
@@ -118,7 +125,7 @@ export default function UserProfileScreen() {
         <ListItem title="Edit Profile" icon="pencil-outline" onPress={handleEditProfile} />
         <ListItem title="Change Password" icon="key-outline" onPress={handleEditPassword} />
         <ListItem title="Notifications" icon="notifications-outline" onPress={handleNotifications} />
-        <ListItem title="Insights" icon="bar-chart-outline" onPress={() => { }} />
+        <ListItem title="Insights" icon="bar-chart-outline" onPress={handleInsightsScreen} />
         <ListItem title="Privacy & Security" icon="shield-checkmark-outline" onPress={() => { }} />
       </View>
 

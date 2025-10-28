@@ -24,6 +24,10 @@ export default function UserLayout() {
         name="editPassword" 
         options={{ headerShown: false }} 
       />
+       <Stack.Screen 
+        name="insights" 
+        options={{ headerShown: false }} 
+      />
     </Stack>
   );
 }

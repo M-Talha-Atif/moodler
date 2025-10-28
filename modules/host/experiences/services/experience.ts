@@ -97,3 +97,30 @@ export const fetchSingleExperience = async (experienceId: string) => {
     throw new Error(error.response?.data?.message || "Failed to fetch experience");
   }
 };
+
+
+// Generate experience using AI (voice or text)
+export const generateExperience = async (file?: any, voiceText?: string) => {
+  try {
+    const formData = new FormData();
+
+    if (file) {
+      formData.append("file", {
+        uri: file.uri,
+        type: file.type || "audio/m4a",
+        name: file.name || "voice.m4a",
+      } as any);
+    } else if (voiceText) {
+      formData.append("voiceText", voiceText);
+    }
+
+    const { data } = await api.post("/host/experiences/generate", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    return data?.data || data;
+  } catch (error: any) {
+    console.error("Error generating experience:", error);
+    throw new Error(error.response?.data?.reason || "Failed to generate experience");
+  }
+};

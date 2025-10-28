@@ -13,16 +13,17 @@ export default function VoiceExperienceInput({ onResult }: VoiceExperienceInputP
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [fileUri, setFileUri] = useState<string | null>(null);
   const [duration, setDuration] = useState<number>(0);
-  const [isPlaying, setIsPlaying] = useState(false);
 
-  // Cleanup on unmount
+  // 🔹 Cleanup resources on unmount
   useEffect(() => {
     return () => {
       (async () => {
         try {
           await sound?.unloadAsync();
           await recording?.stopAndUnloadAsync();
-        } catch {}
+        } catch {
+          /* ignore cleanup errors */
+        }
       })();
     };
   }, [sound, recording]);
@@ -38,6 +39,9 @@ export default function VoiceExperienceInput({ onResult }: VoiceExperienceInputP
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
+        staysActiveInBackground: true,
+        shouldDuckAndroid: false,
+        playThroughEarpieceAndroid: false
       });
 
       const { recording } = await Audio.Recording.createAsync(
@@ -54,17 +58,18 @@ export default function VoiceExperienceInput({ onResult }: VoiceExperienceInputP
   const stopRecording = async () => {
     try {
       if (!recording) return;
+
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
+
       if (!uri) {
         Alert.alert("Error", "Recording failed. Please try again.");
         return;
       }
 
-      // Load sound from file manually (fixes "sound not loaded" issue)
-      const { sound: newSound, status } = await Audio.Sound.createAsync({ uri });
-      setSound(newSound);
-      setDuration(Math.round((status.durationMillis || 0) / 1000));
+      const { sound, status } = await recording.createNewLoadedSoundAsync();
+      setSound(sound);
+      setDuration(Math.round(status.durationMillis / 1000));
       setFileUri(uri);
       onResult({ uri, type: "audio/m4a", name: "voice.m4a" });
 
@@ -77,32 +82,16 @@ export default function VoiceExperienceInput({ onResult }: VoiceExperienceInputP
 
   const playSound = async () => {
     try {
-      if (!fileUri) {
-        Alert.alert("No Audio", "Please record audio first.");
-        return;
-      }
-
-      // Reload if sound was unloaded
-      let soundToPlay = sound;
-      if (!soundToPlay) {
-        const { sound: newSound } = await Audio.Sound.createAsync({ uri: fileUri });
-        setSound(newSound);
-        soundToPlay = newSound;
-      }
+      if (!sound) return;
 
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         playsInSilentModeIOS: true,
+        staysActiveInBackground: true,
+        shouldDuckAndroid: false
       });
 
-      await soundToPlay.replayAsync();
-      setIsPlaying(true);
-
-      soundToPlay.setOnPlaybackStatusUpdate((status) => {
-        if ((status as any).didJustFinish) {
-          setIsPlaying(false);
-        }
-      });
+      await sound.replayAsync();
     } catch (err) {
       console.error("Playback error:", err);
       Alert.alert("Playback error", "Unable to play the audio.");
@@ -116,7 +105,6 @@ export default function VoiceExperienceInput({ onResult }: VoiceExperienceInputP
     setSound(null);
     setFileUri(null);
     setDuration(0);
-    setIsPlaying(false);
     onResult(null);
   };
 
@@ -138,10 +126,8 @@ export default function VoiceExperienceInput({ onResult }: VoiceExperienceInputP
       ) : (
         <View style={styles.actions}>
           <TouchableOpacity style={styles.actionBtn} onPress={playSound}>
-            <Ionicons name={isPlaying ? "pause" : "play"} size={22} color="#030303" />
-            <Text style={styles.actionText}>
-              {isPlaying ? "Playing..." : "Play"}
-            </Text>
+            <Ionicons name="play" size={22} color="#030303" />
+            <Text style={styles.actionText}>Play</Text>
           </TouchableOpacity>
 
           <TouchableOpacity

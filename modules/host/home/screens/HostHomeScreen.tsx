@@ -1,111 +1,176 @@
-// src/modules/host/home/HostHomeScreen.tsx
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, TouchableOpacity, Text, ActivityIndicator } from "react-native";
+import { View, ScrollView, StyleSheet } from "react-native";
 import Header from "@/modules/common/Header";
 import StatCard from "@/modules/common/components/StatCard";
 import Skeleton from "@/modules/common/components/Skeleton";
 import RecentBookingCard from "../components/RecentBookingCard";
 import { fetchBookingStats, fetchRecentBookings } from "../services/hostHomeService";
+import { router } from "expo-router";
+import Button from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
 
-export default function HostHomeScreen({ navigation }: any) {
-    const [stats, setStats] = useState<any>(null);
-    const [recentBookings, setRecentBookings] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+export default function HostHomeScreen() {
+  const [stats, setStats] = useState<any>(null);
+  const [recentBookings, setRecentBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const loadData = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                const statsData = await fetchBookingStats();
-                const recentData = await fetchRecentBookings();
-                setStats(statsData);
-                setRecentBookings(recentData);
-            } catch (err: any) {
-                setError(err.message || "Failed to fetch dashboard data");
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadData();
-    }, []);
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const statsData = await fetchBookingStats();
+        const recentData = await fetchRecentBookings();
+        setStats(statsData);
+        setRecentBookings(recentData);
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
-    return (
-        <>
-            <Header title="Host Dashboard" showBackButton={false} />
+  return (
+    <View style={styles.container}>
+      <Header title="Dashboard" showBackButton={false} />
 
-            <View className="flex-1 bg-gray-50">
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* 📊 Booking Stats */}
+        <View style={styles.section}>
+          {loading ? (
+            <>
+              <View style={styles.row}>
+                <Skeleton height={80} width="48%" radius={16} />
+                <Skeleton height={80} width="48%" radius={16} />
+              </View>
+              <View style={styles.row}>
+                <Skeleton height={80} width="48%" radius={16} />
+                <Skeleton height={80} width="48%" radius={16} />
+              </View>
+            </>
+          ) : (
+            <>
+              <View style={styles.row}>
+                <StatCard
+                  title="Total Bookings"
+                  value={stats.total || 0}
+                  subtitle="All bookings"
+                  colors={["#34d399", "#10b981"]}
+                />
+                <StatCard
+                  title="Revenue"
+                  value={`$${stats.revenue || 0}`}
+                  subtitle="Generated"
+                  colors={["#60a5fa", "#3b82f6"]}
+                />
+              </View>
+              <View style={styles.row}>
+                <StatCard
+                  title="Experiences"
+                  value={stats.experiences || 0}
+                  subtitle="Created by you"
+                  colors={["#f59e0b", "#d97706"]}
+                />
+                <StatCard
+                  title="Avg Rating"
+                  value={stats.avgRating || 0}
+                  subtitle="Across experiences"
+                  colors={["#ec4899", "#be185d"]}
+                />
+              </View>
+            </>
+          )}
+        </View>
 
-                <View className="mt-50" />
+        {/* ➕ Create Experience Buttons (Horizontal) */}
+        <View style={styles.createRow}>
+          {/* Default filled button (from your Button.tsx) */}
+          <Button
+            title="Create Manually"
+            onPress={() => router.push("/(host)/createExperience")}
+            width="48%"
+            height={42}
+            fontSize={14}
+          />
 
-                <ScrollView contentContainerStyle={{ paddingBottom: 10, paddingTop: 100 }} className="flex-1 pt-4 px-4">
-                    {/* 📊 Stats */}
-                    <View className="mb-4">
-                        {loading ? (
-                            <>
-                                <View className="flex-row mb-2">
-                                    <Skeleton height={80} width="48%" radius={16} style={{ marginRight: 8 }} />
-                                    <Skeleton height={80} width="48%" radius={16} />
-                                </View>
-                                <View className="flex-row">
-                                    <Skeleton height={80} width="48%" radius={16} style={{ marginRight: 8 }} />
-                                    <Skeleton height={80} width="48%" radius={16} />
-                                </View>
-                            </>
-                        ) : (
-                            <>
-                                <View className="flex-row mb-2">
-                                    <StatCard
-                                        title="Total Bookings"
-                                        value={stats.total || 0}
-                                        subtitle="All bookings"
-                                        colors={["#34d399", "#10b981"]}
-                                    />
-                                    <StatCard
-                                        title="Revenue"
-                                        value={`$${stats.revenue || 0}`}
-                                        subtitle="Generated"
-                                        colors={["#60a5fa", "#3b82f6"]}
-                                    />
-                                </View>
-                                <View className="flex-row">
-                                    <StatCard
-                                        title="Created Experiences"
-                                        value={stats.experiences || 0}
-                                        subtitle="You own"
-                                        colors={["#f59e0b", "#d97706"]}
-                                    />
-                                    <StatCard
-                                        title="Avg Rating"
-                                        value={stats.avgRating || 0}
-                                        subtitle="Across experiences"
-                                        colors={["#ec4899", "#be185d"]}
-                                    />
-                                </View>
-                            </>
-                        )}
-                    </View>
-                    {/* 📝 Recent Bookings */}
-                    <Text className="text-gray-700 font-semibold mb-2 text-lg">Recent Bookings</Text>
-                    {loading ? (
-                        Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} height={70} radius={12} style={{ marginBottom: 8 }} />)
-                    ) : recentBookings.length === 0 ? (
-                        <Text className="text-gray-500 text-center my-4">No recent bookings</Text>
-                    ) : (
-                        recentBookings.map((b) => <RecentBookingCard key={b.bookingId} booking={b} />)
-                    )}
+          {/* Neutral outlined button */}
+          <Button
+            title="Use AI"
+            onPress={() => router.push("/(host)/hostExperienceInput")}
+            backgroundColor="#EFEFE7"
+            textColor="#030303"
+            borderWidth={1}
+            borderColor="#D1D5DB"
+            width="48%"
+            height={42}
+            fontSize={14}
+          />
+        </View>
 
-                    {/* ➕ Create Experience Button */}
-                    <TouchableOpacity
-                        className="bg-emerald-500 py-3 rounded-2xl mt-6 mb-10 items-center"
-                        onPress={() => navigation.navigate("createExperience")}
-                    >
-                        <Text className="text-white font-semibold text-base">Create New Experience</Text>
-                    </TouchableOpacity>
-                </ScrollView>
-            </View>
+        {/* 📝 Recent Bookings */}
+        <Text variant="header" style={styles.sectionTitle}>
+          Recent Bookings
+        </Text>
 
-        </>
-    );
+        {loading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} height={70} radius={12} style={{ marginBottom: 8 }} />
+          ))
+        ) : error ? (
+          <Text color="#DC2626" style={styles.centerText}>
+            {error}
+          </Text>
+        ) : recentBookings.length === 0 ? (
+          <Text color="#6B7280" style={styles.centerText}>
+            No recent bookings yet.
+          </Text>
+        ) : (
+          recentBookings.map((b) => (
+            <RecentBookingCard key={b.bookingId} booking={b} />
+          ))
+        )}
+      </ScrollView>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FAFAF8",
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 40,
+    paddingTop: 10,
+  },
+  section: {
+    marginBottom: 16,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  createRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 10,
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    marginBottom: 8,
+    color: "#1F2937",
+  },
+  centerText: {
+    textAlign: "center",
+    marginVertical: 8,
+  },
+});

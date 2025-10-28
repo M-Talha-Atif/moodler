@@ -9,7 +9,7 @@ import { Loader } from "@/components/ui/loader";
 import { ErrorScreen } from "@/components/ui/errorScreen";
 import { Text } from "@/components/ui/text";
 
-export default function UserProfileScreen() {
+export default function InsightsScreen() {
   const { user } = useAuthStore();
   const [insights, setInsights] = useState<any>(null);
   const [moodLogs, setMoodLogs] = useState<any[]>([]);
@@ -49,7 +49,7 @@ export default function UserProfileScreen() {
 
   return (
     <View style={styles.screen}>
-      <Header title="Your Journey" showBackButton={false} />
+      <Header title="Your Journey" showBackButton={true} />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -97,9 +97,9 @@ export default function UserProfileScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#F3F4F6" },
-  scrollContent: { paddingBottom: 60, paddingTop: 96, paddingHorizontal: 16 },
+  scrollContent: { paddingBottom: 60, paddingTop: 10, paddingHorizontal: 16 },
   introContainer: {
-    marginBottom: 24,
+    marginBottom: 14,
     paddingHorizontal: 4,
   },
   greeting: {
