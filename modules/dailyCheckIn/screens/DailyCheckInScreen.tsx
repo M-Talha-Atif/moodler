@@ -1,16 +1,23 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Alert, ScrollView, StyleSheet, View, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { MotiView } from "moti";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
-import ScreenWrapper from "@/components/ui/layout/screenWrapper";
 import MoodWheel from "../components/MoodWheel";
 import ExpressionInput from "../components/ExpressionInput";
 import TextAreaWithSentiment from "../components/TextAreaWithSentiment";
 import Button from "@/components/ui/button";
 import { useDailyCheckInStore } from "../store/useDailyCheckInStore";
 import { useMoodLog } from "../hooks/useMoodLog";
+import { LogOut } from "lucide-react-native";
+import { useAuthStore } from "@/store/useAuthStore";
+import AlertDialog from "@/components/ui/alertDialog";
+import { StatusBar } from "expo-status-bar";
+import Header from "@/modules/common/Header";
+import IconCard from "@/components/ui/iconCard";
+
+
 
 export default function DailyCheckInScreen() {
   const [mood, setMood] = useState(null);
@@ -22,6 +29,23 @@ export default function DailyCheckInScreen() {
   const { setHasDailyCheckIn } = useDailyCheckInStore();
   const router = useRouter();
 
+  const { logout } = useAuthStore();
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+
+  const handleLogout = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const handleConfirmLogout = () => {
+    setShowLogoutDialog(false);
+    logout();
+  };
+
+  const handleCancelLogout = () => {
+    setShowLogoutDialog(false);
+  };
+
+
   const handleSubmit = async () => {
     if (!mood) return Alert.alert("Please select your mood ❤️");
     if (!photo && !voice)
@@ -30,15 +54,15 @@ export default function DailyCheckInScreen() {
     const sentiment = note.match(/happy|good/)
       ? "positive"
       : note.match(/sad|angry/)
-      ? "negative"
-      : "neutral";
+        ? "negative"
+        : "neutral";
 
     const payload = { moodLabel: mood.emotion, note, textSentiment: sentiment, photo, voice };
 
     setButtonSubmitLoading(true);
 
     try {
-      
+
       await submitMoodLog(payload);
       setHasDailyCheckIn(true);
       Alert.alert("✨ Check-In Complete", "Your reflection has been saved.", [
@@ -48,34 +72,63 @@ export default function DailyCheckInScreen() {
       setButtonSubmitLoading(false);
       Alert.alert("Oops!", "Something went wrong while saving your check-in.");
     }
-    finally{
+    finally {
       setButtonSubmitLoading(false);
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
+
+      <View style={styles.stickyHeader}>
+        <Header
+          title="Submit your mood vibes"
+          showBackButton={false}
+          rightIcon={
+            <IconCard
+              size={36}
+              borderRadius={12}
+              backgroundColor="#fff"
+              shadow={true}
+              onPress={handleLogout} // optional, can also use Header's onRightPress
+            >
+              <LogOut size={20} color="#DC2626" />
+            </IconCard>
+          }
+          onRightPress={handleLogout} // optional if you already handle inside IconCard
+        />
+      </View>
+
+      <StatusBar style="dark" backgroundColor="#FAFAF8" translucent={false} />
+
+
+
+      <AlertDialog
+        visible={showLogoutDialog}
+        title="Logout"
+        message="Are you sure you want to logout?"
+        confirmText="Logout"
+        cancelText="Cancel"
+        onConfirm={handleConfirmLogout}
+        onCancel={handleCancelLogout}
+      />
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.flex}
       >
+
         {/* 🪶 Scrollable Content */}
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.headerTitle}>How are you feeling today? 🌿</Text>
-          <Text style={styles.headerSubtitle}>
-            Pause for a breath. Tune into yourself and express your mood — in your own way.
-          </Text>
 
-          {/* 🌀 Mood Selection */}
+          {/* Mood Selection */}
           <MotiView from={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} delay={100}>
             <MoodWheel selected={mood} onSelect={setMood} />
           </MotiView>
 
-          {/* 🎙️📸 Expression Input */}
+          {/* Expression Input */}
           <MotiView from={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} delay={200}>
             <ExpressionInput
               photo={photo}
@@ -92,7 +145,7 @@ export default function DailyCheckInScreen() {
             />
           </MotiView>
 
-          {/* 📝 Reflection Input */}
+          {/* Reflection Input */}
           <MotiView from={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} delay={300}>
             <TextAreaWithSentiment value={note} onChange={setNote} />
           </MotiView>
@@ -104,7 +157,7 @@ export default function DailyCheckInScreen() {
         {/* 🪷 Sticky Button */}
         <View style={styles.stickyButtonWrapper}>
           <Button
-            title={ buttonSubmitLoading ? "Submitting your vibes.." : "Submit your mood vibe"}
+            title={buttonSubmitLoading ? "Submitting your vibes.." : "Submit your mood vibe"}
             onPress={handleSubmit}
             disabled={!mood || (!photo && !voice)}
             backgroundColor="#030303"
@@ -128,14 +181,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FAFAF8",
   },
+  stickyHeader: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#FAFAF8",
+    paddingTop: 10,
+    paddingBottom: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#E5E7EB",
+  },
   flex: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 24,
-    paddingTop: 32,
+    paddingTop: 50,
     paddingBottom: 16,
-    gap: 24, // vertical rhythm
+    gap: 24,
   },
   headerTitle: {
     fontFamily: "Nunito",

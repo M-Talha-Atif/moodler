@@ -22,7 +22,7 @@ export default function VoiceExperienceInput({ onResult }: VoiceExperienceInputP
         try {
           await sound?.unloadAsync();
           await recording?.stopAndUnloadAsync();
-        } catch {}
+        } catch { }
       })();
     };
   }, [sound, recording]);
@@ -54,7 +54,13 @@ export default function VoiceExperienceInput({ onResult }: VoiceExperienceInputP
   const stopRecording = async () => {
     try {
       if (!recording) return;
-      await recording.stopAndUnloadAsync();
+      if (recording) {
+        const status = await recording.getStatusAsync();
+        if (status.isRecording) {
+          await recording.stopAndUnloadAsync();
+        }
+      }
+
       const uri = recording.getURI();
       if (!uri) {
         Alert.alert("Error", "Recording failed. Please try again.");
@@ -112,7 +118,7 @@ export default function VoiceExperienceInput({ onResult }: VoiceExperienceInputP
   const handleDelete = async () => {
     try {
       await sound?.unloadAsync();
-    } catch {}
+    } catch { }
     setSound(null);
     setFileUri(null);
     setDuration(0);
@@ -122,7 +128,7 @@ export default function VoiceExperienceInput({ onResult }: VoiceExperienceInputP
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Record your experience</Text>
+      <Text style={styles.label}>Record your mood vibes via voice </Text>
 
       {!fileUri ? (
         <TouchableOpacity

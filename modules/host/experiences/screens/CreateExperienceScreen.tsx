@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
     View,
     ScrollView,
@@ -18,6 +18,7 @@ import Header from "@/modules/common/Header";
 import { createExperience } from "../services/experience";
 import { useLocalSearchParams, router } from "expo-router";
 
+
 export default function CreateExperienceScreen() {
     const { control, handleSubmit, setValue, watch, formState } = useForm<FormData>({
         resolver: zodResolver(experienceSchema),
@@ -33,9 +34,20 @@ export default function CreateExperienceScreen() {
 
     //  receiving JSON from previous screen
     const params = useLocalSearchParams();
-    const aiResponse = params?.aiResponse
-        ? JSON.parse(params.aiResponse)
-        : null;
+    const aiResponse = useMemo(
+        () => (params?.aiResponse ? JSON.parse(params.aiResponse) : null),
+        [params?.aiResponse]
+    );
+
+    const isoToTimeString = (iso: string) => {
+        const date = new Date(iso);
+        let hours = date.getHours();
+        const minutes = date.getMinutes().toString().padStart(2, "0");
+        const ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12 || 12;
+        return `${hours}:${minutes} ${ampm}`;
+    };
+
 
     useEffect(() => {
         if (aiResponse) {
@@ -45,8 +57,17 @@ export default function CreateExperienceScreen() {
             setValue("desiredOutcomes", aiResponse.desiredOutcomes || []);
             setValue("targetEmotions", aiResponse.targetEmotions || []);
             if (aiResponse.location) setValue("location", aiResponse.location);
+            if (aiResponse.date) setValue("date", new Date(aiResponse.date));
+
+            if (aiResponse.sessionStartTime)
+                setValue("sessionStartTime", new Date(aiResponse.sessionStartTime));
+            if (aiResponse.sessionEndTime)
+                setValue("sessionEndTime", new Date(aiResponse.sessionEndTime));
+
+
         }
     }, [aiResponse, setValue]);
+
 
     /**  Simplified showErrors — just shows first message */
     const showErrors = () => {
@@ -65,35 +86,17 @@ export default function CreateExperienceScreen() {
     const onSubmit = async (data: FormData) => {
         try {
             setSubmitting(true);
+            const startTime = data.sessionStartTime;
+            const endTime = data.sessionEndTime;
 
-            // Convert to valid ISO strings
-            const baseDate = data.date instanceof Date
-                ? data.date
-                : new Date(data.date as any);
-
-            const startTime = new Date(baseDate);
-            const endTime = new Date(baseDate);
-
-            // Parse "hh:mm AM/PM" → hours/minutes
-            const parseTime = (timeStr: string) => {
-                const [time, modifier] = timeStr.split(" ");
-                let [hours, minutes] = time.split(":").map(Number);
-                if (modifier === "PM" && hours < 12) hours += 12;
-                if (modifier === "AM" && hours === 12) hours = 0;
-                return { hours, minutes };
-            };
-
-            const { hours: startHours, minutes: startMinutes } = parseTime(data.sessionStartTime);
-            const { hours: endHours, minutes: endMinutes } = parseTime(data.sessionEndTime);
-
-            startTime.setHours(startHours, startMinutes, 0, 0);
-            endTime.setHours(endHours, endMinutes, 0, 0);
 
             const payload = {
                 ...data,
-                date: baseDate.toISOString(),
-                sessionStartTime: startTime.toISOString(),
-                sessionEndTime: endTime.toISOString(),
+                date: data.date instanceof Date ? data.date.toISOString() : new Date(data.date).toISOString(),
+                sessionStartTime:
+                    startTime instanceof Date ? startTime.toISOString() : new Date(startTime).toISOString(),
+                sessionEndTime:
+                    endTime instanceof Date ? endTime.toISOString() : new Date(endTime).toISOString(),
                 price: Number(data.price),
                 totalSpots: Number(data.totalSpots),
                 spotsFilled: 0,

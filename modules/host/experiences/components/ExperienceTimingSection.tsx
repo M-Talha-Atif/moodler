@@ -17,36 +17,35 @@ export default function ExperienceTimingSection({ control }: any) {
     if (!timeValue) return new Date();
 
     try {
-      // If it's already a Date object, return it
-      if (timeValue instanceof Date) {
-        return timeValue;
+      if (timeValue instanceof Date) return timeValue;
+
+      // ISO string (e.g., "2023-11-25T17:00:00Z")
+      if (typeof timeValue === "string" && timeValue.includes("T")) {
+        const parsed = new Date(timeValue);
+        if (!isNaN(parsed.getTime())) return parsed;
       }
 
-      // If it's an ISO string (like "2025-10-12T15:19:00.000Z")
-      if (typeof timeValue === 'string' && timeValue.includes('T')) {
-        return new Date(timeValue);
-      }
-
-      // If it's a time string (like "8:19 PM")
-      if (typeof timeValue === 'string') {
+      // "hh:mm AM/PM" string
+      if (typeof timeValue === "string" && timeValue.match(/^\d{1,2}:\d{2}\s?(AM|PM)$/i)) {
         const [time, modifier] = timeValue.trim().split(" ");
         let [hours, minutes] = time.split(":").map(Number);
 
         if (modifier?.toUpperCase() === "PM" && hours < 12) hours += 12;
         if (modifier?.toUpperCase() === "AM" && hours === 12) hours = 0;
 
-        const date = new Date();
-        date.setHours(hours, minutes, 0, 0);
-        return date;
+        const now = new Date();
+        now.setHours(hours, minutes, 0, 0);
+        return now;
       }
 
       // Fallback
-      return new Date();
-    } catch (error) {
-      console.error("Error parsing time:", timeValue, error);
+      const parsed = new Date(timeValue);
+      return isNaN(parsed.getTime()) ? new Date() : parsed;
+    } catch {
       return new Date();
     }
   };
+
 
   // For min/max constraints, create Date objects from time strings
   const getStartTimeDate = () => {

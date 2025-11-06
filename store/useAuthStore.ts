@@ -52,7 +52,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         email,
         password,
       });
-      console.log("📥 Store received login response:", response);
+      console.log(" Store received login response:", response);
 
       const userWithDefaults: User = {
         ...response.user,
@@ -61,6 +61,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       };
 
       await storageService.setItem("auth_token", response.token);
+      await storageService.setItem("refresh_token", response.refresh_token);
       await storageService.setItem(
         "user_data",
         JSON.stringify(userWithDefaults),
@@ -101,6 +102,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } finally {
       await storageService.removeItem("auth_token");
       await storageService.removeItem("user_data");
+      await storageService.removeItem("refresh_token");
       set({ user: null, token: null, isLoading: false, error: null });
     }
   },
@@ -108,15 +110,56 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   checkAuth: async () => {
     try {
       const token = await storageService.getItem("auth_token");
+      const refreshToken = await storageService.getItem("refresh_token");
       const userData = await storageService.getItem("user_data");
-      if (token && userData) {
+
+      if (token && refreshToken && userData) {
         const user = JSON.parse(userData);
+
+        // ✅ Token exists - set user immediately for better UX
         set({ user, token, isLoading: false });
+
+        // ✅ Optional: Verify token is still valid by making a test API call
+        try {
+          // This will trigger interceptor if token is expired
+          await authService.getCurrentUser();
+        } catch (error: any) {
+          if (error.response?.status === 401 || error.response?.status === 403) {
+            console.log("🔄 Token expired, attempting refresh on app start...");
+            try {
+              const refreshed = await authService.refreshToken(refreshToken);
+
+              // Update with new tokens
+              await storageService.setItem("auth_token", refreshed.token);
+              await storageService.setItem("refresh_token", refreshed.refresh_token);
+
+              set({
+                user: { ...user, ...refreshed.user },
+                token: refreshed.token
+              });
+
+              console.log("✅ Token refreshed successfully on app start");
+            } catch (refreshError) {
+              console.log("❌ Auto-refresh failed, logging out:", refreshError);
+              // Clear storage but don't redirect here - let navigation handle it
+              await storageService.removeItem("auth_token");
+              await storageService.removeItem("refresh_token");
+              await storageService.removeItem("user_data");
+              set({ user: null, token: null });
+            }
+          }
+        }
+      } else {
+        // Clear any partial state
+        set({ user: null, token: null, isLoading: false });
       }
     } catch (error) {
       console.error("Auth check error:", error);
+      // Clear corrupted data
       await storageService.removeItem("auth_token");
       await storageService.removeItem("user_data");
+      await storageService.removeItem("refresh_token");
+      set({ user: null, token: null, isLoading: false });
     }
   },
 

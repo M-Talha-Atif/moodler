@@ -35,7 +35,7 @@ export default function ExpressionInput({ photo, voice, onPhotoUpload, onPhotoRe
         {mode === "photo" ? (
           <PhotoUpload photo={photo} onUpload={onPhotoUpload} onRemove={onPhotoRemove} />
         ) : (
-          <VoiceRecorder onRecordingComplete={onVoiceComplete} />
+          <VoiceRecorder onResult={onVoiceComplete} />
         )}
       </MotiView>
     </View>

@@ -3,12 +3,16 @@ import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "expo-router";
+import Toast from "@/components/ui/toast";
+
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
 
   const { error, login, setError, clearError } = useAuthStore();
   const router = useRouter();
@@ -16,6 +20,7 @@ export default function LoginForm() {
   const handleSubmit = async () => {
     if (!email || !password) {
       setError("Please fill all fields");
+      setShowToast(true);
       return;
     }
     try {
@@ -23,6 +28,8 @@ export default function LoginForm() {
       setIsLoading(true);
       await login(email, password);
     } catch (err) {
+      setError("Invalid credentials");
+      setShowToast(true);
       console.error("Login error:", err);
     } finally {
       setIsLoading(false);
@@ -31,11 +38,7 @@ export default function LoginForm() {
 
   return (
     <View style={styles.container}>
-      {error && (
-        <View style={styles.errorBox}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      )}
+
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Email Address</Text>
@@ -89,6 +92,15 @@ export default function LoginForm() {
           {isLoading ? "Signing In..." : "Sign In"}
         </Text>
       </Pressable>
+
+
+      <Toast
+        message={error || ""}
+        type="error"
+        visible={showToast}
+        onHide={() => setShowToast(false)}
+      />
+
 
     </View>
   );

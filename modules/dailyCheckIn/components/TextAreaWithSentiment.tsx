@@ -36,11 +36,11 @@ export default function TextAreaWithSentiment({ value, onChange }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Reflect on your day 💬</Text>
+      <Text style={styles.title}>Reflect on your thoughts 💬</Text>
       <TextInput
         value={value}
         onChangeText={onChange}
-        placeholder="Write freely... how are you feeling today?"
+        placeholder="Write freely... how are you feeling at the moment?"
         placeholderTextColor="#9CA3AF"
         multiline
         numberOfLines={5}

@@ -73,8 +73,8 @@ export default function DatePickerField({
           <DateTimePickerModal
             isVisible={visible}
             mode={mode}
-            date={value || new Date()}
-            /** 🧠 Enforce min/max boundaries */
+            date={value instanceof Date ? value : new Date(value || Date.now())}
+            /** Enforce min/max boundaries */
             minimumDate={minDate}
             maximumDate={maxDate}
             onConfirm={(date) => {
