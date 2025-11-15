@@ -34,11 +34,11 @@ export const useBookings = () => {
 
   const [error, setError] = useState<string | null>(null);
 
-  // ✅ Active filter tracker
+  // Active filter tracker
   const hasActiveFilters =
     status !== "all" || timeFilter !== "anytime" || search !== "";
 
-  // ✅ Safe data fetcher
+  // Safe data fetcher
   const fetchData = useCallback(
     async (pageNum = 1, append = false) => {
       if (!isMountedRef.current) return;
@@ -70,12 +70,12 @@ export const useBookings = () => {
 
         if (!isMountedRef.current) return;
 
-        // ✅ Update stats safely
+        // Update stats safely
         if (statsRes.status === "fulfilled") {
           setBookingStats(statsRes.value);
         }
 
-        // ✅ Update bookings safely
+        // Update bookings safely
         if (bookingsRes.status === "fulfilled") {
           const data = bookingsRes.value.data || [];
           const meta = bookingsRes.value.meta || {};
@@ -104,12 +104,12 @@ export const useBookings = () => {
     [status, timeFilter, search]
   );
 
-  // ✅ Debounce search to prevent spamming requests
+  //  Debounce search to prevent spamming requests
   const debouncedFetch = useRef(
     debounce((fn) => fn(), 400)
   ).current;
 
-  // ✅ Initial load (runs once)
+  //  Initial load (runs once)
   useEffect(() => {
     isMountedRef.current = true;
     fetchData(1, false);
@@ -121,13 +121,13 @@ export const useBookings = () => {
     };
   }, []);
 
-  // ✅ Refetch when filters change (debounced)
+  // Refetch when filters change (debounced)
   useEffect(() => {
     if (!isMountedRef.current) return;
     debouncedFetch(() => fetchData(1, false));
   }, [status, timeFilter, search, fetchData]);
 
-  // ✅ Pull-to-refresh
+  // Pull-to-refresh
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
     fetchData(1, false);

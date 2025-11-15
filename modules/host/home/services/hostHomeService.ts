@@ -21,3 +21,16 @@ export const fetchRecentBookings = async () => {
     throw new Error(error.response?.data?.message || "Failed to fetch recent bookings");
   }
 };
+
+export const fetchBookingTrend = async (range: string) => {
+  try {
+    const { data } = await api.get("/host/bookings/trend", {
+      params: { range }, // "7", "30", "90"
+    });
+    return data?.data || [];
+  } catch (error: any) {
+    console.error("Error fetching booking trend:", error);
+    throw new Error(error.response?.data?.message || "Failed to fetch trend");
+  }
+};
+

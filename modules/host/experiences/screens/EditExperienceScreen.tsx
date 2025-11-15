@@ -49,7 +49,6 @@ export default function EditExperienceScreen() {
     };
 
     // Load Experience Data
-    // Load Experience Data
     useEffect(() => {
         let isActive = true;
 
@@ -59,6 +58,8 @@ export default function EditExperienceScreen() {
                 const data = await fetchSingleExperience(experienceId);
 
                 if (!data || !isActive) return;
+
+                console.log(data)
 
                 // Helper function to convert "8:19 PM" to Date object
                 // In EditExperienceScreen - update the timeStringToDate function:

@@ -8,12 +8,18 @@ import { fetchBookingStats, fetchRecentBookings } from "../services/hostHomeServ
 import { router } from "expo-router";
 import Button from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
+import SegmentedControl from "@/components/ui/segmentedControl";
+import { useBookingTrend } from "../hooks/useBookingTrend";
+import BookingTrendChart from "../components/BookingTrendChart";
 
 export default function HostHomeScreen() {
   const [stats, setStats] = useState<any>(null);
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [trendRange, setTrendRange] = useState("7");
+  const { data: trendData, isLoading: trendLoading } = useBookingTrend(trendRange);
 
   useEffect(() => {
     const loadData = async () => {
@@ -32,6 +38,12 @@ export default function HostHomeScreen() {
     };
     loadData();
   }, []);
+
+  // In your HostHomeScreen component, add this:
+  console.log('Trend data:', trendData);
+  console.log('Trend range:', trendRange);
+  console.log('Trend loading:', trendLoading);
+
 
   return (
     <View style={styles.container}>
@@ -88,6 +100,8 @@ export default function HostHomeScreen() {
           )}
         </View>
 
+
+
         {/* ➕ Create Experience Buttons (Horizontal) */}
         <View style={styles.createRow}>
           {/* Default filled button (from your Button.tsx) */}
@@ -113,14 +127,50 @@ export default function HostHomeScreen() {
           />
         </View>
 
+
+
+        {/* 📈 Booking Trend Section */}
+        {/* 📈 Booking Trend Section */}
+        <View style={{ marginBottom: 24 }}>
+          <SegmentedControl
+            tabs={[
+              { label: "7 Day", value: "7" },
+              { label: "30 Day", value: "30" },
+              { label: "90 Day", value: "90" },
+            ]}
+            initialValue="7"
+            onChange={(v) => setTrendRange(v)}
+          />
+
+          {trendLoading ? (
+            <Skeleton height={200} radius={12} />
+          ) : trendData && Array.isArray(trendData) && trendData.length > 0 ? (
+            <BookingTrendChart data={trendData} />
+          ) : (
+            <View style={{
+              backgroundColor: 'white',
+              borderRadius: 12,
+              padding: 16,
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: 200
+            }}>
+              <Text style={{ color: '#6B7280' }}>
+                No booking data available for selected period
+              </Text>
+            </View>
+          )}
+        </View>
+
+
         {/* 📝 Recent Bookings */}
         <Text variant="header" style={styles.sectionTitle}>
           Recent Bookings
         </Text>
 
         {loading ? (
-          Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} height={70} radius={12} style={{ marginBottom: 8 }} />
+          Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} height={120} radius={12} style={{ marginBottom: 8 }} />
           ))
         ) : error ? (
           <Text color="#DC2626" style={styles.centerText}>
@@ -168,6 +218,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginBottom: 8,
     color: "#1F2937",
+    fontWeight: "bold"
   },
   centerText: {
     textAlign: "center",

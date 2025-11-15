@@ -10,6 +10,9 @@ import Animated, { FadeIn, FadeOut, ZoomIn } from "react-native-reanimated";
 import * as Font from "expo-font";
 import { useFonts } from "expo-font"
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const { user, isLoading, checkAuth } = useAuthStore();
@@ -74,7 +77,7 @@ export default function RootLayout() {
     // Host
     if (user.role === "host") {
       const validHostRoutes = ["(tabs)", "(host)"];
-       if (!validHostRoutes.includes(segments[0])) {
+      if (!validHostRoutes.includes(segments[0])) {
         router.replace("/(tabs)/(host)");
       }
       return;
@@ -109,19 +112,21 @@ export default function RootLayout() {
   }, [user, isLoading, segments, isNavigationReady, hasDailyCheckIn, router]);
 
   return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen
-          name="(user)"
-          options={{ presentation: "modal", headerShown: false }}
-        />
-        <Stack.Screen name="onboarding" />
-        <Stack.Screen name="(tabs)/(user)" />
-        <Stack.Screen name="(tabs)/(host)" />
-        <Stack.Screen name="daily-check-in" />
-        <Stack.Screen name="index" />
-      </Stack>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen
+            name="(user)"
+            options={{ presentation: "modal", headerShown: false }}
+          />
+          <Stack.Screen name="onboarding" />
+          <Stack.Screen name="(tabs)/(user)" />
+          <Stack.Screen name="(tabs)/(host)" />
+          <Stack.Screen name="daily-check-in" />
+          <Stack.Screen name="index" />
+        </Stack>
+      </QueryClientProvider>
     </GestureHandlerRootView>
   );
 }

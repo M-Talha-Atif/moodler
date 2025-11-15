@@ -59,7 +59,7 @@ export const experienceSchema = z
       .max(200, "Location must be under 200 characters")
       .optional(),
 
-    meetLink: z.string().url("Enter a valid meeting link").optional(),
+    meetLink: z.string().optional(),
 
     // Start / End Time (stored as readable strings)
     sessionStartTime: z.date({ required_error: "Start time is required" }),
@@ -106,10 +106,22 @@ export const experienceSchema = z
     path: ["location"],
   })
   // Require meetLink if virtual
-  .refine((d) => !d.isVirtual || !!d.meetLink, {
-    message: "Meeting link required for virtual events",
+  // .refine((d) => !d.isVirtual || !!d.meetLink, {
+  //   message: "Meeting link required for virtual events",
+  //   path: ["meetLink"],
+  // })
+
+  .refine((d) => {
+    if (!d.isVirtual) return true;          // No meetLink needed
+    if (!d.meetLink) return false;          // Required if virtual
+
+    const urlPattern = /^https?:\/\/.+/i;
+    return urlPattern.test(d.meetLink);     // validate URL only if needed
+  }, {
+    message: "Enter a valid meeting link",
     path: ["meetLink"],
   })
+
   //  Ensure end time is after start time
   // Ensure end time is after start time (with debug logs)
   .refine((d) => {

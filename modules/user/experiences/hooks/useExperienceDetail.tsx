@@ -7,6 +7,7 @@ import {
   createBooking,
   type Experience
 } from '../services/experienceService';
+import { router } from "expo-router";
 
 export const useExperienceDetail = () => {
   const params = useLocalSearchParams<{ id: string }>();
@@ -61,6 +62,10 @@ export const useExperienceDetail = () => {
         "You have successfully booked this experience!",
         [{ text: "OK", onPress: loadExperience }]
       );
+      router.push({
+      pathname: "/bookingConfirmation",
+      params: { bookingId: booking.id },
+    });
     } catch (err: any) {
       Alert.alert(
         "❌ Booking Failed",

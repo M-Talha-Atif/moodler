@@ -62,10 +62,10 @@ export default function Header({
             )}
 
             <Text
-              className="font-bold"
               style={{
                 fontSize,
                 color: "#030303",
+                fontWeight: "bold",
                 flexShrink: 1,
               }}
               numberOfLines={1}

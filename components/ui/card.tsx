@@ -1,65 +1,67 @@
 import React from "react";
 import {
-    View,
-    StyleSheet,
-    TouchableOpacity,
-    StyleProp,
-    ViewStyle,
-    DimensionValue
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  StyleProp,
+  ViewStyle,
 } from "react-native";
 
 interface CardProps {
-    width?: DimensionValue;
-    height?: DimensionValue;
-    backgroundColor?: string;
-    borderRadius?: number;
-    padding?: number;
-    margin?: number;
-    shadow?: boolean;
-    onPress?: () => void;
-    style?: StyleProp<ViewStyle>;
-    children?: React.ReactNode;
+  width?: number | string;
+  height?: number | string;
+  backgroundColor?: string;
+  borderRadius?: number;
+  padding?: number;
+  marginBottom?: number;
+  shadow?: boolean;
+  onPress?: () => void;
+  style?: StyleProp<ViewStyle>;
+  children?: React.ReactNode;
 }
 
 const Card: React.FC<CardProps> = ({
-    width = 335,
-    height = 157,
-    backgroundColor = "#d3d3d3",
-    borderRadius = 10,
-    padding = 10,
-    margin = 0,
-    shadow = true,
-    onPress,
-    style,
-    children,
+  width = "100%", // ✅ fills parent container (use scrollView padding to control spacing)
+  height,
+  backgroundColor = "#FFFFFF",
+  borderRadius = 16,
+  padding = 16,
+  marginBottom = 16,
+  shadow = true,
+  onPress,
+  style,
+  children,
 }) => {
-    const baseStyle: ViewStyle = {
-        width,
-        height,
-        backgroundColor,
-        borderRadius,
-        padding,
-        margin,
-        justifyContent: "center",
-        alignItems: "center",
-        ...(shadow && {
-            shadowColor: "#000",
-            shadowOpacity: 0.1,
-            shadowOffset: { width: 0, height: 2 },
-            shadowRadius: 4,
-            elevation: 3,
-        }),
-    };
+  const baseStyle: ViewStyle = {
+    width,
+    height: height === "auto" ? undefined : height,
+    backgroundColor,
+    borderRadius,
+    padding,
+    marginBottom,
+    alignSelf: "stretch", // ✅ prevents weird centering issues
+    ...(shadow && {
+      shadowColor: "#000",
+      shadowOpacity: 0.08,
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 6,
+      elevation: 3,
+    }),
+  };
 
-    const content = <View style={[baseStyle, style]}>{children}</View>;
+  const content = <View style={[baseStyle, style]}>{children}</View>;
 
-    return onPress ? (
-        <TouchableOpacity activeOpacity={0.8} onPress={onPress}>
-            {content}
-        </TouchableOpacity>
-    ) : (
-        content
-    );
+  return onPress ? (
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={onPress}
+      style={{ width: "100%" }} // ✅ ensures proper pressable width
+    >
+      {content}
+    </TouchableOpacity>
+  ) : (
+    content
+  );
 };
 
 export default Card;

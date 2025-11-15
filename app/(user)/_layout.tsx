@@ -17,6 +17,10 @@ export default function UserLayout() {
         options={{ headerShown: false }} 
       />
       <Stack.Screen 
+        name="bookingConfirmation" 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
         name="editProfile" 
         options={{ headerShown: false }} 
       />

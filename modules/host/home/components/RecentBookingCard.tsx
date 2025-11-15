@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { MotiView } from "moti";
 import { Ionicons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
 
 interface BookingProps {
   booking: {
@@ -15,17 +14,10 @@ interface BookingProps {
     guestCount?: number;
     duration?: string;
   };
-  onPress?: (bookingId: string) => void;
   onQuickAction?: (action: string, bookingId: string) => void;
 }
 
-export default function SimpleRecentBookingCard({
-  booking,
-  onPress,
-  onQuickAction,
-}: BookingProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
+export default function SimpleRecentBookingCard({ booking, onQuickAction }: BookingProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "confirmed":
@@ -48,12 +40,6 @@ export default function SimpleRecentBookingCard({
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
-  const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setIsExpanded(!isExpanded);
-    onPress?.(booking.bookingId);
-  };
-
   return (
     <MotiView
       from={{ opacity: 0, translateY: 8 }}
@@ -61,29 +47,22 @@ export default function SimpleRecentBookingCard({
       transition={{ type: "timing", duration: 250 }}
       style={styles.card}
     >
-      <TouchableOpacity activeOpacity={0.9} onPress={handlePress}>
-        {/* Header */}
-        <View style={styles.topRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.title}>{booking.experienceTitle}</Text>
-            <Text style={styles.subtitle}>{booking.guestName}</Text>
-          </View>
-
-          <View
-            style={[
-              styles.statusPill,
-              { backgroundColor: status.bg },
-            ]}
-          >
-            <Ionicons name={status.icon as any} size={14} color={status.color} />
-            <Text style={[styles.statusText, { color: status.color }]}>
-              {booking.status}
-            </Text>
-          </View>
+      {/* Header */}
+      <View style={styles.topRow}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title}>{booking.experienceTitle}</Text>
+          <Text style={styles.subtitle}>Booked by {booking.guestName}</Text>
         </View>
 
-        {/* Details */}
-        <View style={styles.detailsRow}>
+        <View style={[styles.statusPill, { backgroundColor: status.bg }]}>
+          <Ionicons name={status.icon as any} size={14} color={status.color} />
+          <Text style={[styles.statusText, { color: status.color }]}>{booking.status}</Text>
+        </View>
+      </View>
+
+      {/* Main Content (Left details + Right price) */}
+      <View style={styles.middleRow}>
+        <View style={{ flex: 1 }}>
           <View style={styles.detailGroup}>
             <Ionicons name="calendar" size={16} color="#030303" />
             <Text style={styles.detailText}>{formatDate(booking.date)}</Text>
@@ -99,69 +78,37 @@ export default function SimpleRecentBookingCard({
           {booking.guestCount && (
             <View style={styles.detailGroup}>
               <Ionicons name="people" size={16} color="#030303" />
-              <Text style={styles.detailText}>
-                {booking.guestCount} guests
-              </Text>
+              <Text style={styles.detailText}>{booking.guestCount} guests</Text>
             </View>
           )}
         </View>
 
-        {/* Price */}
-        <View style={styles.footer}>
-          <Text style={styles.price}>${booking.amount}</Text>
-          <View style={styles.footerRight}>
-            <Text style={styles.footerText}>
-              {isExpanded ? "Collapse" : "Details"}
-            </Text>
-            <Ionicons
-              name={isExpanded ? "chevron-up" : "chevron-down"}
-              size={14}
-              color="#6B7280"
-            />
-          </View>
+        {/* Price on the right side */}
+        <View style={styles.priceContainer}>
+          <Text style={styles.price}>${booking.amount.toFixed(2)}</Text>
         </View>
+      </View>
 
-        {/* Quick Actions */}
-        {isExpanded && (
-          <View style={styles.actionRow}>
-            {booking.status === "pending" && (
-              <>
-                <TouchableOpacity
-                  style={[styles.actionBtn, { backgroundColor: "#E6F4EA" }]}
-                  onPress={() => onQuickAction?.("confirm", booking.bookingId)}
-                >
-                  <Ionicons name="checkmark" size={14} color="#15803D" />
-                  <Text style={[styles.actionText, { color: "#15803D" }]}>
-                    Confirm
-                  </Text>
-                </TouchableOpacity>
+      {/* Quick Actions */}
+      {booking.status === "pending" && (
+        <View style={styles.actionRow}>
+          <TouchableOpacity
+            style={[styles.actionBtn, { backgroundColor: "#E6F4EA" }]}
+            onPress={() => onQuickAction?.("confirm", booking.bookingId)}
+          >
+            <Ionicons name="checkmark" size={14} color="#15803D" />
+            <Text style={[styles.actionText, { color: "#15803D" }]}>Confirm</Text>
+          </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={[styles.actionBtn, { backgroundColor: "#FEE2E2" }]}
-                  onPress={() => onQuickAction?.("decline", booking.bookingId)}
-                >
-                  <Ionicons name="close" size={14} color="#B91C1C" />
-                  <Text style={[styles.actionText, { color: "#B91C1C" }]}>
-                    Decline
-                  </Text>
-                </TouchableOpacity>
-              </>
-            )}
-
-            {booking.status === "confirmed" && (
-              <TouchableOpacity
-                style={[styles.actionBtn, { backgroundColor: "#DBEAFE" }]}
-                onPress={() => onQuickAction?.("message", booking.bookingId)}
-              >
-                <Ionicons name="chatbubble" size={14} color="#1D4ED8" />
-                <Text style={[styles.actionText, { color: "#1D4ED8" }]}>
-                  Message
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionBtn, { backgroundColor: "#FEE2E2" }]}
+            onPress={() => onQuickAction?.("decline", booking.bookingId)}
+          >
+            <Ionicons name="close" size={14} color="#B91C1C" />
+            <Text style={[styles.actionText, { color: "#B91C1C" }]}>Decline</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </MotiView>
   );
 }
@@ -178,19 +125,17 @@ const styles = StyleSheet.create({
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   title: {
-    fontFamily: "Nunito",
-    fontSize: 15,
-    color: "#030303",
+    fontSize: 16,
+    color: "#111827",
     fontWeight: "700",
-    marginBottom: 2,
   },
   subtitle: {
-    fontFamily: "Nunito",
     fontSize: 13,
-    color: "#555",
+    color: "#6B7280",
   },
   statusPill: {
     flexDirection: "row",
@@ -200,53 +145,40 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   statusText: {
-    fontFamily: "Nunito",
     fontSize: 12,
     fontWeight: "600",
     textTransform: "capitalize",
     marginLeft: 4,
   },
-  detailsRow: {
+  middleRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    marginVertical: 10,
-    gap: 10,
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    marginTop: 10,
   },
   detailGroup: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 5,
     gap: 6,
   },
   detailText: {
-    fontFamily: "Nunito",
     fontSize: 13,
     color: "#333",
   },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+  priceContainer: {
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
   },
   price: {
-    fontFamily: "Poppins",
     fontSize: 20,
     fontWeight: "700",
     color: "#030303",
   },
-  footerRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  footerText: {
-    fontFamily: "Nunito",
-    fontSize: 12,
-    color: "#6B7280",
-  },
   actionRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 12,
+    marginTop: 14,
   },
   actionBtn: {
     flex: 1,
@@ -258,7 +190,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   actionText: {
-    fontFamily: "Nunito",
     fontSize: 13,
     fontWeight: "600",
     marginLeft: 6,

@@ -66,7 +66,7 @@ export const updateExperience = async (experienceId: string, payload: Partial<Ex
 };
 
 // Delete a experience
-export const deleteExperience = async (experienceId: string) => {
+export const deleteHostExperience = async (experienceId: string) => {
   try {
     const { data } = await api.delete(`/host/experiences/${experienceId}`);
     return data?.data || data;
@@ -76,16 +76,26 @@ export const deleteExperience = async (experienceId: string) => {
   }
 };
 
-// Fetch all experiences
-export const fetchExperiences = async () => {
+export interface FetchHostExperiencesParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  cultureTags?: string;
+  desiredOutcomes?: string;
+  timeFilter?: "anytime" | "today" | "this_week" | "this_month";
+  status?: "upcoming" | "past"; // optional
+}
+
+export const fetchHostExperiences = async (params: FetchHostExperiencesParams = {}) => {
   try {
-    const { data } = await api.get("/host/experiences");
-    return data?.data?.data || [];
+    const { data } = await api.get("/host/experiences", { params });
+    return data?.data || { data: [], meta: { total: 0, hasNextPage: false } };
   } catch (error: any) {
     console.error("Error fetching experiences:", error);
     throw new Error(error.response?.data?.message || "Failed to fetch experiences");
   }
 };
+
 
 // Fetch single experience
 export const fetchSingleExperience = async (experienceId: string) => {
