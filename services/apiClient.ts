@@ -14,7 +14,7 @@ const onRefreshed = (token: string) => {
 };
 
 const api = axios.create({
-  baseURL: "https://shy-trees-shake.loca.lt",
+  baseURL: "https://ai-moodler-backend-production.up.railway.app",
 });
 
 api.interceptors.request.use(async config => {

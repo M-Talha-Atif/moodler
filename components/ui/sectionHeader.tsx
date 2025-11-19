@@ -18,7 +18,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
 }) => {
   return (
     <View style={[styles.container, style]}>
-      <Text variant="header" color="#030303">
+      <Text variant="header" color="#030303" fontWeight="bold">
         {title}
       </Text>
 
@@ -27,7 +27,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
           title="See All"
           onPress={onSeeAll}
           backgroundColor="transparent"
-          textColor="#0066FF"
+          textColor="#030303"
           width="auto"
           height="auto"
           paddingHorizontal={0}

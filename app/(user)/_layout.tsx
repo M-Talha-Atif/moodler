@@ -20,12 +20,20 @@ export default function UserLayout() {
         name="bookingConfirmation" 
         options={{ headerShown: false }} 
       />
+       <Stack.Screen 
+        name="change-your-vibes" 
+        options={{ headerShown: false }} 
+      />
       <Stack.Screen 
         name="editProfile" 
         options={{ headerShown: false }} 
       />
         <Stack.Screen 
         name="editPassword" 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="privacySecurity" 
         options={{ headerShown: false }} 
       />
        <Stack.Screen 

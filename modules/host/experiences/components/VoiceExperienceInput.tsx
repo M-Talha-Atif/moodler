@@ -1,284 +1,425 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, TouchableOpacity, StyleSheet, Alert, Dimensions } from "react-native";
+import { 
+  View, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Dimensions,
+  ScrollView 
+} from "react-native";
 import { Audio } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import { MotiView, AnimatePresence } from "moti";
 import { Text } from "@/components/ui/text";
+import Toast from "react-native-toast-message";
 
 interface VoiceExperienceInputProps {
   onResult: (res: { uri: string; type: string; name: string } | null) => void;
+  onRecordingComplete?: () => void;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const WAVEFORM_WIDTH = SCREEN_WIDTH * 0.8;
 
-export default function VoiceExperienceInput({ onResult }: VoiceExperienceInputProps) {
+export default function VoiceExperienceInput({ 
+  onResult, 
+  onRecordingComplete 
+}: VoiceExperienceInputProps) {
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
-  const [fileUri, setFileUri] = useState<string | null>(null);
-  const [duration, setDuration] = useState<number>(0);
   const [audioLevels, setAudioLevels] = useState<number[]>([]);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [playbackPosition, setPlaybackPosition] = useState<number>(0);
-  const [waveformData, setWaveformData] = useState<number[]>([]);
+  const [recordingDuration, setRecordingDuration] = useState<number>(0);
+  const [showTips, setShowTips] = useState<boolean>(true);
+  
   const animationInterval = useRef<NodeJS.Timeout | null>(null);
-  const playbackInterval = useRef<NodeJS.Timeout | null>(null);
+  const durationInterval = useRef<NodeJS.Timeout | null>(null);
+  const recordingRef = useRef<Audio.Recording | null>(null);
+  const startTimeRef = useRef<number>(0);
 
-  // Cleanup
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       (async () => {
         try {
-          await sound?.unloadAsync();
-          await recording?.stopAndUnloadAsync();
-        } catch {}
+          if (recordingRef.current) {
+            await recordingRef.current.stopAndUnloadAsync();
+          }
+        } catch (error) {
+          console.error("Cleanup error:", error);
+        }
       })();
+      
       if (animationInterval.current) {
         clearInterval(animationInterval.current);
       }
-      if (playbackInterval.current) {
-        clearInterval(playbackInterval.current);
+      if (durationInterval.current) {
+        clearInterval(durationInterval.current);
       }
     };
-  }, [sound, recording]);
+  }, []);
 
   // Generate random audio levels for animation
   const updateAudioLevels = () => {
-    const newLevels = Array.from({ length: 7 }, () => 
-      Math.random() * 0.7 + 0.3 // Random levels between 0.3 and 1.0
+    const newLevels = Array.from({ length: 9 }, () => 
+      Math.random() * 0.7 + 0.3
     );
     setAudioLevels(newLevels);
   };
 
-  // Generate simulated waveform data
-  const generateWaveformData = () => {
-    const dataPoints = 50; // Number of bars in waveform
-    const data = Array.from({ length: dataPoints }, () => 
-      Math.random() * 0.8 + 0.2 // Random heights for waveform
-    );
-    setWaveformData(data);
-  };
-
-  // Update playback position
-  const updatePlaybackPosition = async () => {
-    if (sound && isPlaying) {
-      try {
-        const status = await sound.getStatusAsync();
-        if (status.isLoaded) {
-          setPlaybackPosition(status.positionMillis);
-        }
-      } catch (error) {
-        console.error("Error getting playback status:", error);
-      }
-    }
-  };
-
   const startRecording = async () => {
     try {
-      const { granted } = await Audio.requestPermissionsAsync();
+      console.log("Requesting permissions...");
+      
+      // Request microphone permissions
+      const { status, granted } = await Audio.requestPermissionsAsync();
+      
       if (!granted) {
-        Alert.alert("Permission required", "Please allow microphone access.");
+        Toast.show({
+          type: "error",
+          text1: "Microphone Access Required",
+          text2: "Please enable microphone access in your device settings",
+          position: "top",
+        });
         return;
       }
 
+      console.log("Permission granted, configuring audio mode...");
+
+      // Configure audio mode for recording
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
       });
 
-      const { recording } = await Audio.Recording.createAsync(
+      console.log("Starting recording...");
+
+      // Start recording
+      const { recording: newRecording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
 
-      setRecording(recording);
+      console.log("Recording started successfully");
+
+      // Store recording in both state and ref
+      setRecording(newRecording);
+      recordingRef.current = newRecording;
       
-      // Start animation interval
-      animationInterval.current = setInterval(updateAudioLevels, 200);
+      // Reset and start duration tracking
+      startTimeRef.current = Date.now();
+      setRecordingDuration(0);
+      setShowTips(false);
+      
+      // Start animation interval for visual feedback
+      animationInterval.current = setInterval(updateAudioLevels, 150);
+      
+      // Start duration counter
+      durationInterval.current = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        setRecordingDuration(elapsed);
+      }, 100); // Update more frequently for accuracy
+      
+      Toast.show({
+        type: "success",
+        text1: "Recording Started",
+        text2: "Speak clearly about your experience",
+        position: "top",
+        visibilityTime: 2000,
+      });
       
     } catch (err) {
-      console.error(err);
-      Alert.alert("Error", "Unable to start recording. Try again.");
+      console.error("Error starting recording:", err);
+      Toast.show({
+        type: "error",
+        text1: "Recording Error",
+        text2: "Unable to start recording. Please try again.",
+        position: "top",
+      });
     }
   };
 
   const stopRecording = async () => {
     try {
-      if (!recording) return;
+      console.log("Stopping recording...");
+      
+      if (!recordingRef.current) {
+        console.log("No recording found");
+        return;
+      }
 
-      // Clear animation interval
+      // Calculate actual duration before stopping
+      const actualDuration = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      console.log("Actual recording duration:", actualDuration, "seconds");
+
+      // Clear intervals first
       if (animationInterval.current) {
         clearInterval(animationInterval.current);
         animationInterval.current = null;
       }
+      if (durationInterval.current) {
+        clearInterval(durationInterval.current);
+        durationInterval.current = null;
+      }
+      
       setAudioLevels([]);
 
-      await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
-      if (!uri) return;
+      // Stop recording and get URI
+      await recordingRef.current.stopAndUnloadAsync();
+      const uri = recordingRef.current.getURI();
+      
+      console.log("Recording stopped, URI:", uri);
+      
+      if (!uri) {
+        Toast.show({
+          type: "error",
+          text1: "Recording Error",
+          text2: "Failed to save your recording. Please try again.",
+          position: "top",
+        });
+        setRecording(null);
+        recordingRef.current = null;
+        setRecordingDuration(0);
+        return;
+      }
 
-      const { sound, status } = await recording.createNewLoadedSoundAsync();
-      setSound(sound);
-      const durationSeconds = Math.round(status.durationMillis / 1000);
-      setDuration(durationSeconds);
-      setFileUri(uri);
+      // Check minimum duration using actual duration
+      if (actualDuration < 3) {
+        Toast.show({
+          type: "error",
+          text1: "Recording Too Short",
+          text2: `Please record for at least 3 seconds. You recorded ${actualDuration} second(s).`,
+          position: "top",
+          visibilityTime: 3000,
+        });
+        setRecording(null);
+        recordingRef.current = null;
+        setRecordingDuration(0);
+        return;
+      }
+
+      console.log("Recording valid, passing to parent");
+
+      // Pass the audio file to parent
       onResult({ uri, type: "audio/m4a", name: "voice.m4a" });
       setRecording(null);
+      recordingRef.current = null;
       
-      // Generate waveform data after recording
-      generateWaveformData();
+      Toast.show({
+        type: "success",
+        text1: "Recording Complete",
+        text2: "Processing your experience...",
+        position: "top",
+        visibilityTime: 2000,
+      });
       
-      // Set up playback listener
-      sound.setOnPlaybackStatusUpdate(playbackStatusUpdate);
+      // Trigger completion callback to auto-submit
+      if (onRecordingComplete) {
+        onRecordingComplete();
+      }
+      
     } catch (err) {
-      console.error(err);
-      Alert.alert("Error", "Unable to stop recording. Try again.");
+      console.error("Error stopping recording:", err);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Unable to stop recording. Please try again.",
+        position: "top",
+      });
+      setRecording(null);
+      recordingRef.current = null;
+      setRecordingDuration(0);
     }
   };
 
-  const playbackStatusUpdate = (status: any) => {
-    if (status.isLoaded) {
-      setPlaybackPosition(status.positionMillis);
-      if (status.didJustFinish) {
-        setIsPlaying(false);
-        setPlaybackPosition(0);
-        if (playbackInterval.current) {
-          clearInterval(playbackInterval.current);
-          playbackInterval.current = null;
-        }
-      }
-    }
-  };
-
-  const togglePlayPause = async () => {
-    try {
-      if (!sound) return;
-
-      if (isPlaying) {
-        await sound.pauseAsync();
-        setIsPlaying(false);
-        if (playbackInterval.current) {
-          clearInterval(playbackInterval.current);
-          playbackInterval.current = null;
-        }
-      } else {
-        await Audio.setAudioModeAsync({ allowsRecordingIOS: false, playsInSilentModeIOS: true });
-        await sound.playAsync();
-        setIsPlaying(true);
-        
-        // Start updating playback position
-        playbackInterval.current = setInterval(updatePlaybackPosition, 100);
-      }
-    } catch {
-      Alert.alert("Error", "Unable to play/pause audio.");
-    }
-  };
-
-  const seekAudio = async (position: number) => {
-    try {
-      if (!sound) return;
-
-      const status = await sound.getStatusAsync();
-      if (status.isLoaded) {
-        await sound.setPositionAsync(position);
-        setPlaybackPosition(position);
-      }
-    } catch (error) {
-      console.error("Error seeking audio:", error);
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      if (playbackInterval.current) {
-        clearInterval(playbackInterval.current);
-        playbackInterval.current = null;
-      }
-      await sound?.unloadAsync();
-    } catch {}
-    setSound(null);
-    setFileUri(null);
-    setDuration(0);
-    setIsPlaying(false);
-    setPlaybackPosition(0);
-    setWaveformData([]);
-    onResult(null);
-  };
-
-  const formatTime = (milliseconds: number) => {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
-  const calculateSeekPosition = (event: any) => {
-    const { locationX } = event.nativeEvent;
-    const seekPercentage = locationX / WAVEFORM_WIDTH;
-    const newPosition = seekPercentage * (duration * 1000); // Convert duration to milliseconds
-    return Math.max(0, Math.min(newPosition, duration * 1000));
+  // Format duration as MM:SS
+  const formatDuration = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Tell us about what it will do, where, when, for which people</Text>
+    <ScrollView 
+      style={styles.scrollContainer}
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Header Section */}
+      <View style={styles.headerSection}>
+        <View style={styles.iconContainer}>
+          <Ionicons name="mic-circle" size={40} color="#030303" />
+        </View>
+        <Text style={styles.mainTitle}>Voice Recording Guide</Text>
+        <Text style={styles.subtitle}>
+          Describe your experience in your own words
+        </Text>
+      </View>
 
-      {!fileUri ? (
-        <View style={{ alignItems: "center" }}>
-          {/* Improved Animated Wave */}
-          <AnimatePresence>
-            {recording && (
+      {/* Tips Section - Show when not recording */}
+      <AnimatePresence>
+        {showTips && !recording && (
+          <MotiView
+            from={{ opacity: 0, translateY: -10 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            exit={{ opacity: 0, translateY: -10 }}
+            transition={{ type: "timing", duration: 300 }}
+            style={styles.tipsCard}
+          >
+            <View style={styles.tipsHeader}>
+              <View style={styles.tipHeaderIcon}>
+                <Ionicons name="bulb" size={18} color="#030303" />
+              </View>
+              <Text style={styles.tipsTitle}>What to Include</Text>
+            </View>
+            
+            <View style={styles.tipsList}>
+              <View style={styles.tipItem}>
+                <View style={styles.tipNumber}>
+                  <Text style={styles.tipNumberText}>1</Text>
+                </View>
+                <View style={styles.tipContent}>
+                  <Text style={styles.tipLabel}>Experience Title</Text>
+                  <Text style={styles.tipDescription}>
+                    Give it a catchy name like "Sunset Yoga on the Beach"
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.tipItem}>
+                <View style={styles.tipNumber}>
+                  <Text style={styles.tipNumberText}>2</Text>
+                </View>
+                <View style={styles.tipContent}>
+                  <Text style={styles.tipLabel}>Description & Activities</Text>
+                  <Text style={styles.tipDescription}>
+                    Explain what guests will do and what makes it special
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.tipItem}>
+                <View style={styles.tipNumber}>
+                  <Text style={styles.tipNumberText}>3</Text>
+                </View>
+                <View style={styles.tipContent}>
+                  <Text style={styles.tipLabel}>Schedule & Duration</Text>
+                  <Text style={styles.tipDescription}>
+                    Mention start time, end time (e.g., 6 PM to 7 PM)
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.tipItem}>
+                <View style={styles.tipNumber}>
+                  <Text style={styles.tipNumberText}>4</Text>
+                </View>
+                <View style={styles.tipContent}>
+                  <Text style={styles.tipLabel}>Target Audience</Text>
+                  <Text style={styles.tipDescription}>
+                    Who is this for? (Beginners, families, couples, etc.)
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.exampleBox}>
+              <View style={styles.exampleHeader}>
+                <Ionicons name="chatbox-ellipses" size={16} color="#030303" />
+                <Text style={styles.exampleLabel}>Example:</Text>
+              </View>
+              <Text style={styles.exampleText}>
+                "I want to host a sunset yoga session on Clifton Beach. It's a relaxing 
+                one-hour class from 6 PM to 7 PM, perfect for beginners who want to unwind. 
+                We'll do gentle poses with beautiful ocean views."
+              </Text>
+            </View>
+
+            <TouchableOpacity 
+              style={styles.dismissTipsButton}
+              onPress={() => setShowTips(false)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.dismissTipsText}>Got it, Let's Record</Text>
+              <Ionicons name="arrow-forward" size={18} color="#FAFAF8" />
+            </TouchableOpacity>
+          </MotiView>
+        )}
+      </AnimatePresence>
+
+      {/* Recording Interface */}
+      <View style={styles.recordingSection}>
+        {/* Animated Wave Visualization */}
+        <AnimatePresence>
+          {recording && (
+            <MotiView
+              from={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              style={styles.waveWrapper}
+            >
               <View style={styles.waveContainer}>
-                {[...Array(7)].map((_, i) => (
+                {[...Array(9)].map((_, i) => (
                   <MotiView
                     key={i}
                     from={{ 
-                      scaleY: 0.2, 
-                      opacity: 0.3,
-                      backgroundColor: "#030303"
+                      scaleY: 0.3, 
+                      opacity: 0.4,
                     }}
                     animate={{
-                      scaleY: audioLevels[i] || [0.4, 0.8, 1.2, 0.6],
-                      opacity: [0.6, 1, 0.8, 0.5],
-                      backgroundColor: ["#030303", "#444", "#030303"],
+                      scaleY: audioLevels[i] || [0.4, 0.9, 1.3, 0.7],
+                      opacity: [0.6, 1, 0.8, 0.6],
                     }}
                     transition={{
-                      duration: 600 + Math.random() * 400,
-                      delay: i * 80,
+                      duration: 500 + Math.random() * 300,
+                      delay: i * 60,
                       loop: true,
                       type: "timing",
                     }}
                     style={[
                       styles.waveBar,
                       {
-                        height: 24 + Math.sin(i) * 8, // Varying heights
+                        height: 32 + Math.sin(i) * 12,
                       }
                     ]}
                   />
                 ))}
               </View>
-            )}
-          </AnimatePresence>
-
-          {/* Recording Status */}
-          {recording && (
-            <MotiView
-              from={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              style={styles.recordingStatus}
-            >
-              <View style={styles.recordingDot} />
-              <Text style={styles.recordingText}>Recording...</Text>
             </MotiView>
           )}
+        </AnimatePresence>
 
-          {/* Mic Button */}
+        {/* Recording Status with Duration */}
+        {recording && (
+          <MotiView
+            from={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            style={styles.recordingStatus}
+          >
+            <View style={styles.recordingIndicator}>
+              <MotiView
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ 
+                  loop: true, 
+                  duration: 1500,
+                  type: "timing" 
+                }}
+                style={styles.recordingDot}
+              />
+              <Text style={styles.recordingText}>Recording</Text>
+            </View>
+            <Text style={styles.durationText}>{formatDuration(recordingDuration)}</Text>
+          </MotiView>
+        )}
+
+        {/* Microphone Button */}
+        <View style={styles.micButtonContainer}>
           <TouchableOpacity
             onPress={recording ? stopRecording : startRecording}
             style={[styles.micButton, recording && styles.activeMic]}
+            activeOpacity={0.8}
           >
             <MotiView
               animate={{ 
-                scale: recording ? [1, 1.1, 1] : 1,
+                scale: recording ? [1, 1.08, 1] : 1,
               }}
               transition={{ 
                 loop: recording, 
@@ -288,219 +429,402 @@ export default function VoiceExperienceInput({ onResult }: VoiceExperienceInputP
             >
               <Ionicons
                 name={recording ? "stop" : "mic"}
-                size={34}
+                size={38}
                 color={recording ? "#FAFAF8" : "#030303"}
               />
             </MotiView>
           </TouchableOpacity>
         </View>
-      ) : (
-        <View style={styles.playbackContainer}>
-          {/* Waveform Display */}
-          <TouchableOpacity 
-            style={styles.waveformContainer}
-            activeOpacity={0.8}
-            onPress={(event) => {
-              const newPosition = calculateSeekPosition(event);
-              seekAudio(newPosition);
-            }}
+
+        {/* Instruction Text */}
+        {!recording ? (
+          <MotiView
+            from={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 300 }}
+            style={styles.instructionContainer}
           >
-            {waveformData.map((height, index) => {
-              const barPosition = (index / waveformData.length) * (duration * 1000);
-              const isActive = playbackPosition >= barPosition;
-              
-              return (
-                <View
-                  key={index}
-                  style={[
-                    styles.waveformBar,
-                    {
-                      height: height * 30 + 5, // Scale height
-                      backgroundColor: isActive ? "#030303" : "#E8E8E6",
-                    }
-                  ]}
-                />
-              );
-            })}
-            
-            {/* Playback Progress Indicator */}
-            <View 
-              style={[
-                styles.progressIndicator,
-                {
-                  left: `${(playbackPosition / (duration * 1000)) * 100}%`,
-                }
-              ]} 
-            />
-          </TouchableOpacity>
+            <Text style={styles.instructionText}>
+              Tap to start recording
+            </Text>
+            <Text style={styles.subInstructionText}>
+              Speak clearly and include all 4 points
+            </Text>
+          </MotiView>
+        ) : (
+          <MotiView
+            from={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={styles.instructionContainer}
+          >
+            <Text style={styles.recordingInstructionText}>
+              Tap to stop recording
+            </Text>
+            <Text style={styles.recordingSubText}>
+              Minimum 3 seconds required
+            </Text>
+          </MotiView>
+        )}
 
-          {/* Time Display */}
-          <View style={styles.timeContainer}>
-            <Text style={styles.timeText}>{formatTime(playbackPosition)}</Text>
-            <Text style={styles.timeText}>{formatTime(duration * 1000)}</Text>
-          </View>
+        {/* Quick Tips While Recording */}
+        {recording && recordingDuration < 15 && (
+          <MotiView
+            from={{ opacity: 0, translateY: 10 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ delay: 1000 }}
+            style={styles.quickTipBox}
+          >
+            <View style={styles.quickTipIcon}>
+              <Ionicons name="information-circle" size={16} color="#030303" />
+            </View>
+            <Text style={styles.quickTipText}>
+              Mention: title, activities, schedule, and audience
+            </Text>
+          </MotiView>
+        )}
+      </View>
 
-          {/* Playback Controls */}
-          <View style={styles.actions}>
-            <TouchableOpacity 
-              style={styles.playPauseBtn} 
-              onPress={togglePlayPause}
-            >
-              <Ionicons 
-                name={isPlaying ? "pause" : "play"} 
-                size={24} 
-                color="#FAFAF8" 
-              />
-              <Text style={[styles.actionText, { color: "#FAFAF8" }]}>
-                {isPlaying ? "Pause" : "Play"}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.actionBtn, styles.deleteBtn]}
-              onPress={handleDelete}
-            >
-              <Ionicons name="trash-outline" size={22} color="#FAFAF8" />
-              <Text style={[styles.actionText, { color: "#FAFAF8" }]}>Delete</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+      {/* Help Section */}
+      {!recording && !showTips && (
+        <TouchableOpacity 
+          style={styles.helpButton}
+          onPress={() => setShowTips(true)}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="help-circle-outline" size={20} color="#030303" />
+          <Text style={styles.helpButtonText}>View tips again</Text>
+        </TouchableOpacity>
       )}
-    </View>
+
+      {/* Bottom Spacer */}
+      <View style={styles.bottomSpacer} />
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flex: 1,
+  },
   container: {
     alignItems: "center",
-    marginTop: 20,
+    paddingTop: 16,
+    paddingHorizontal: 20,
   },
-  label: {
-    fontFamily: "Nunito",
-    fontWeight: "600",
-    fontSize: 14,
-    color: "#030303",
-    marginBottom: 10,
+  headerSection: {
+    alignItems: "center",
+    marginBottom: 24,
+    width: "100%",
   },
-  micButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 2,
-    borderColor: "#030303",
+  iconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#EFEFE7",
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: 12,
+  },
+  mainTitle: {
+    fontFamily: "Nunito",
+    fontWeight: "800",
+    fontSize: 20,
+    color: "#030303",
+    textAlign: "center",
+    marginBottom: 6,
+  },
+  subtitle: {
+    fontFamily: "Nunito",
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  tipsCard: {
+    width: "100%",
     backgroundColor: "#FAFAF8",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 28,
+    borderWidth: 2,
+    borderColor: "#E8E8E6",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  tipsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E8E8E6",
+  },
+  tipHeaderIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#EFEFE7",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  tipsTitle: {
+    fontFamily: "Nunito",
+    fontWeight: "800",
+    fontSize: 16,
+    color: "#030303",
+  },
+  tipsList: {
+    marginBottom: 20,
+  },
+  tipItem: {
+    flexDirection: "row",
+    marginBottom: 18,
+  },
+  tipNumber: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#030303",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
+    marginTop: 2,
+  },
+  tipNumberText: {
+    fontFamily: "Nunito",
+    fontWeight: "800",
+    fontSize: 14,
+    color: "#FAFAF8",
+  },
+  tipContent: {
+    flex: 1,
+    paddingTop: 2,
+  },
+  tipLabel: {
+    fontFamily: "Nunito",
+    fontWeight: "700",
+    fontSize: 14,
+    color: "#030303",
+    marginBottom: 4,
+  },
+  tipDescription: {
+    fontFamily: "Nunito",
+    fontSize: 13,
+    color: "#666",
+    lineHeight: 19,
+  },
+  exampleBox: {
+    backgroundColor: "#EFEFE7",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    borderLeftWidth: 4,
+    borderLeftColor: "#030303",
+  },
+  exampleHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  exampleLabel: {
+    fontFamily: "Nunito",
+    fontWeight: "700",
+    fontSize: 13,
+    color: "#030303",
+    marginLeft: 6,
+  },
+  exampleText: {
+    fontFamily: "Nunito",
+    fontSize: 13,
+    color: "#444",
+    lineHeight: 20,
+    fontStyle: "italic",
+  },
+  dismissTipsButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#030303",
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 3,
   },
-  activeMic: {
-    backgroundColor: "#030303",
-    transform: [{ scale: 1.05 }],
+  dismissTipsText: {
+    fontFamily: "Nunito",
+    fontWeight: "700",
+    fontSize: 15,
+    color: "#FAFAF8",
+    marginRight: 8,
+  },
+  recordingSection: {
+    alignItems: "center",
+    width: "100%",
+  },
+  waveWrapper: {
+    marginBottom: 20,
   },
   waveContainer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "flex-end",
-    height: 40,
-    marginBottom: 16,
-    gap: 4,
+    height: 60,
+    gap: 6,
   },
   waveBar: {
-    width: 5,
-    borderRadius: 3,
+    width: 7,
+    borderRadius: 4,
     backgroundColor: "#030303",
   },
   recordingStatus: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: "rgba(3, 3, 3, 0.05)",
+    justifyContent: "space-between",
+    marginBottom: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    backgroundColor: "#FAFAF8",
+    borderWidth: 2,
+    borderColor: "#030303",
+    minWidth: 220,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  recordingIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   recordingDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: "#DC2626",
-    marginRight: 6,
+    marginRight: 8,
   },
   recordingText: {
     fontFamily: "Nunito",
-    fontWeight: "600",
-    fontSize: 12,
-    color: "#666",
+    fontWeight: "700",
+    fontSize: 14,
+    color: "#030303",
   },
-  playbackContainer: {
+  durationText: {
+    fontFamily: "Nunito",
+    fontWeight: "800",
+    fontSize: 16,
+    color: "#030303",
+  },
+  micButtonContainer: {
+    marginBottom: 20,
+  },
+  micButton: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 3,
+    borderColor: "#030303",
+    justifyContent: "center",
     alignItems: "center",
-    width: "100%",
+    backgroundColor: "#FAFAF8",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  waveformContainer: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-    width: WAVEFORM_WIDTH,
-    height: 40,
-    marginBottom: 8,
-    paddingHorizontal: 4,
-    position: "relative",
+  activeMic: {
+    backgroundColor: "#030303",
+    borderColor: "#030303",
   },
-  waveformBar: {
-    flex: 1,
-    marginHorizontal: 1,
-    borderRadius: 1,
-    minHeight: 5,
-  },
-  progressIndicator: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    width: 2,
-    backgroundColor: "#DC2626",
-    zIndex: 2,
-  },
-  timeContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: WAVEFORM_WIDTH,
+  instructionContainer: {
+    alignItems: "center",
     marginBottom: 16,
   },
-  timeText: {
-    fontSize: 12,
-    color: "#666",
-    fontWeight: "500",
-  },
-  actions: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-    width: "85%",
-    marginTop: 8,
-  },
-  playPauseBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 12,
-    backgroundColor: "#030303",
-  },
-  actionBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 10,
-    backgroundColor: "#E8E8E6",
-  },
-  deleteBtn: {
-    backgroundColor: "#DC2626",
-  },
-  actionText: {
+  instructionText: {
     fontFamily: "Nunito",
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#030303",
+    textAlign: "center",
+    marginBottom: 6,
+  },
+  subInstructionText: {
+    fontFamily: "Nunito",
+    fontSize: 13,
+    color: "#666",
+    textAlign: "center",
+  },
+  recordingInstructionText: {
+    fontFamily: "Nunito",
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#030303",
+    textAlign: "center",
+    marginBottom: 6,
+  },
+  recordingSubText: {
+    fontFamily: "Nunito",
+    fontSize: 12,
+    color: "#999",
+    textAlign: "center",
+  },
+  quickTipBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#EFEFE7",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    maxWidth: SCREEN_WIDTH * 0.88,
+  },
+  quickTipIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#FAFAF8",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  quickTipText: {
+    fontFamily: "Nunito",
+    fontSize: 12,
     fontWeight: "600",
+    color: "#030303",
+    flex: 1,
+    lineHeight: 17,
+  },
+  helpButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 24,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: "#EFEFE7",
+  },
+  helpButtonText: {
+    fontFamily: "Nunito",
     fontSize: 14,
-    marginLeft: 6,
+    fontWeight: "600",
+    color: "#030303",
+    marginLeft: 8,
+  },
+  bottomSpacer: {
+    height: 40,
   },
 });

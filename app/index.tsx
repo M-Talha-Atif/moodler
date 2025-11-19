@@ -1,20 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Text } from "@/components/ui/text";
 import Container from "@/components/ui/container";
 import Logo from "@/assets/images/logo.svg";
 
-
 export default function Index() {
+  // Add this to prevent layout measurement errors
+  useEffect(() => {
+    // Small delay to ensure layout is ready
+    const timer = setTimeout(() => {}, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <Container
       backgroundColor="#fff"
       padding={32}
       style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
     >
-      {/* Logo */}
-      <Logo width={80} height={80} />
-
-      {/* Title */}
+      {/* Add key prop to SVG to force remount if needed */}
+      <Logo key="app-logo" width={80} height={80} />
+      
       <Text
         variant="display"
         style={{
@@ -29,8 +34,7 @@ export default function Index() {
       >
         Moodly
       </Text>
-
-      {/* Subtitle */}
+      
       <Text
         variant="body"
         style={{

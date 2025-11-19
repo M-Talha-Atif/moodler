@@ -53,7 +53,7 @@ export default function HostHomeScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* 📊 Booking Stats */}
+        {/* Booking Stats */}
         <View style={styles.section}>
           {loading ? (
             <>
@@ -70,13 +70,13 @@ export default function HostHomeScreen() {
             <>
               <View style={styles.row}>
                 <StatCard
-                  title="Total Bookings"
+                  title="Bookings Made"
                   value={stats.total || 0}
                   subtitle="All bookings"
                   colors={["#34d399", "#10b981"]}
                 />
                 <StatCard
-                  title="Revenue"
+                  title="Total Earnings"
                   value={`$${stats.revenue || 0}`}
                   subtitle="Generated"
                   colors={["#60a5fa", "#3b82f6"]}
@@ -84,13 +84,13 @@ export default function HostHomeScreen() {
               </View>
               <View style={styles.row}>
                 <StatCard
-                  title="Experiences"
+                  title="Your Experiences"
                   value={stats.experiences || 0}
                   subtitle="Created by you"
                   colors={["#f59e0b", "#d97706"]}
                 />
                 <StatCard
-                  title="Avg Rating"
+                  title="Average Rating"
                   value={stats.avgRating || 0}
                   subtitle="Across experiences"
                   colors={["#ec4899", "#be185d"]}
@@ -102,11 +102,11 @@ export default function HostHomeScreen() {
 
 
 
-        {/* ➕ Create Experience Buttons (Horizontal) */}
+        {/* Create Experience Buttons (Horizontal) */}
         <View style={styles.createRow}>
           {/* Default filled button (from your Button.tsx) */}
           <Button
-            title="Create Manually"
+            title="Design Every Detail"
             onPress={() => router.push("/(host)/createExperience")}
             width="48%"
             height={42}
@@ -115,7 +115,7 @@ export default function HostHomeScreen() {
 
           {/* Neutral outlined button */}
           <Button
-            title="Use AI"
+            title="AI-Assisted Setup"
             onPress={() => router.push("/(host)/hostExperienceInput")}
             backgroundColor="#EFEFE7"
             textColor="#030303"
@@ -129,8 +129,7 @@ export default function HostHomeScreen() {
 
 
 
-        {/* 📈 Booking Trend Section */}
-        {/* 📈 Booking Trend Section */}
+        {/* Booking Trend Section */}
         <View style={{ marginBottom: 24 }}>
           <SegmentedControl
             tabs={[
@@ -163,7 +162,7 @@ export default function HostHomeScreen() {
         </View>
 
 
-        {/* 📝 Recent Bookings */}
+        {/* Recent Bookings */}
         <Text variant="header" style={styles.sectionTitle}>
           Recent Bookings
         </Text>

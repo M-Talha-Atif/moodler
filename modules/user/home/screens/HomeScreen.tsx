@@ -16,15 +16,22 @@ import MoodWidget from "../components/MoodWidget";
 import RecommendedExperiences from "../components/RecommendedExperiences";
 import { Experience } from "../services/homeService";
 import DashboardHeader from "@/modules/user/home/components/DashboardHeader";
+import { useFocusEffect } from "@react-navigation/native";
 
 
 export default function HomeScreen() {
   const router = useRouter();
   const { homeData, loading, error, refetch } = useHome();
 
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [])
+  );
+
   const handleJoinExperience = useCallback(
     (experience: Experience) =>
-      router.push(`/(user)/experienceDetail?id=${experience.id}`), 
+      router.push(`/(user)/experienceDetail?id=${experience.id}`),
     [router]
   );
 
@@ -57,6 +64,9 @@ export default function HomeScreen() {
     );
   }
 
+ 
+
+
   // --- Main UI ---
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -87,6 +97,11 @@ export default function HomeScreen() {
             <StreakWidget streak={homeData.streak} />
           </View>
         )}
+
+        {/* Change Vibes Button */}
+        <TouchableOpacity style={styles.vibeBtn} onPress={() => router.push("/change-your-vibes")}>
+          <Text style={styles.vibeBtnText}>Change your vibes ✨</Text>
+        </TouchableOpacity>
 
         {/* Recommended Experiences (already scrollable) */}
         <View style={[styles.section, { flex: 1 }]}>
@@ -172,4 +187,20 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "Nunito",
   },
+  vibeBtn: {
+    marginTop: 20,
+    backgroundColor: "#111",
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    marginHorizontal: 28,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  vibeBtnText: {
+    color: "#FFF",
+    fontSize: 14,
+    fontWeight: "600",
+    fontFamily: "Nunito",
+  },
+
 });

@@ -1,24 +1,24 @@
 // src/features/onboarding/components/OnboardingScreen.tsx
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { MotiView } from "moti";
+import { useEffect, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
-import ChatBubble from "./ChatBubble";
-import QuestionInput from "./QuestionInput";
-import ProgressFooter from "./ProgressFooter";
-import onboardingQuestions from "../utils/onboardingQuestions";
+import Logo from "@/assets/images/logo.svg";
+import ScreenWrapper from "@/components/ui/layout/screenWrapper";
+import { useAuthStore } from "@/store/useAuthStore";
+import ChatBubble from "../components/ChatBubble";
+import ProgressFooter from "../components/ProgressFooter";
+import QuestionInput from "../components/QuestionInput";
 import {
-  startOnboarding,
   answerQuestion,
-  setGoals,
-  setActivities,
   completeOnboarding,
   getOnboardingStatus,
+  setActivities,
+  setGoals,
+  startOnboarding,
 } from "../services/onboardingService";
-import Logo from "@/assets/images/logo.svg";
-import { useAuthStore } from "@/store/useAuthStore";
-import ScreenWrapper from "@/components/ui/layout/screenWrapper";
+import onboardingQuestions from "../utils/onboardingQuestions";
 
 export default function OnboardingScreen() {
   const [step, setStep] = useState(0);

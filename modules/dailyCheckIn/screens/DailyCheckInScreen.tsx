@@ -16,6 +16,7 @@ import AlertDialog from "@/components/ui/alertDialog";
 import { StatusBar } from "expo-status-bar";
 import Header from "@/modules/common/Header";
 import IconCard from "@/components/ui/iconCard";
+import Toast from "react-native-toast-message";
 
 
 
@@ -62,17 +63,27 @@ export default function DailyCheckInScreen() {
     setButtonSubmitLoading(true);
 
     try {
-
       await submitMoodLog(payload);
       setHasDailyCheckIn(true);
-      Alert.alert("✨ Check-In Complete", "Your reflection has been saved.", [
-        { text: "Continue", onPress: () => router.replace("/(tabs)/(user)") },
-      ]);
+
+      Toast.show({
+        type: "success",
+        text1: "✨ Check-In Complete",
+        text2: "Your reflection has been saved.",
+        position: "bottom",
+      });
+
+      router.replace("/(tabs)/(user)");
     } catch {
       setButtonSubmitLoading(false);
-      Alert.alert("Oops!", "Something went wrong while saving your check-in.");
-    }
-    finally {
+
+      Toast.show({
+        type: "error",
+        text1: "Oops!",
+        text2: "Something went wrong while saving your check-in.",
+        position: "bottom",
+      });
+    } finally {
       setButtonSubmitLoading(false);
     }
   };
@@ -168,6 +179,7 @@ export default function DailyCheckInScreen() {
             height={48}
             width="100%"
             borderRadius={12}
+            loading={buttonSubmitLoading}
             style={styles.shadow}
           />
         </View>

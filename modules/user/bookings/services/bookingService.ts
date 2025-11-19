@@ -131,3 +131,5 @@ export const deleteBooking = async (bookingId: string) => {
   const response = await api.delete(`/user/bookings/${bookingId}`, { withCredentials: true });
   return response.data;
 };
+
+

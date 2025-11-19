@@ -7,6 +7,7 @@ import {
   ViewStyle,
   TextStyle,
   DimensionValue,
+  ActivityIndicator
 } from "react-native";
 
 interface ButtonProps {
@@ -15,19 +16,21 @@ interface ButtonProps {
   backgroundColor?: string;
   textColor?: string;
   fontFamily?: string;
+  loading?: boolean;
   fontWeight?: TextStyle["fontWeight"];
   fontSize?: number;
   lineHeight?: number;
   borderRadius?: number;
   borderWidth?: number;
   borderColor?: string;
-  width?: DimensionValue; 
-  height?: DimensionValue; 
+  width?: DimensionValue;
+  height?: DimensionValue;
   paddingHorizontal?: number;
   paddingVertical?: number;
   disabled?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
+
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -49,6 +52,7 @@ const Button: React.FC<ButtonProps> = ({
   disabled = false,
   style,
   textStyle,
+  loading = false,
 }) => {
   return (
     <TouchableOpacity
@@ -71,21 +75,26 @@ const Button: React.FC<ButtonProps> = ({
         style,
       ]}
     >
-      <Text
-        style={[
-          styles.text,
-          {
-            color: textColor,
-            fontFamily,
-            fontWeight,
-            fontSize,
-            lineHeight,
-          },
-          textStyle,
-        ]}
-      >
-        {title}
-      </Text>
+
+      {loading ? (
+        <ActivityIndicator color={textColor} />
+      ) : (
+        <Text
+          style={[
+            styles.text,
+            {
+              color: textColor,
+              fontFamily,
+              fontWeight,
+              fontSize,
+              lineHeight,
+            },
+            textStyle,
+          ]}
+        >
+          {title}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };

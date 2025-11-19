@@ -15,7 +15,7 @@ import Logo from "@/assets/images/logo.svg";
 interface ScreenWrapperProps extends ScrollViewProps {
   title?: string;
   subtitle?: string;
-  showLogo?: boolean; // 👈 toggle logo visibility
+  showLogo?: boolean; // toggle logo visibility
   scrollable?: boolean;
   backgroundColor?: string;
   children: React.ReactNode;

@@ -31,10 +31,10 @@ export default function SignupForm() {
     try {
       clearError();
       await signup(name, email, password, selectedRole);
-      ToastAndroid.show("✅ Account created successfully!", ToastAndroid.SHORT);
+      ToastAndroid.show("Account created successfully!", ToastAndroid.SHORT);
     } catch (err) {
       console.error("Signup error:", err);
-      ToastAndroid.show("❌ Signup failed", ToastAndroid.SHORT);
+      ToastAndroid.show("Signup failed", ToastAndroid.SHORT);
     }
   };
 

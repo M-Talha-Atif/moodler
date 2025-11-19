@@ -1,9 +1,9 @@
 // app/(onboarding)/index.tsx
-import OnboardingScreen from "@/modules/onboarding/components/OnboardingScreen";
-import { useEffect } from "react";
+import OnboardingScreen from "@/modules/onboarding/screens/OnboardingScreen";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "expo-router";
-import { View, ActivityIndicator, Text } from "react-native";
+import { useEffect } from "react";
+import { ActivityIndicator, Text, View } from "react-native";
 
 export default function OnboardingPage() {
   const { user, isLoading } = useAuthStore();

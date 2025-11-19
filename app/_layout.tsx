@@ -7,7 +7,6 @@ import "../global.css";
 import { useDailyCheckInStore } from "@/modules/dailyCheckIn/store/useDailyCheckInStore";
 import { useMoodLog } from "@/modules/dailyCheckIn/hooks/useMoodLog";
 import Animated, { FadeIn, FadeOut, ZoomIn } from "react-native-reanimated";
-import * as Font from "expo-font";
 import { useFonts } from "expo-font"
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -29,7 +28,7 @@ export default function RootLayout() {
 
 
 
-  // 🔍 Daily check-in fetch
+  // Daily check-in fetch
   useEffect(() => {
     const checkDaily = async () => {
       if (user?.role === "user") {
@@ -49,14 +48,14 @@ export default function RootLayout() {
     if (user) checkDaily();
   }, [user]);
 
-  // 🔐 Auth check
+  //  Auth check
   useEffect(() => {
     checkAuth().finally(() => {
       setIsNavigationReady(true);
     });
   }, []);
 
-  // 🚦 AUTO NAVIGATION
+  // AUTO NAVIGATION
   useEffect(() => {
     if (!isNavigationReady || isLoading) return;
 
@@ -66,7 +65,7 @@ export default function RootLayout() {
 
     const currentSegment = segments[0];
 
-    // 1️⃣ No user → Login
+    // No user → Login
     if (!user) {
       if (currentSegment !== "(auth)") {
         router.replace("/(auth)/login");

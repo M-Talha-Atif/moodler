@@ -8,6 +8,7 @@ import {
   type Experience
 } from '../services/experienceService';
 import { router } from "expo-router";
+import Toast from "react-native-toast-message";
 
 export const useExperienceDetail = () => {
   const params = useLocalSearchParams<{ id: string }>();
@@ -36,10 +37,10 @@ export const useExperienceDetail = () => {
       setError(null);
       console.log("📡 Calling fetchExperienceById...");
       const data = await fetchExperienceById(id);
-      console.log("✅ Experience data received:", data ? "has data" : "no data");
+      console.log("Experience data received:", data ? "has data" : "no data");
       setExperience(data);
     } catch (err: any) {
-      console.log("❌ Error loading experience:", err.message);
+      console.log("Error loading experience:", err.message);
       setError(err.message || 'Failed to load experience');
     } finally {
       console.log("🏁 Loading complete");
@@ -52,25 +53,40 @@ export const useExperienceDetail = () => {
   }, [loadExperience]);
 
   const handleBooking = async () => {
-    if (!id || !experience || experience.isBooked) return;
+    if (!id || !experience) return;
+
+    console.log(experience)
+
+    if (experience.isBooked ){
+      console.log(experience.bookingId)
+        router.push({
+        pathname: "/bookingDetail",
+        params: { bookingId: experience.bookingId },
+      });
+    }
 
     setBookingLoading(true);
     try {
-      await createBooking(id);
-      Alert.alert(
-        "✅ Booking Confirmed",
-        "You have successfully booked this experience!",
-        [{ text: "OK", onPress: loadExperience }]
-      );
+      const booking = await createBooking(id);
+
+      Toast.show({
+        type: "success",
+        text1: "Booking Confirmed 🎉",
+        text2: "You have successfully booked this experience!",
+        position: "bottom",
+      });
+
       router.push({
-      pathname: "/bookingConfirmation",
-      params: { bookingId: booking.id },
-    });
+        pathname: "/bookingConfirmation",
+        params: { bookingId: booking.id },
+      });
     } catch (err: any) {
-      Alert.alert(
-        "❌ Booking Failed",
-        err.message || "Something went wrong. Please try again."
-      );
+      Toast.show({
+        type: "error",
+        text1: "Booking Failed",
+        text2: err?.message || "Something went wrong.",
+        position: "bottom",
+      });
     } finally {
       setBookingLoading(false);
     }

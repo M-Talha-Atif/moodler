@@ -1,131 +1,173 @@
 import React from "react";
-import { View, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Image, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useBookingDetail } from "@/modules/user/bookings/hooks/useBookingDetail";
 import Button from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import Separator from "@/components/ui/separator";
 
 export default function BookingConfirmationScreen() {
   const { bookingId } = useLocalSearchParams();
+  // const bookingId = "8039bfba-1f45-4de7-9077-0f89baaaf3ef"
   const router = useRouter();
 
-  // Dummy data for now — you’ll replace this with API data
-  const booking = {
-    date: "Oct 28",
-    start: "7:00 PM",
-    end: "8:30 PM",
-    qrImage:
-      "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=300&q=60",
-  };
+  const { data: booking, isLoading } = useBookingDetail(bookingId as string);
+  React.useEffect(() => {
+    // Auto-close after 5 seconds
+    const timer = setTimeout(() => {
+      router.push("/");
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingWrap}>
+        <Text variant="body">Loading booking details...</Text>
+      </View>
+    );
+  }
+
+  if (!booking) {
+    return (
+      <View style={styles.loadingWrap}>
+        <Text variant="body">No booking found.</Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      {/* Close Button */}
-      <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
-        <Text style={{ fontSize: 24 }}>×</Text>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Close */}
+      <TouchableOpacity style={styles.closeBtn} onPress={() => router.push("/")}>
+        <Text style={{ fontSize: 26 }}>×</Text>
       </TouchableOpacity>
 
-      {/* Success Icon */}
+      {/* Success */}
       <View style={styles.successCircle}>
-        <Text style={{ fontSize: 32, color: "#0BDE73" }}>✔</Text>
+        <Text style={{ fontSize: 34, color: "#0BDE73" }}>✔</Text>
       </View>
 
-      {/* Headings */}
-      <Text variant="header" style={styles.title}>
-        Your booking has been confirmed!
-      </Text>
-      <Text variant="micro" style={styles.subtitle}>
-        Please check your mail for booking details.
+      <Text style={styles.title}>
+        Your booking is confirmed, Talha!
       </Text>
 
-      {/* QR Section */}
-      <View style={styles.qrWrapper}>
-        <Image source={{ uri: booking.qrImage }} style={styles.qrImage} />
-      </View>
-      <Text variant="micro" style={styles.qrNote}>
-        Show this QR code for entry
+      <Text style={styles.subtitle}>
+        You're all set for an amazing experience.
       </Text>
 
-      <Separator thickness={1} margin={14} />
+      {/* Experience Banner */}
+      <Image source={{ uri: booking.image }} style={styles.banner} />
+      <Text style={styles.expTitle}>
+        {booking.title}
+      </Text>
 
-      {/* Date + Time Row */}
+      <Separator margin={14} />
+
+      {/* Info */}
       <View style={styles.row}>
         <View style={styles.col}>
-          <Text variant="micro" style={styles.label}>
-            Date
-          </Text>
-          <Text variant="body">{booking.date}</Text>
+          <Text style={styles.label}>Date</Text>
+          <Text style={styles.bodyText}>{booking.date.split("T")[0]}</Text>
         </View>
 
         <View style={styles.col}>
-          <Text variant="micro" style={styles.label}>
-            Start Time
-          </Text>
-          <Text variant="body">{booking.start}</Text>
+          <Text style={styles.label}>Time</Text>
+          <Text style={styles.bodyText}>{booking.time?.split("T")[1]?.slice(0, 5)}</Text>
         </View>
 
         <View style={styles.col}>
-          <Text variant="micro" style={styles.label}>
-            End Time
-          </Text>
-          <Text variant="body">{booking.end}</Text>
+          <Text style={styles.label}>Host</Text>
+          <Text style={styles.bodyText}>{booking.hostName}</Text>
         </View>
       </View>
 
-      <Separator thickness={1} margin={14} />
+      {/* Location / Meeting */}
+      <Separator margin={24} />
 
-      {/* Two Actions */}
-      <View style={styles.actionsRow}>
-        <TouchableOpacity style={styles.actionBtn}>
-          <Text variant="micro">📅 Add to calendar</Text>
-        </TouchableOpacity>
+      {booking.isVirtual ? (
+        <View style={styles.meetingContainer}>
+          <View style={styles.iconRow}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.iconText}>🔗</Text>
+            </View>
+            <View style={styles.textContainer}>
+              <Text style={styles.sectionTitle}>Virtual Event</Text>
+              <Text style={styles.descriptionText}>
+                Join using the link below
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={styles.linkContainer}
+            onPress={() => router.push(booking.meetingLink)}
+          >
+            <Text style={styles.meetingLink}>{booking.meetingLink}</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.locationContainer}>
+          <View style={styles.iconRow}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.iconText}>📍</Text>
+            </View>
+            <View style={styles.textContainer}>
+              <Text style={styles.sectionTitle}>Location</Text>
+              <Text style={styles.descriptionText}>
+                {booking.location}
+              </Text>
+            </View>
+          </View>
+        </View>
+      )}
 
-        <TouchableOpacity style={styles.actionBtn}>
-          <Text variant="micro">📍 View Location</Text>
-        </TouchableOpacity>
+      {/* Attendees */}
+      <Separator margin={24} />
+
+      <Text style={styles.sectionTitleWithMargin}>
+        Attendees ({booking.attendees.length})
+      </Text>
+
+      <View style={styles.attendeesRow}>
+        {booking.attendees.map((u: any) => (
+          <View key={u.userId} style={styles.attendeeCard}>
+            <Image
+              source={{ uri: u.avatarUrl || "https://i.pravatar.cc/100" }}
+              style={styles.avatar}
+            />
+            <Text style={styles.attendeeName}>
+              {u.name}
+            </Text>
+          </View>
+        ))}
       </View>
 
-      {/* CTA Button */}
-      <Button
-        title="Explore More Experiences"
-        backgroundColor="#00E676"
-        textColor="#030303"
-        width="100%"
-        height={52}
-        borderRadius={30}
-        style={{ marginTop: 20 }}
-        onPress={() => router.push("/experiences")}
-      />
+      {/* Auto-close notice */}
+      <Text style={styles.autoCloseText}>
+        Returning to dashboard in 5 seconds...
+      </Text>
 
-      {/* Bottom Link */}
-      <TouchableOpacity onPress={() => router.push("/dashboard")}>
-        <Text
-          variant="body"
-          style={{
-            marginTop: 16,
-            textAlign: "center",
-            color: "#030303",
-            fontWeight: "600",
-          }}
-        >
-          Return to Dashboard
-        </Text>
-      </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 22,
-    backgroundColor: "#FFFFFF",
+    padding: 16,
+    backgroundColor: "#FFF"
+  },
+  loadingWrap: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center"
   },
   closeBtn: {
     position: "absolute",
     top: 16,
     left: 16,
-    zIndex: 10,
+    zIndex: 10
   },
   successCircle: {
     width: 80,
@@ -138,50 +180,193 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
+    fontFamily: "Nunito",
+    fontSize: 28,
+    fontWeight: "700",
+    lineHeight: 36,
+    color: "#030303",
     textAlign: "center",
-    marginTop: 20,
+    marginTop: 20
   },
   subtitle: {
+    fontFamily: "System",
+    fontSize: 12,
+    fontWeight: "400",
+    lineHeight: 18,
+    color: "#6B7280",
     textAlign: "center",
-    marginTop: 6,
-    color: "#777",
+    marginTop: 6
   },
-  qrWrapper: {
-    marginTop: 30,
-    alignSelf: "center",
-    padding: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#E5E5E5",
-  },
-  qrImage: {
-    width: 160,
-    height: 160,
+  banner: {
+    width: "100%",
+    height: 180,
     borderRadius: 12,
+    marginTop: 20
   },
-  qrNote: {
+  expTitle: {
+    fontFamily: "Nunito",
+    fontSize: 14,
+    fontWeight: "600",
+    lineHeight: 20,
+    color: "#1F2937",
     textAlign: "center",
-    marginTop: 8,
-    color: "#777",
+    marginTop: 12
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 14,
+    marginTop: 14
   },
   col: {
-    alignItems: "center",
     flex: 1,
+    alignItems: "center"
   },
   label: {
-    color: "#777",
+    fontFamily: "Nunito",
+    fontSize: 14,
+    fontWeight: "600",
+    lineHeight: 20,
+    color: "#1F2937"
   },
-  actionsRow: {
+  bodyText: {
+    fontFamily: "System",
+    fontSize: 16,
+    fontWeight: "400",
+    lineHeight: 24,
+    color: "#111827",
+    marginTop: 6
+  },
+
+  // Icon styles
+  iconRow: {
     flexDirection: "row",
-    justifyContent: "space-evenly",
-    marginTop: 18,
+    alignItems: "flex-start",
   },
-  actionBtn: {
+  iconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#F5F5F5",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  iconText: {
+    fontSize: 18,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  sectionTitle: {
+    fontFamily: "Nunito",
+    fontSize: 14,
+    fontWeight: "600",
+    lineHeight: 20,
+    color: "#1F2937"
+  },
+  sectionTitleWithMargin: {
+    fontFamily: "Nunito",
+    fontSize: 14,
+    fontWeight: "600",
+    lineHeight: 20,
+    color: "#1F2937",
+    marginBottom: 8
+  },
+  descriptionText: {
+    fontFamily: "System",
+    fontSize: 12,
+    fontWeight: "400",
+    lineHeight: 18,
+    color: "#6B7280",
+    marginTop: 4
+  },
+
+  // Virtual meeting styles
+  meetingContainer: {
+    marginTop: 10,
+  },
+  linkContainer: {
+    marginTop: 12,
+    marginLeft: 52,
+  },
+  meetingLink: {
+    fontFamily: "System",
+    fontSize: 13,
+    fontWeight: "400",
+    color: "#007AFF",
+  },
+
+  // Location styles
+  locationContainer: {
+    marginTop: 10,
+  },
+
+  // Attendees styles
+  attendeesRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 14,
+    marginTop: 10,
+  },
+  attendeeCard: {
+    alignItems: "center",
+    width: 70
+  },
+  avatar: {
+    width: 55,
+    height: 55,
+    borderRadius: 30
+  },
+  attendeeName: {
+    fontFamily: "System",
+    fontSize: 12,
+    fontWeight: "400",
+    lineHeight: 18,
+    color: "#6B7280",
+    marginTop: 4,
+    textAlign: "center"
+  },
+
+  // Button styles
+  buttonContainer: {
+    marginTop: 28,
+  },
+  primaryButton: {
+    backgroundColor: "#00E676",
+    width: "100%",
+    height: 52,
+    borderRadius: 9,
+    justifyContent: "center",
     alignItems: "center",
   },
+  buttonText: {
+    fontFamily: "System",
+    fontSize: 16,
+    fontWeight: "700",
+    lineHeight: 24,
+    color: "#030303",
+  },
+  secondaryButton: {
+    marginTop: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  secondaryButtonText: {
+    fontFamily: "System",
+    fontSize: 16,
+    fontWeight: "400",
+    lineHeight: 24,
+    color: "#030303",
+    textAlign: "center",
+  },
+  autoCloseText: {
+    fontFamily: "System",
+    fontSize: 12,
+    fontWeight: "400",
+    lineHeight: 18,
+    color: "#6B7280",
+    textAlign: "center",
+    marginTop: 24,
+    marginBottom: 20
+  }
 });
