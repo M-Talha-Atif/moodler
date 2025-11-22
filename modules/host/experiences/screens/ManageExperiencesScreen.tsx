@@ -5,49 +5,49 @@ import { fetchHostExperiences, deleteHostExperience } from "../services/experien
 import HostExperienceCard from "../components/HostExperienceCard";
 import Skeleton from "@/modules/common/components/Skeleton";
 import Header from "@/modules/common/Header";
+import BottomSheetModal from "@gorhom/bottom-sheet";
 import HostExperienceBottomFilterSheet, { HostExperienceFilters } from "../components/HostExperienceBottomFilterSheet";
 import HostExperienceSearchBar from "../components/HostExperienceSearchBar";
 import { Filter } from "lucide-react-native";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+// Types matching your API response
+type HostExperience = {
+  id: string;
+  title: string;
+  image: string;
+  date: string;
+  totalSpots: number;
+  totalBookings: number;
+  status: "upcoming" | "past";
+};
+
+type HostExperiencePage = {
+  data: HostExperience[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+    nextPage: number | null;
+    prevPage: number | null;
+  };
+};
+
 export default function ManageHostExperiencesScreen() {
   const navigation = useNavigation<any>();
   const queryClient = useQueryClient();
-  const filterSheetRef = useRef<any>(null);
-
+  const filterSheetRef = useRef<BottomSheetModal>(null);
+  
   const [filters, setFilters] = useState<HostExperienceFilters>({
     cultureTags: "all",
     desiredOutcomes: "all",
     timeFilter: "anytime",
   });
-
   const [searchText, setSearchText] = useState("");
 
-
-  // Types matching your API response
-  type HostExperience = {
-    id: string;
-    title: string;
-    image: string;
-    date: string;
-    totalSpots: number;
-    totalBookings: number;
-    status: "upcoming" | "past";
-  };
-
-  type HostExperiencePage = {
-    data: HostExperience[];
-    meta: {
-      total: number;
-      page: number;
-      limit: number;
-      totalPages: number;
-      hasNextPage: boolean;
-      hasPrevPage: boolean;
-      nextPage: number | null;
-      prevPage: number | null;
-    };
-  };
   const {
     data,
     isLoading,
@@ -61,7 +61,7 @@ export default function ManageHostExperiencesScreen() {
     queryFn: async ({ pageParam = 1 }) => {
       console.log("Fetching experiences - page:", pageParam, "filters:", filters, "search:", searchText);
       const response = await fetchHostExperiences({
-        page: pageParam,
+        page: pageParam as number,
         limit: 10,
         search: searchText,
         ...filters,
@@ -76,11 +76,8 @@ export default function ManageHostExperiencesScreen() {
       return hasNext;
     },
     refetchOnWindowFocus: true,
-    // Add these to prevent duplicates
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 10, // 10 minutes (formerly cacheTime)
-    // onSuccess: () => console.log("Query successful"),
-    onError: (error) => console.log("Query error:", error),
   });
 
   // Fix: Use a more unique key extractor to prevent duplicates
@@ -95,10 +92,10 @@ export default function ManageHostExperiencesScreen() {
   }, [data]);
 
   const onRefresh = () => refetch();
+  
   const loadMore = () => {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
   };
-
 
   // Add this in your component
   useFocusEffect(
@@ -113,7 +110,6 @@ export default function ManageHostExperiencesScreen() {
     onSuccess: (_, id) => {
       queryClient.setQueryData(["experiences", filters, searchText], (old: any) => {
         if (!old?.pages) return old;
-
         return {
           ...old,
           pages: old.pages.map((page: any) => ({
@@ -132,7 +128,7 @@ export default function ManageHostExperiencesScreen() {
     setSearchText("");
   };
 
-  const renderItem = ({ item }: { item: any }) => (
+  const renderItem = ({ item }: { item: HostExperience }) => (
     <HostExperienceCard
       experience={item}
       onEdit={() => navigation.navigate("UpdateHostExperience", { id: item.id })}
@@ -145,9 +141,9 @@ export default function ManageHostExperiencesScreen() {
       <Header
         title="Manage Experiences"
         rightIcon={<Filter size={22} color="#030303" />}
-        onRightPress={() => filterSheetRef.current?.open()}
+        onRightPress={() => filterSheetRef.current?.present()}
       />
-
+      
       <View style={{ marginTop: 12, paddingHorizontal: 2 }}>
         <HostExperienceSearchBar
           value={searchText}
@@ -190,7 +186,6 @@ export default function ManageHostExperiencesScreen() {
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F9FAFB" },

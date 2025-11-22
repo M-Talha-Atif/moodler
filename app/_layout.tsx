@@ -2,14 +2,14 @@
 import { useAuthStore } from "@/store/useAuthStore";
 import { useEffect, useState } from "react";
 import { useRouter, useSegments, Stack } from "expo-router";
-import { View, ActivityIndicator, Text } from "react-native";
 import "../global.css";
 import { useDailyCheckInStore } from "@/modules/dailyCheckIn/store/useDailyCheckInStore";
 import { useMoodLog } from "@/modules/dailyCheckIn/hooks/useMoodLog";
-import Animated, { FadeIn, FadeOut, ZoomIn } from "react-native-reanimated";
 import { useFonts } from "expo-font"
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -111,21 +111,26 @@ export default function RootLayout() {
   }, [user, isLoading, segments, isNavigationReady, hasDailyCheckIn, router]);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(auth)" />
-          <Stack.Screen
-            name="(user)"
-            options={{ presentation: "modal", headerShown: false }}
-          />
-          <Stack.Screen name="onboarding" />
-          <Stack.Screen name="(tabs)/(user)" />
-          <Stack.Screen name="(tabs)/(host)" />
-          <Stack.Screen name="daily-check-in" />
-          <Stack.Screen name="index" />
-        </Stack>
-      </QueryClientProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <QueryClientProvider client={queryClient}>
+          <BottomSheetModalProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen
+                name="(user)"
+                options={{ presentation: "modal", headerShown: false }}
+              />
+              <Stack.Screen name="onboarding" />
+              <Stack.Screen name="(tabs)/(user)" />
+              <Stack.Screen name="(tabs)/(host)" />
+              <Stack.Screen name="daily-check-in" />
+              <Stack.Screen name="index" />
+            </Stack>
+          </BottomSheetModalProvider>
+        </QueryClientProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
+
 }

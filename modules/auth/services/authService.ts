@@ -55,7 +55,7 @@ export const authService = {
   },
 
   async logout(): Promise<void> {
-    await api.post("/auth/logout");
+    await api.post("/auth/logout", {}, { withCredentials: true });
   },
 
   async getCurrentUser() {
@@ -109,7 +109,7 @@ export const authService = {
           email: user.email,
           role: user.role,
           onboardingCompleted: user.onboardingCompleted ?? false,
-        } 
+        }
       };
     } catch (error: any) {
       console.log("❌ Refresh token API call failed:", {

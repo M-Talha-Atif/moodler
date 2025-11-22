@@ -5,18 +5,14 @@ import {
     KeyboardAvoidingView,
     StyleSheet,
     Platform,
-    ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Toast from "react-native-toast-message";
-import dayjs from "dayjs";
-
-import { experienceSchema, FormData } from "../validation/experienceSchema";
-import ExperienceBasicsSection from "../components/ExperienceBasicSection";
-import ExperienceTimingSection from "../components/ExperienceTimingSection";
-import ExperienceFocusSection from "../components/ExperienceFocusSection";
+import { experienceSchema, FormData } from "@/modules/host/experiences/validation/experienceSchema";
+import ExperienceBasicsSection from "@/modules/host/experiences/components/ExperienceBasicSection";
+import ExperienceTimingSection from "@/modules/host/experiences/components/ExperienceTimingSection";
 import Button from "@/components/ui/button";
 import Header from "@/modules/common/Header";
 import Skeleton from "@/modules/common/components/Skeleton";
@@ -114,9 +110,6 @@ export default function EditExperienceScreen() {
                     meetLink: data.meetLink || "",
                     timezone: data.timezone || "UTC+9",
                     language: data.language || "English",
-                    targetEmotions: data.targetEmotions || [],
-                    desiredOutcomes: data.desiredOutcomes || [],
-                    culturalTags: data.culturalTags || [],
                 } as any);
             } catch (error: any) {
                 console.error("Error loading experience:", error);
@@ -247,7 +240,6 @@ export default function EditExperienceScreen() {
                 >
                     <ExperienceBasicsSection control={control} />
                     <ExperienceTimingSection control={control} />
-                    <ExperienceFocusSection control={control} setValue={setValue} />
                 </ScrollView>
 
                 <View style={styles.footer}>

@@ -6,9 +6,9 @@ import BookingFiltersSheet from "../components/BookingFilterBottomSheet";
 import AlertDialog from "@/components/ui/alertDialog";
 import { deleteBooking } from "../services/bookingService";
 import { View } from "react-native";
-import { Modalize } from "react-native-modalize";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import Toast from "@/components/ui/toast";
 
 
@@ -18,7 +18,7 @@ export interface BookingFilters {
 }
 
 export default function BookingsScreen() {
-  const sheetRef = useRef<Modalize>(null);
+  const sheetRef = useRef<BottomSheetModal>(null);
   const [filters, setFilters] = useState<BookingFilters>({
     status: "all",
     timeFilter: "anytime",
@@ -99,7 +99,7 @@ export default function BookingsScreen() {
             )}
           </View>
         }
-        onRightPress={() => sheetRef.current?.open()}
+        onRightPress={() => sheetRef.current?.present()}
       />
 
       <View style={{ marginTop: 16, flex: 1 }}>

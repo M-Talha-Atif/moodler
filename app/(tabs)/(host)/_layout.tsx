@@ -1,4 +1,3 @@
-// app/(tabs)/(host)/_layout.tsx
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -44,24 +43,6 @@ export default function HostTabs() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
           ),
-        }}
-      />
-      {/* Hidden Screens */}
-      <Tabs.Screen
-        name="createExperience"
-        options={{
-          href: null,
-          headerShown: false,
-          title: "Create Experience",
-        }}
-      />
-
-      <Tabs.Screen
-        name="updateExperience"
-        options={{
-          href: null,
-          headerShown: false,
-          title: "Update Experience",
         }}
       />
     </Tabs>

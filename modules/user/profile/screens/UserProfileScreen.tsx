@@ -127,182 +127,102 @@ export default function UserProfileScreen() {
   const handleCancelLogout = () => {
     setShowLogoutDialog(false);
   };
+return (
+  <SafeAreaView style={styles.safeArea}>
+    <Header title="Profile" showBackButton={false} />
 
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <Header title="Profile" showBackButton={false} />
-
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Profile Header Section */}
-        <View style={styles.profileSection}>
-          {isLoading ? (
-            <Skeleton width={80} height={80} radius={40} />
-          ) : (
-            <Image
-              source={
-                avatarUrl
-                  ? { uri: avatarUrl }
-                  : require("@/assets/images/default-avatar.png")
-              }
-              style={styles.avatar}
-            />
-          )}
-          <View style={styles.userInfo}>
-            <Text variant="header" style={styles.userName}>
-              {user?.name || "User"}
-            </Text>
-            <Text variant="caption" color="#6B7280" style={styles.userEmail}>
-              {user?.email || "user@example.com"}
-            </Text>
-          </View>
-        </View>
-
-        <Separator color="#E8E8E6" thickness={1} margin={16} />
-
-        {/* Account Section */}
-        <View style={styles.section}>
-          <Text variant="subheader" style={styles.sectionTitle}>
-            Account
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Profile Header Section */}
+      <View style={styles.profileSection}>
+        {isLoading ? (
+          <Skeleton width={80} height={80} radius={40} />
+        ) : (
+          <Image
+            source={avatarUrl ? { uri: avatarUrl } : require("@/assets/images/default-avatar.png")}
+            style={styles.avatar}
+          />
+        )}
+        <View style={styles.userInfo}>
+          <Text variant="header" style={styles.userName}>
+            {user?.name || "User"}
           </Text>
-          <View style={styles.listContainer}>
-            <ListItem
-              title="Edit Profile"
-              icon="pencil-outline"
-              onPress={handleEditProfile}
-            />
-            <ListItem
-              title="Change Password"
-              icon="key-outline"
-              onPress={handleEditPassword}
-            />
-          </View>
-        </View>
-
-        {/* Preferences Section */}
-        <View style={styles.section}>
-          <Text variant="subheader" style={styles.sectionTitle}>
-            Preferences
+          <Text variant="caption" color="#6B7280" style={styles.userEmail}>
+            {user?.email || "user@example.com"}
           </Text>
-          <View style={styles.listContainer}>
-            <ListItem
-              title="Notifications"
-              icon="notifications-outline"
-              onPress={handleNotifications}
-            />
-            <ListItem
-              title="Privacy & Security"
-              icon="shield-checkmark-outline"
-              onPress={handlePrivacySecurity}
-            />
-          </View>
         </View>
+      </View>
 
-        {/* Analytics Section */}
-        <View style={styles.section}>
-          <Text variant="subheader" style={styles.sectionTitle}>
-            Analytics
-          </Text>
-          <View style={styles.listContainer}>
-            <ListItem
-              title="Insights"
-              icon="bar-chart-outline"
-              onPress={handleInsightsScreen}
-            />
-          </View>
+      <Separator color="#E8E8E6" thickness={1} margin={16} />
+
+      {/* Account Section */}
+      <View style={styles.section}>
+        <Text variant="subheader" style={styles.sectionTitle}>Account</Text>
+        <View style={styles.listContainer}>
+          <ListItem title="Edit Profile" icon="pencil-outline" onPress={handleEditProfile} />
+          <ListItem title="Change Password" icon="key-outline" onPress={handleEditPassword} />
         </View>
+      </View>
 
-        {/* Logout Button */}
-        <TouchableOpacity
-          style={styles.logoutBtn}
-          onPress={handleLogout}
-          activeOpacity={0.8}
-        >
-          <LogOut size={20} color="#EFEFE7" />
-          <Text
-            variant="button"
-            style={styles.logoutText}
-            fontWeight="700"
-          >
-            Logout
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
+      {/* Preferences Section */}
+      <View style={styles.section}>
+        <Text variant="subheader" style={styles.sectionTitle}>Preferences</Text>
+        <View style={styles.listContainer}>
+          <ListItem title="Notifications" icon="notifications-outline" onPress={handleNotifications} />
+          <ListItem title="Privacy & Security" icon="shield-checkmark-outline" onPress={handlePrivacySecurity} />
+        </View>
+      </View>
 
-      {/* Logout Confirmation Dialog */}
-      <AlertDialog
-        visible={showLogoutDialog}
-        title="Logout"
-        message="Are you sure you want to logout?"
-        confirmText="Logout"
-        cancelText="Cancel"
-        onConfirm={handleConfirmLogout}
-        onCancel={handleCancelLogout}
-      />
-    </SafeAreaView>
-  );
+      {/* Analytics Section */}
+      <View style={styles.section}>
+        <Text variant="subheader" style={styles.sectionTitle}>Analytics</Text>
+        <View style={styles.listContainer}>
+          <ListItem title="Insights" icon="bar-chart-outline" onPress={handleInsightsScreen} />
+        </View>
+      </View>
+    </ScrollView>
+
+    {/* Logout Button fixed at bottom */}
+    <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
+      <LogOut size={20} color="#EFEFE7" />
+      <Text variant="button" style={styles.logoutText} fontWeight="700">Logout</Text>
+    </TouchableOpacity>
+
+    {/* Logout Confirmation Dialog */}
+    <AlertDialog
+      visible={showLogoutDialog}
+      title="Logout"
+      message="Are you sure you want to logout?"
+      confirmText="Logout"
+      cancelText="Cancel"
+      onConfirm={handleConfirmLogout}
+      onCancel={handleCancelLogout}
+    />
+  </SafeAreaView>
+);
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#FAFAF8",
-  },
-  scrollContent: {
-    paddingBottom: 80,
-  },
-  profileSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-    backgroundColor: "#FAFAF8",
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#E8E8E6",
-  },
-  userInfo: {
-    marginLeft: 16,
-    flex: 1,
-    justifyContent: "center",
-  },
-  userName: {
-    marginBottom: 4,
-  },
-  userEmail: {
-    lineHeight: 20,
-  },
-  section: {
-    marginHorizontal: 24,
-    marginTop: 8,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    marginBottom: 12,
-    color: "#030303",
-  },
-  listContainer: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
+  safeArea: { flex: 1, backgroundColor: "#FAFAF8" },
+  scrollContent: { paddingBottom: 20 },
+  profileSection: { flexDirection: "row", alignItems: "center", paddingHorizontal: 24, paddingVertical: 20, backgroundColor: "#FAFAF8" },
+  avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: "#E8E8E6" },
+  userInfo: { marginLeft: 16, flex: 1, justifyContent: "center" },
+  userName: { marginBottom: 4 },
+  userEmail: { lineHeight: 20 },
+  section: { marginHorizontal: 24, marginTop: 8, marginBottom: 16 },
+  sectionTitle: { marginBottom: 12, color: "#030303" },
+  listContainer: { backgroundColor: "#FFFFFF", borderRadius: 16, overflow: "hidden", shadowColor: "#000", shadowOpacity: 0.04, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
   logoutBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#030303",
     marginHorizontal: 24,
-    marginTop: 24,
+    marginVertical: 16,
     paddingVertical: 14,
     borderRadius: 12,
     shadowColor: "#000",
@@ -311,9 +231,5 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
-  logoutText: {
-    color: "#EFEFE7",
-    marginLeft: 8,
-    letterSpacing: 0.5,
-  },
+  logoutText: { color: "#EFEFE7", marginLeft: 8, letterSpacing: 0.5 },
 });

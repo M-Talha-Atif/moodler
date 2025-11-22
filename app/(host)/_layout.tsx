@@ -36,6 +36,14 @@ export default function UserLayout() {
         name="editExperience" 
         options={{ headerShown: false }} 
       />
+       <Stack.Screen 
+        name="privacySecurity" 
+        options={{ headerShown: false }} 
+      />
+       <Stack.Screen 
+        name="insights" 
+        options={{ headerShown: false }} 
+      />
     </Stack>
   );
 }

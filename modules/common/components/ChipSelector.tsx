@@ -1,75 +1,153 @@
-import React from 'react';
-import { View, Text, Pressable, FlatList } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import React from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ViewStyle,
+  TextStyle,
+} from "react-native";
 
-// If you use a theme hook/provider, you can import/use it here for dynamic colors.
-
-type Props = {
-  label: string;
+interface ChipSelectorProps {
+  label?: string;
   options: string[];
-  selected: string[];
-  onToggle: (val: string) => void;
+  selectedValues?: string[];
   maxCount: number;
-};
+  onToggle: (value: string) => void;
+  selectedColor?: string;
+  unselectedColor?: string;
+  textColor?: string;
+  selectedTextColor?: string;
+  borderColor?: string;
+  borderRadius?: number;
+  fontFamily?: string;
+  fontSize?: number;
+  spacing?: number;
+  containerStyle?: ViewStyle;
+  chipStyle?: ViewStyle;
+  textStyle?: TextStyle;
+}
 
-export default function ChipSelector({
+const ChipSelector: React.FC<ChipSelectorProps> = ({
   label,
   options,
-  selected,
-  onToggle,
+  selectedValues = [],
   maxCount,
-}: Props) {
-  const handleToggle = (item: string) => {
-    Haptics.selectionAsync();
-    onToggle(item);
+  onToggle,
+  selectedColor = "#4ADE80",
+  unselectedColor = "#F3F4F6",
+  textColor = "#1E293B",
+  selectedTextColor = "#0F172A",
+  borderColor = "#CBD5E1",
+  borderRadius = 16,
+  fontFamily = "Nunito",
+  fontSize = 14,
+  spacing = 8,
+  containerStyle,
+  chipStyle,
+  textStyle,
+}) => {
+  const handleChipPress = (value: string) => {
+    const isSelected = selectedValues.includes(value);
+    const isMaxReached = selectedValues.length >= maxCount;
+    
+    // Don't allow selection if max count reached and chip is not already selected
+    if (!isSelected && isMaxReached) {
+      return;
+    }
+    
+    // Pass the clicked value to parent
+    onToggle(value);
   };
 
   return (
-    <View className="mb-3">
-      <View className="flex-row items-center justify-between mb-1">
-        <Text className="text-base font-medium text-slate-700">{label}</Text>
-        <Text className="text-xs text-muted-foreground">Selected: {selected.length}/{maxCount}</Text>
-      </View>
-      <FlatList
-        data={options}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={o => o}
-        renderItem={({ item }) => {
-          const isActive = selected.includes(item);
-          const disabled = !isActive && selected.length >= maxCount;
+    <View style={styles.wrapper}>
+      {label && (
+        <View style={styles.header}>
+          <Text style={styles.label}>{label}</Text>
+          <Text style={styles.count}>
+            Selected: {selectedValues.length}/{maxCount}
+          </Text>
+        </View>
+      )}
+      
+      <View style={[styles.container, { gap: spacing }, containerStyle]}>
+        {options.map((option) => {
+          const isSelected = selectedValues.includes(option);
+          const isDisabled = !isSelected && selectedValues.length >= maxCount;
+
           return (
-            <Pressable
-              onPress={() => !disabled && handleToggle(item)}
-              className={`
-                px-4 py-2 mr-2 mb-2 rounded-full border
-                ${isActive 
-                  ? 'bg-primary text-primary-foreground border-primary' 
-                  : 'bg-secondary text-secondary-foreground border-border'}
-                ${disabled ? 'opacity-40' : ''}
-              `}
-              accessibilityState={{ selected: isActive, disabled }}
-              accessibilityLabel={item}
+            <TouchableOpacity
+              key={option}
+              onPress={() => handleChipPress(option)}
+              activeOpacity={0.8}
+              disabled={isDisabled}
               style={[
-                isActive
-                  ? { backgroundColor: '#4ADE80', borderColor: '#4ADE80' } // primary
-                  : { backgroundColor: '#F3F4F6', borderColor: '#E2E8F0' }, // secondary & border
-                { marginRight: 8, marginBottom: 8, borderRadius: 9999, borderWidth: 1, paddingHorizontal: 16, paddingVertical: 8 },
-                disabled && { opacity: 0.4 }
+                styles.chip,
+                {
+                  backgroundColor: isSelected ? selectedColor : unselectedColor,
+                  borderColor: isSelected ? selectedColor : borderColor,
+                  borderRadius,
+                  opacity: isDisabled ? 0.35 : 1,
+                },
+                chipStyle,
               ]}
             >
               <Text
-                style={{
-                  color: isActive ? '#0F172A' : '#1E293B', // foreground (deep slate) for contrast
-                  fontWeight: isActive ? '700' : '400',
-                }}
+                style={[
+                  styles.chipText,
+                  {
+                    color: isSelected ? selectedTextColor : textColor,
+                    fontFamily,
+                    fontSize,
+                  },
+                  textStyle,
+                ]}
               >
-                {item}
+                {option}
               </Text>
-            </Pressable>
+            </TouchableOpacity>
           );
-        }}
-      />
+        })}
+      </View>
     </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  wrapper: {
+    marginBottom: 12,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "600",
+    fontFamily: "Nunito",
+    color: "#1E293B",
+  },
+  count: {
+    fontSize: 12,
+    fontFamily: "Nunito",
+    fontWeight: "500",
+    color: "#64748B",
+  },
+  container: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  chip: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderWidth: 1.5,
+  },
+  chipText: {
+    fontWeight: "600",
+  },
+});
+
+export default ChipSelector;

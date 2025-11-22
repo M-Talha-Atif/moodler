@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useCancelableApi } from "@/hooks/useCanceleableApi";
 import Button from "@/components/ui/button";
-import Alert from "@/components/ui/alert"; // ✅ your custom alert
-import Input from "@/components/ui/input"; // ✅ your new reusable input with eye
-import { updatePassword } from "../services/profileService";
+import Alert from "@/components/ui/alert"; 
+import Input from "@/components/ui/input"; 
+import { updatePassword } from "@/modules/host/profile/services/profileService";
 import Logo from "@/assets/images/logo.svg";
 
 interface PasswordErrors {

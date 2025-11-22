@@ -12,7 +12,7 @@ import Button from "@/components/ui/button";
 import Alert from "@/components/ui/alert";
 import * as ImagePicker from "expo-image-picker";
 import api from "@/services/apiClient";
-import { getProfileImage } from "../services/profileService";
+import { getProfileImage } from "@/modules/host/profile/services/profileService";
 import { useAuthStore } from "@/store/useAuthStore";
 import Skeleton from "@/modules/common/components/Skeleton";
 

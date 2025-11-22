@@ -1,23 +1,5 @@
 import { z } from "zod";
 
-// Helper: Convert Date → "hh:mm AM/PM"
-function toTimeString(val: unknown) {
-  if (!(val instanceof Date)) return val;
-  let hours = val.getHours();
-  const minutes = val.getMinutes().toString().padStart(2, "0");
-  const ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12 || 12; // 0 => 12
-  return `${hours}:${minutes} ${ampm}`;
-}
-
-// Helper: Compare two time strings (e.g. "3:45 PM")
-function parseTimeToMinutes(t: string) {
-  const [time, ampm] = t.split(" ");
-  const [hours, minutes] = time.split(":").map(Number);
-  let total = hours % 12 + (ampm === "PM" ? 12 : 0);
-  return total * 60 + minutes;
-}
-
 export const experienceSchema = z
   .object({
     title: z
@@ -80,36 +62,16 @@ export const experienceSchema = z
       .min(1, "At least one spot required")
       .max(1000, "No more than 1000 spots allowed"),
 
-    // Focus
-    targetEmotions: z
-      .array(z.string(), { required_error: "Select at least one target emotion" })
-      .min(1, "Select at least one emotion")
-      .max(5, "No more than 5 emotions"),
-
-    desiredOutcomes: z
-      .array(z.string(), { required_error: "Select at least one desired outcome" })
-      .min(1, "Select at least one outcome")
-      .max(5, "No more than 5 outcomes"),
-
     language: z
       .string({ required_error: "Language is required" })
       .min(1, "Language is required"),
 
-    culturalTags: z
-      .array(z.string(), { required_error: "Select at least one cultural tag" })
-      .min(1, "Select at least one tag")
-      .max(8, "No more than 8 tags"),
   })
   // Require location if not virtual
   .refine((d) => d.isVirtual || !!d.location, {
     message: "Location required for onsite events",
     path: ["location"],
   })
-  // Require meetLink if virtual
-  // .refine((d) => !d.isVirtual || !!d.meetLink, {
-  //   message: "Meeting link required for virtual events",
-  //   path: ["meetLink"],
-  // })
 
   .refine((d) => {
     if (!d.isVirtual) return true;          // No meetLink needed

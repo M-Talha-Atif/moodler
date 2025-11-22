@@ -2,10 +2,9 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { View, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Filter } from "lucide-react-native";
-import { Modalize } from "react-native-modalize";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { router } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
-// import SearchBar from "../components/SearchBar"; // ensure this is the new simple one
 import Header from "@/modules/common/Header";
 import ExperienceList from "../components/ExperienceList";
 import ExperienceBottomFilterSheet, {
@@ -32,7 +31,7 @@ export default function ExploreScreen() {
     const [search, setSearch] = useState("");
 
     const abortController = useRef<AbortController | null>(null);
-    const sheetRef = useRef<Modalize>(null);
+    const sheetRef = useRef<BottomSheetModal>(null);
 
     const fetchData = useCallback(
         async (pageNum = 1, append = false) => {
@@ -100,7 +99,7 @@ export default function ExploreScreen() {
             <Header
                 title="Explore"
                 rightIcon={<Filter size={22} color="#030303" />}
-                onRightPress={() => sheetRef.current?.open()}
+                onRightPress={() => sheetRef.current?.present()}
             />
 
             <View style={styles.searchSection}>

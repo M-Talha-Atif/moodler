@@ -1,37 +1,58 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { useWatch, Controller, useFormState } from "react-hook-form";
+import { Controller, useFormState } from "react-hook-form";
 import ChipSelector from "@/modules/common/components/ChipSelector";
 import { Text } from "@/components/ui/text";
+import Toast from "react-native-toast-message";
 
 const emotions = [
-  "happy", "sad", "angry", "excited", "calm", "anxious", "peaceful", "inspired"
+  "happy", "sad", "angry", "excited", "calm", "anxious", "peaceful", "inspired",
 ];
+
 const outcomes = [
-  "happiness", "calmness", "relief", "excitement", "peace", "inspiration", "connection", "relaxation"
+  "happiness", "calmness", "relief", "excitement", "peace", "inspiration", "connection", "relaxation",
 ];
+
 const tags = [
-  "beach", "music", "dance", "food", "art", "nature", "festival", "cultural"
+  "beach", "music", "dance", "food", "art", "nature", "festival", "cultural",
 ];
 
-export default function ExperienceFocusSection({ control, setValue }: any) {
-  const targetEmotions = useWatch({ control, name: "targetEmotions" }) || [];
-  const desiredOutcomes = useWatch({ control, name: "desiredOutcomes" }) || [];
-  const culturalTags = useWatch({ control, name: "culturalTags" }) || [];
+interface ExperienceFocusSectionProps {
+  control: any;
+  setValue?: any;
+}
 
-  // Access all validation errors from React Hook Form
+export default function ExperienceFocusSection({ control }: ExperienceFocusSectionProps) {
   const { errors } = useFormState({ control });
 
-  const handleChip = (field: string, max: number, val: string, selected: string[]) => {
-    setValue(
-      field,
-      selected.includes(val)
-        ? selected.filter((v: string) => v !== val)
-        : selected.length < max
-        ? [...selected, val]
-        : selected,
-      { shouldValidate: true }
-    );
+  /**
+   * Handle chip toggle - add or remove value from array
+   */
+  const handleToggle = (
+    current: string[],
+    value: string,
+    maxCount: number,
+    fieldName: string
+  ): string[] => {
+    // Check if value is already selected
+    if (current.includes(value)) {
+      // Remove the value (unselect)
+      return current.filter((v) => v !== value);
+    } else {
+      // Check if max count reached
+      if (current.length >= maxCount) {
+        Toast.show({
+          type: "info",
+          text1: "Maximum Reached",
+          text2: `You can only select up to ${maxCount} ${fieldName}`,
+          position: "top",
+          visibilityTime: 2000,
+        });
+        return current; // Don't add, max reached
+      }
+      // Add the value (select)
+      return [...current, value];
+    }
   };
 
   return (
@@ -40,14 +61,28 @@ export default function ExperienceFocusSection({ control, setValue }: any) {
       <Controller
         control={control}
         name="targetEmotions"
-        render={() => (
+        render={({ field }) => (
           <View style={styles.fieldGroup}>
             <ChipSelector
               label="Target Emotions"
               options={emotions}
-              selected={targetEmotions}
+              selectedValues={field.value || []}
               maxCount={5}
-              onToggle={(v) => handleChip("targetEmotions", 5, v, targetEmotions)}
+              onToggle={(value: string) => {
+                const currentValues = field.value || [];
+                const updated = handleToggle(
+                  currentValues,
+                  value,
+                  5,
+                  "emotions"
+                );
+                // Use shouldValidate: true to trigger validation after state update
+                field.onChange(updated);
+              }}
+               selectedColor="#030303"
+              unselectedColor="#E8E8E6"
+              selectedTextColor="#EFEFE7"
+              textColor="#030303"
             />
             {errors?.targetEmotions && (
               <Text style={styles.errorText} color="#DC2626">
@@ -62,14 +97,27 @@ export default function ExperienceFocusSection({ control, setValue }: any) {
       <Controller
         control={control}
         name="desiredOutcomes"
-        render={() => (
+        render={({ field }) => (
           <View style={styles.fieldGroup}>
             <ChipSelector
               label="Desired Outcomes"
               options={outcomes}
-              selected={desiredOutcomes}
+              selectedValues={field.value || []}
               maxCount={5}
-              onToggle={(v) => handleChip("desiredOutcomes", 5, v, desiredOutcomes)}
+              onToggle={(value: string) => {
+                const currentValues = field.value || [];
+                const updated = handleToggle(
+                  currentValues,
+                  value,
+                  5,
+                  "outcomes"
+                );
+                field.onChange(updated);
+              }}
+              selectedColor="#030303"
+              unselectedColor="#E8E8E6"
+              selectedTextColor="#EFEFE7"
+              textColor="#030303"
             />
             {errors?.desiredOutcomes && (
               <Text style={styles.errorText} color="#DC2626">
@@ -84,14 +132,27 @@ export default function ExperienceFocusSection({ control, setValue }: any) {
       <Controller
         control={control}
         name="culturalTags"
-        render={() => (
+        render={({ field }) => (
           <View style={styles.fieldGroup}>
             <ChipSelector
               label="Cultural Tags"
               options={tags}
-              selected={culturalTags}
+              selectedValues={field.value || []}
               maxCount={8}
-              onToggle={(v) => handleChip("culturalTags", 8, v, culturalTags)}
+              onToggle={(value: string) => {
+                const currentValues = field.value || [];
+                const updated = handleToggle(
+                  currentValues,
+                  value,
+                  8,
+                  "tags"
+                );
+                field.onChange(updated);
+              }}
+               selectedColor="#030303"
+              unselectedColor="#E8E8E6"
+              selectedTextColor="#EFEFE7"
+              textColor="#030303"
             />
             {errors?.culturalTags && (
               <Text style={styles.errorText} color="#DC2626">
@@ -115,5 +176,7 @@ const styles = StyleSheet.create({
   errorText: {
     marginTop: 4,
     fontSize: 12,
+    fontFamily: "Nunito",
+    fontWeight: "500",
   },
 });

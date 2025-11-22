@@ -84,20 +84,20 @@ export default function ExperienceDetailScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent} 
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {/* Hero Image with Rounded Bottom Corners */}
-        <Image 
-          source={{ uri: experience.image }} 
-          style={styles.heroImage} 
-          resizeMode="cover" 
+        <Image
+          source={{ uri: experience.image }}
+          style={styles.heroImage}
+          resizeMode="cover"
         />
 
         {/* Content Container - All content in a card-like wrapper */}
         <View style={styles.contentWrapper}>
-          
+
           {/* Emotional Preview Section */}
           {emotionTags.length > 0 && (
             <View style={styles.emotionPreview}>
@@ -143,14 +143,14 @@ export default function ExperienceDetailScreen() {
                   {spotsLeft} {spotsLeft === 1 ? 'spot' : 'spots'} left
                 </Text>
               </View>
-              
-              <Separator 
-                orientation="vertical" 
-                color="#E8E8E6" 
-                thickness={1} 
-                style={styles.verticalDivider} 
+
+              <Separator
+                orientation="vertical"
+                color="#E8E8E6"
+                thickness={1}
+                style={styles.verticalDivider}
               />
-              
+
               <View style={styles.infoItem}>
                 <Ionicons name="calendar-outline" size={20} color="#030303" />
                 <Text variant="body" style={styles.infoLabel}>
@@ -164,6 +164,22 @@ export default function ExperienceDetailScreen() {
             </View>
 
             <Separator color="#E8E8E6" thickness={1} margin={12} />
+
+            {/* Experience Outcome Summary */}
+            {experience.experienceOutcomeSummary && (
+              <View style={styles.section}>
+                <Text variant="header" style={styles.sectionTitle}>
+                  Experience Outcome
+                </Text>
+                <Text variant="body" style={styles.descriptionText}>
+                  {experience.experienceOutcomeSummary}
+                </Text>
+              </View>
+            )}
+
+
+            <Separator color="#E8E8E6" thickness={1} margin={12} />
+
 
             <View style={styles.locationRow}>
               <Ionicons name="location-outline" size={20} color="#030303" />
@@ -195,6 +211,7 @@ export default function ExperienceDetailScreen() {
               </View>
             </View>
           )}
+
 
           {/* Outcomes Section */}
           {outcomeTags.length > 0 && (
@@ -258,9 +275,9 @@ export default function ExperienceDetailScreen() {
               Your Host
             </Text>
             <View style={styles.hostCard}>
-              <Image 
-                source={{ uri: experience.host.avatarUrl || undefined }} 
-                style={styles.hostAvatar} 
+              <Image
+                source={{ uri: experience.host.avatarUrl || undefined }}
+                style={styles.hostAvatar}
               />
               <View style={styles.hostInfo}>
                 <Text variant="body" style={styles.hostName}>
@@ -298,18 +315,18 @@ export default function ExperienceDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { 
-    flex: 1, 
+  safeArea: {
+    flex: 1,
     backgroundColor: "#FFFFFF",
   },
-  scrollContent: { 
-    paddingBottom: 140 
+  scrollContent: {
+    paddingBottom: 140
   },
-  
+
   // Hero Image
-  heroImage: { 
-    width: "100%", 
-    height: 280, 
+  heroImage: {
+    width: "100%",
+    height: 280,
     backgroundColor: "#E8E8E6",
   },
 
@@ -339,9 +356,9 @@ const styles = StyleSheet.create({
   },
 
   // Title Section
-  titleSection: { 
-    flexDirection: "row", 
-    justifyContent: "space-between", 
+  titleSection: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: 16,
     gap: 16,
@@ -350,16 +367,16 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 38,
   },
-  priceBadge: { 
-    backgroundColor: "#030303", 
-    paddingHorizontal: 16, 
-    paddingVertical: 8, 
+  priceBadge: {
+    backgroundColor: "#030303",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
     minWidth: 70,
     alignItems: "center",
   },
-  priceText: { 
-    color: "#EFEFE7", 
+  priceText: {
+    color: "#EFEFE7",
     fontWeight: "700",
     fontSize: 16,
   },
@@ -411,7 +428,7 @@ const styles = StyleSheet.create({
   },
 
   // Sections
-  section: { 
+  section: {
     marginBottom: 32,
   },
   sectionTitle: {
@@ -426,8 +443,8 @@ const styles = StyleSheet.create({
   chipWrapper: {
     marginTop: 4,
   },
-  descriptionText: { 
-    marginTop: 12, 
+  descriptionText: {
+    marginTop: 12,
     color: "#4B5563",
     lineHeight: 24,
   },
@@ -449,10 +466,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E8E8E6",
   },
-  hostAvatar: { 
-    width: 56, 
-    height: 56, 
-    borderRadius: 28, 
+  hostAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: "#E8E8E6",
     marginRight: 16,
   },

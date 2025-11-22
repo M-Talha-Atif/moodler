@@ -25,6 +25,7 @@ export interface Experience {
   isBooked: boolean;
   bookingId?: string;
   bookingStatus?: string;
+  experienceOutcomeSummary?: string;
   sessionStartTime?: string;
   sessionEndTime?: string;
   host: Host;

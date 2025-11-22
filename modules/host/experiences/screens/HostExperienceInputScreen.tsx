@@ -5,9 +5,9 @@ import { Ionicons } from "@expo/vector-icons";
 import Header from "@/modules/common/Header";
 import { Text } from "@/components/ui/text";
 import Button from "@/components/ui/button";
-import VoiceExperienceInput from "../components/VoiceExperienceInput";
-import TextExperienceInput from "../components/TextExperienceInput";
-import { generateExperience } from "../services/experience";
+import VoiceExperienceInput from "@/modules/host/experiences/components/VoiceExperienceInput";
+import TextExperienceInput from "@/modules/host/experiences/components/TextExperienceInput";
+import { generateExperience } from "@/modules/host/experiences/services/experience";
 import { router } from "expo-router";
 
 export default function HostExperienceInputScreen() {
@@ -194,7 +194,7 @@ export default function HostExperienceInputScreen() {
                                 Processing Your Recording
                             </Text>
                             <Text style={styles.loadingText}>
-                                AI is analyzing your voice and creating your experience...
+                               Moodly AI is analyzing your voice and creating your experience...
                             </Text>
                         </View>
                     </View>

@@ -12,7 +12,6 @@ import Toast from "react-native-toast-message";
 import { experienceSchema, FormData } from "../validation/experienceSchema";
 import ExperienceBasicsSection from "../components/ExperienceBasicSection";
 import ExperienceTimingSection from "../components/ExperienceTimingSection";
-import ExperienceFocusSection from "../components/ExperienceFocusSection";
 import Button from "@/components/ui/button";
 import Header from "@/modules/common/Header";
 import { createExperience } from "../services/experience";
@@ -22,13 +21,18 @@ import { useLocalSearchParams, router } from "expo-router";
 export default function CreateExperienceScreen() {
     const { control, handleSubmit, setValue, watch, formState } = useForm<FormData>({
         resolver: zodResolver(experienceSchema),
-        mode: "onChange",
+        mode: "onBlur", // Changed from "onChange" to "onBlur" to fix validation timing
+        reValidateMode: "onChange", // Re-validate on change after first validation
         defaultValues: {
             language: "English",
             timezone: "UTC+9",
             isVirtual: false,
+            targetEmotions: [],
+            desiredOutcomes: [],
+            culturalTags: [],
         } as any,
     });
+
 
     const [submitting, setSubmitting] = useState(false);
 
@@ -53,17 +57,12 @@ export default function CreateExperienceScreen() {
         if (aiResponse) {
             setValue("title", aiResponse.title || "");
             setValue("description", aiResponse.description || "");
-            setValue("culturalTags", aiResponse.culturalTags || []);
-            setValue("desiredOutcomes", aiResponse.desiredOutcomes || []);
-            setValue("targetEmotions", aiResponse.targetEmotions || []);
             if (aiResponse.location) setValue("location", aiResponse.location);
             if (aiResponse.date) setValue("date", new Date(aiResponse.date));
-
             if (aiResponse.sessionStartTime)
                 setValue("sessionStartTime", new Date(aiResponse.sessionStartTime));
             if (aiResponse.sessionEndTime)
                 setValue("sessionEndTime", new Date(aiResponse.sessionEndTime));
-
 
         }
     }, [aiResponse, setValue]);
@@ -148,7 +147,6 @@ export default function CreateExperienceScreen() {
                 >
                     <ExperienceBasicsSection control={control} watch={watch} setValue={setValue} />
                     <ExperienceTimingSection control={control} setValue={setValue} />
-                    <ExperienceFocusSection control={control} setValue={setValue} />
                 </ScrollView>
 
                 <View style={styles.footer}>

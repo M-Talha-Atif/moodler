@@ -1,1 +1,2 @@
-export { default } from "@/modules/dailyCheckIn/screens/DailyCheckInScreen";
+import DailyCheckInScreen from "@/modules/dailyCheckIn/screens/DailyCheckInScreen";
+export default DailyCheckInScreen;
