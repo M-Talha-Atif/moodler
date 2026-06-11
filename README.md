@@ -1,5 +1,9 @@
 # Moodler - Mood Tracking & Experience Booking App
 
+<p align="center">
+  <img src="demos/moodly-hero.png" alt="Moodler Hero" width="800"/>
+</p>
+
 A React Native mobile application for tracking daily moods and booking wellness experiences, built with Expo.
 
 ## Key Features
@@ -148,3 +152,51 @@ moodler/
 - **Token refresh** implemented via Axios interceptors
 - **Role-based routing** with separate user and host flows
 - **Form validation** using React Hook Form + Zod schemas
+
+## Screenshots
+
+<p align="center">
+  <img src="demos/mobileImages/moodly_image_1.jpg" alt="Screenshot 1" width="200"/>
+  <img src="demos/mobileImages/moodly_image_2.jpg" alt="Screenshot 2" width="200"/>
+  <img src="demos/mobileImages/moodly_image_3.jpg" alt="Screenshot 3" width="200"/>
+  <img src="demos/mobileImages/moodly_image_4.jpg" alt="Screenshot 4" width="200"/>
+  <img src="demos/mobileImages/moodly_image_5.jpg" alt="Screenshot 5" width="200"/>
+  <img src="demos/mobileImages/moodly_image_6.jpg" alt="Screenshot 6" width="200"/>
+  <img src="demos/mobileImages/moodly_image_7.jpg" alt="Screenshot 7" width="200"/>
+  <img src="demos/mobileImages/moodly_image_8.jpg" alt="Screenshot 8" width="200"/>
+  <img src="demos/mobileImages/moodly_image_9.jpg" alt="Screenshot 9" width="200"/>
+  <img src="demos/mobileImages/moodly_image_10.jpg" alt="Screenshot 10" width="200"/>
+  <img src="demos/mobileImages/moodly_image_11.jpg" alt="Screenshot 11" width="200"/>
+  <img src="demos/mobileImages/moodly_image_12.jpg" alt="Screenshot 12" width="200"/>
+  <img src="demos/mobileImages/moodly_image_13.jpg" alt="Screenshot 13" width="200"/>
+  <img src="demos/mobileImages/moodly_image_14.jpg" alt="Screenshot 14" width="200"/>
+  <img src="demos/mobileImages/moodly_image_15.jpg" alt="Screenshot 15" width="200"/>
+  <img src="demos/mobileImages/moodly_image_16.jpg" alt="Screenshot 16" width="200"/>
+  <img src="demos/mobileImages/moodly_image_17.jpg" alt="Screenshot 17" width="200"/>
+  <img src="demos/mobileImages/moodly_image_18.jpg" alt="Screenshot 18" width="200"/>
+  <img src="demos/mobileImages/moodly_image_19.jpg" alt="Screenshot 19" width="200"/>
+  <img src="demos/mobileImages/moodly_image_20.jpg" alt="Screenshot 20" width="200"/>
+  <img src="demos/mobileImages/moodly_image_21.jpg" alt="Screenshot 21" width="200"/>
+  <img src="demos/mobileImages/moodly_image_22.jpg" alt="Screenshot 22" width="200"/>
+  <img src="demos/mobileImages/moodly_image_23.jpg" alt="Screenshot 23" width="200"/>
+  <img src="demos/mobileImages/moodly_image_24.jpg" alt="Screenshot 24" width="200"/>
+  <img src="demos/mobileImages/moodly_image_25.jpg" alt="Screenshot 25" width="200"/>
+  <img src="demos/mobileImages/moodly_image_26.jpg" alt="Screenshot 26" width="200"/>
+  <img src="demos/mobileImages/moodly_image_27.jpg" alt="Screenshot 27" width="200"/>
+  <img src="demos/mobileImages/moodly_image_28.jpg" alt="Screenshot 28" width="200"/>
+  <img src="demos/mobileImages/moodly_image_29.jpg" alt="Screenshot 29" width="200"/>
+  <img src="demos/mobileImages/moodly_image_30.jpg" alt="Screenshot 30" width="200"/>
+  <img src="demos/mobileImages/moodly_image_31.jpg" alt="Screenshot 31" width="200"/>
+  <img src="demos/mobileImages/moodly_image_32.jpg" alt="Screenshot 32" width="200"/>
+  <img src="demos/mobileImages/moodly_image_33.jpg" alt="Screenshot 33" width="200"/>
+  <img src="demos/mobileImages/moodly_image_34.jpg" alt="Screenshot 34" width="200"/>
+  <img src="demos/mobileImages/moodly_image_35.jpg" alt="Screenshot 35" width="200"/>
+  <img src="demos/mobileImages/moodly_image_36.jpg" alt="Screenshot 36" width="200"/>
+  <img src="demos/mobileImages/moodly_image_37.jpg" alt="Screenshot 37" width="200"/>
+  <img src="demos/mobileImages/moodly_image_38.jpg" alt="Screenshot 38" width="200"/>
+  <img src="demos/mobileImages/moodly_image_39.jpg" alt="Screenshot 39" width="200"/>
+  <img src="demos/mobileImages/moodly_image_40.jpg" alt="Screenshot 40" width="200"/>
+  <img src="demos/mobileImages/moodly_image_41.jpg" alt="Screenshot 41" width="200"/>
+  <img src="demos/mobileImages/moodly_image_42.jpg" alt="Screenshot 42" width="200"/>
+  <img src="demos/mobileImages/moodly_image_43.jpg" alt="Screenshot 43" width="200"/>
+</p>
